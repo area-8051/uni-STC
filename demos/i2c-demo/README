@@ -1,0 +1,9 @@
+Uses the I2C controller in master mode to print "Hello, World!" on a 
+1602 LCD display.
+
+SCL is connected to P1.5, and SDA to P1.4.
+
+The file using i2c-hal is lcd-link-i2c.c.
+
+This example also demonstrates the use of my modular LCD driver, 
+published in its own repository.

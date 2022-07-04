@@ -84,6 +84,7 @@ UNISTC_DIR = ../../include
 
 SRCS = \
 	delay.c \
+	enhpwm-hal.c \
 	gpio-hal.c \
 	pca-hal.c \
 	serial-console.c \

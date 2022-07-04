@@ -57,6 +57,14 @@
 		#define SMALL_FLASH
 	#endif
 	
+	#ifdef BUILD_FOR_STC8H3K64S2_TSSOP20
+		#include <STC/8H3KxxS2/TSSOP20.h>
+	#endif
+	
+	#ifdef BUILD_FOR_STC8H3K64S4_LQFP32
+		#include <STC/8H3KxxS4/LQFP32.h>
+	#endif
+	
 	#ifdef BUILD_FOR_STC8H8K64U_PDIP40
 		#include <STC/8H8KxxU/PDIP40.h>
 	#endif
@@ -100,36 +108,49 @@
 #define BLINKING_HALF_PERIOD 250
 
 // 3. The MCU will glow an LED connected to a PCA CCP pin.
-// Exercises: PCA
+// Exercises: PCA (when available)
 
 // Target MCU   | Glowing LED pin
 // -------------+-----------------
 // All STC8A    | P1.7
 // STC8G1K08A   | P3.2
 // Other STC8G  | P1.1
-// All STC8H    | -
 // All STC15    | P1.1
 // STC12C5AxxS2 | P1.3
 
-// Number of gradation steps (not too many so the change is noticeable)
-#define GLOWING_SWEEP_STEPS 8
-// Output frequency of the PWM channel in Hz
-#define GLOWING_PWM_FREQ 100UL
-
 // Let's use 8-bit PWM mode, all MCU have it
-#define GLOWING_PWM_BITS 8
+#define PCA_GLOWING_PWM_BITS 8
 
 // All MCU have this pin configuration
-#define GLOWING_PIN_CONFIG 0
+#define PCA_GLOWING_PIN_CONFIG 0
 
 // All MCU have CCP0
-#define GLOWING_CCP_CHANNEL PCA_CHANNEL0
+#define PCA_GLOWING_CHANNEL PCA_CHANNEL0
+#define PCA_GLOWING_PWM_FREQ 100UL
+#define PCA_GLOWING_COUNTER_FREQ ((1 << PCA_GLOWING_PWM_BITS) * PCA_GLOWING_PWM_FREQ)
 
-#define GLOWING_COUNTER_FREQ ((1 << GLOWING_PWM_BITS) * GLOWING_PWM_FREQ)
+// 4. The MCU will glow an LED connected to an enhanced PWM pin.
+// Exercises: 15-bit Enhanced PWM (when available)
 
-#define GLOWING_DUTY_CYCLE_INCREMENT ((1 << GLOWING_PWM_BITS) / GLOWING_SWEEP_STEPS)
-#define GLOWING_DUTY_CYCLE_MIN 0
-#define GLOWING_DUTY_CYCLE_MAX ((1 << GLOWING_PWM_BITS) - 1)
+// Target MCU   | Glowing LED pin
+// -------------+-----------------
+// All STC8A    | P2.0
+// STC8G2KxxSx  | P2.0
+// STC15W4KxxS4 | P3.7
+
+#define ENHPWM_GLOWING_CHANNEL ENHPWM_Channel0
+// All MCU have this pin configuration
+#define ENHPWM_GLOWING_PIN_CONFIG 0
+
+// 5. The MCU will glow an LED connected to an advanced PWM pin.
+// Exercises: 16-bit Advanced PWM (when available)
+
+// Target MCU   | Glowing LED pin
+// -------------+-----------------
+// All STC8H    | P1.0
+
+#define ADVPWM_GLOWING_GROUP   PWMA
+#define ADVPWM_GLOWING_CHANNEL PWM1P
 	
 #ifdef SMALL_FLASH
 	// Manage to fit in 8 KB flash...

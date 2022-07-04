@@ -39,12 +39,29 @@
 	#include "pca-hal.h"
 #endif // MCU_HAS_PCA
 
+#ifdef MCU_HAS_ENHANCED_PWM
+	#include "enhpwm-hal.h"
+#endif // MCU_HAS_ENHANCED_PWM
+
+#ifdef MCU_HAS_ADVANCED_PWM
+	// Not supported yet
+	#undef MCU_HAS_ADVANCED_PWM
+#endif // MCU_HAS_ADVANCED_PWM
+
 static GpioConfig blinkingPin = GPIO_PIN_CONFIG(GPIO_PORT3, BLINKING_PIN, GPIO_BIDIRECTIONAL);
 static uint8_t blinkingState = 0;
 
 #ifdef MCU_HAS_PCA
-static int16_t glowingDutyCycle = GLOWING_DUTY_CYCLE_MIN;
-static int8_t glowingIncrement = GLOWING_DUTY_CYCLE_INCREMENT;
+// Luminance as per CIELAB scaled to 256 (8-bit PWM)
+static const uint8_t PCA_GLOWING_GRADIENT[] = {
+	1, 3, 5, 7, 10, 15, 20, 27, 34, 44, 54, 
+	67, 81, 97, 114, 134, 157, 181, 208, 237,
+};
+
+#define PCA_GLOWING_STEPS (sizeof(PCA_GLOWING_GRADIENT) / sizeof(PCA_GLOWING_GRADIENT[0]))
+
+static int8_t pcaGlowingStep = 0;
+static int8_t pcaGlowingIncrement = 1;
 
 /*
  * @see pca.h
@@ -54,17 +71,70 @@ static int8_t glowingIncrement = GLOWING_DUTY_CYCLE_INCREMENT;
 void pcaOnInterrupt(PCA_Channel channel, uint16_t pulseLength) USE_BANK(1) {
 }
 
-void updateGlowingDutyCycle() {
-	pcaSetPwmDutyCycle(GLOWING_CCP_CHANNEL, glowingDutyCycle);
-	int16_t newDutyCycle = glowingDutyCycle + glowingIncrement;
+void pcaUpdateGlowingDutyCycle() {
+	pcaSetPwmDutyCycle(PCA_GLOWING_CHANNEL, 255 - PCA_GLOWING_GRADIENT[pcaGlowingStep]);
+	int8_t newStep = pcaGlowingStep + pcaGlowingIncrement;
 	
-	if (newDutyCycle <= GLOWING_DUTY_CYCLE_MIN || newDutyCycle > GLOWING_DUTY_CYCLE_MAX) {
-		glowingIncrement = -glowingIncrement;
+	if (newStep < 0 || newStep >= PCA_GLOWING_STEPS) {
+		pcaGlowingIncrement = -pcaGlowingIncrement;
 	}
 	
-	glowingDutyCycle += glowingIncrement;
+	pcaGlowingStep += pcaGlowingIncrement;
 }
 #endif // MCU_HAS_PCA
+
+// ---------------------------------------------------------------------
+
+#ifdef MCU_HAS_ENHANCED_PWM
+
+static const uint16_t ENHPWM_GLOWING_GRADIENT[] = {
+	181, 342, 579, 907, 1340, 1893, 2579, 3415, 4414, 5590, 6960, 
+	8536, 10334, 12368, 14653, 17204, 20034, 23159, 26594, 30352, 
+};
+
+#define ENHPWM_GLOWING_STEPS (sizeof(ENHPWM_GLOWING_GRADIENT) / sizeof(ENHPWM_GLOWING_GRADIENT[0]))
+
+static int8_t enhpwmGlowingStep = 0;
+static int8_t enhpwmGlowingIncrement = 1;
+
+void enhpwmUpdateGlowingDutyCycle() {
+	enhpwmSetDutyCycle(ENHPWM_GLOWING_CHANNEL, ENHPWM_GLOWING_GRADIENT[enhpwmGlowingStep]);
+	int8_t newStep = enhpwmGlowingStep + enhpwmGlowingIncrement;
+	
+	if (newStep < 0 || newStep >= ENHPWM_GLOWING_STEPS) {
+		enhpwmGlowingIncrement = -enhpwmGlowingIncrement;
+	}
+	
+	enhpwmGlowingStep += enhpwmGlowingIncrement;
+}
+#endif // MCU_HAS_ENHANCED_PWM
+
+// ---------------------------------------------------------------------
+
+#ifdef MCU_HAS_ADVANCED_PWM
+static const uint16_t ADVPWM_GLOWING_GRADIENT[] = {
+	363, 684, 1159, 1814, 2680, 3785, 5159, 6830, 8827, 11181, 13919, 
+	17072, 20668, 24736, 29306, 34407, 40069, 46319, 53187, 60703, 
+};
+
+#define ADVPWM_GLOWING_STEPS (sizeof(ADVPWM_GLOWING_GRADIENT) / sizeof(ADVPWM_GLOWING_GRADIENT[0]))
+
+static int8_t advpwmGlowingStep = 0;
+static int8_t advpwmGlowingIncrement = 1;
+
+void advpwmUpdateGlowingDutyCycle() {
+//	advpwmSetDutyCycle(ADVPWM_GLOWING_GROUP, ADVPWM_GLOWING_CHANNEL, ADVPWM_GLOWING_GRADIENT[advpwmGlowingStep]);
+	int8_t newStep = advpwmGlowingStep + advpwmGlowingIncrement;
+	
+	if (newStep < 0 || newStep >= ADVPWM_GLOWING_STEPS) {
+		advpwmGlowingIncrement = -advpwmGlowingIncrement;
+	}
+	
+	advpwmGlowingStep += advpwmGlowingIncrement;
+}
+#endif // MCU_HAS_ADVANCED_PWM
+
+// ---------------------------------------------------------------------
 
 void echoCharactersReceived() {
 	uint8_t c;
@@ -80,15 +150,23 @@ void echoCharactersReceived() {
 
 void stuffToDoWhileTheLedBlinks(uint16_t delay) {
 #ifdef MCU_HAS_PCA
-		// Glow that other LED
-		updateGlowingDutyCycle();
+	// Glow that other LED
+	pcaUpdateGlowingDutyCycle();
 #endif // MCU_HAS_PCA
-		
-		// Echo characters typed on the host
-		echoCharactersReceived();
-		
-		// Leave time for the blinking LED to be perceptible.
-		delay1ms(delay);
+
+#ifdef MCU_HAS_ENHANCED_PWM
+	enhpwmUpdateGlowingDutyCycle();
+#endif // MCU_HAS_ENHANCED_PWM
+
+#ifdef MCU_HAS_ADVANCED_PWM
+	advpwmUpdateGlowingDutyCycle();
+#endif // MCU_HAS_ADVANCED_PWM
+	
+	// Echo characters typed on the host
+	echoCharactersReceived();
+	
+	// Leave time for the blinking LED to be perceptible.
+	delay1ms(delay);
 }
 
 void main() {
@@ -103,7 +181,7 @@ void main() {
 #ifdef MCU_HAS_PCA
 	startTimer(
 		TIMER0, 
-		frequencyToSysclkDivisor(GLOWING_COUNTER_FREQ), 
+		frequencyToSysclkDivisor(PCA_GLOWING_COUNTER_FREQ), 
 		TIMER_OUTPUT_DISABLE, 
 		TIMER_INTERRUPT_DISABLE, 
 		TIMER_FREE_RUNNING
@@ -113,17 +191,36 @@ void main() {
 		PCA_TIMER0, 
 		PCA_FREE_RUNNING, 
 		PCA_INTERRUPT_DISABLE, 
-		GLOWING_PIN_CONFIG
+		PCA_GLOWING_PIN_CONFIG
 	);
 	
 	pcaStartPwm(
-		GLOWING_CCP_CHANNEL, 
+		PCA_GLOWING_CHANNEL, 
 		GPIO_BIDIRECTIONAL, 
-		MAKE_PCA_PWM_BITS(GLOWING_PWM_BITS), 
+		MAKE_PCA_PWM_BITS(PCA_GLOWING_PWM_BITS), 
 		PCA_EDGE_NONE, 
-		glowingDutyCycle
+		255 - PCA_GLOWING_GRADIENT[0]
 	);
 #endif // MCU_HAS_PCA
+
+// ---------------------------------------------------------------------
+
+#ifdef MCU_HAS_ENHANCED_PWM
+	enhpwmInitialise(ENHPWM_SYSCLK_DIV_7, 32767, ENHPWM_INTERRUPT_DISABLE);
+	enhpwmStartChannel(
+		ENHPWM_GLOWING_CHANNEL, 
+		ENHPWM_GLOWING_PIN_CONFIG, 
+		GPIO_BIDIRECTIONAL, 
+		ENHPWM_LOW, 
+		ENHPWM_INTERRUPT_EVENT_NONE, 
+		ENHPWM_GLOWING_GRADIENT[0]
+	);
+#endif // MCU_HAS_ENHANCED_PWM
+
+// ---------------------------------------------------------------------
+
+#ifdef MCU_HAS_ADVANCED_PWM
+#endif // MCU_HAS_ADVANCED_PWM
 	
 	// Enable interrupts -----------------------------------------------
 	EA = 1;

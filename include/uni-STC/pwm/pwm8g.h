@@ -223,6 +223,11 @@ SFRX(PWM00CR, 0xFF14);
 #define M_ENO 0x80
 #define P_ENO 7
 
+#if MCU_SERIES == 'A' // STC8A8KxxD4
+	#define M_C_S 0x18
+	#define P_C_S 3
+#endif // MCU_SERIES == 'A'
+
 // SFR PWM00HLD: PWM00 level hold control register
 SFRX(PWM00HLD, 0xFF15);
 

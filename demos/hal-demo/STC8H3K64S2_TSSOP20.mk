@@ -62,17 +62,17 @@
 
 PROJECT_NAME = hal-demo
 
-# Tested on STC15W4K32S4-30I-PDIP40
+# Tested on STC8H3K64S2-45I-TSSOP20
 
-BUILD_FOR = BUILD_FOR_STC15W4K32S4_PDIP40
+BUILD_FOR = BUILD_FOR_STC8H3K64S2_TSSOP20
 MCU_FREQ = 23961600
 TARGET_ARCH = -mmcs51
 MEMORY_MODEL = --model-large
 MEMORY_SIZES = \
 	--xram-loc 0 \
-	--xram-size 4096 \
+	--xram-size 3072 \
 	--stack-size 128 \
-	--code-size 32768
+	--code-size 65536
 
 CONSOLE_BAUDRATE = 115200
 CONSOLE_PORT = ttyUSB0
@@ -85,9 +85,7 @@ UNISTC_DIR = ../../include
 SRCS = \
 	timer-hal.c \
 	delay.c \
-	enhpwm-hal.c \
 	gpio-hal.c \
-	pca-hal.c \
 	serial-console.c \
 	uart-hal.c \
 	uart-buffer.c \
@@ -105,7 +103,7 @@ ifeq ($(BUILD_MODE),debug)
 	CFLAGS += --debug
 	BUILD_DIR = debug
 else
-	CFLAGS += --opt-code-speed
+	CFLAGS += --opt-code-size
 	BUILD_DIR = release
 endif
 

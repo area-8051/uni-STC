@@ -6,11 +6,13 @@
 #define MCU_PINS 20
 #define MCU_HAS_COMPARATOR
 #define MCU_HAS_MDU
-#define GPIO_HAS_INT_WK
 #define PWM_GROUPS 2
 #define PWM_CHANNELS 4
 #define ADC_CHANNELS 12
-#define MCU_HAS_P1_2
+#define GPIO_HAS_INT_WK
+#define GPIO_NO_P13
+#define GPIO_NO_P14
+#define GPIO_NO_P15
 #define SPI_HAS_HIGH_SPEED
 
 #include <uni-STC/stcmcu.h>

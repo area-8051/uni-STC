@@ -42,15 +42,18 @@
 #define SPI_MOSI_PIN 2
 #define SPI_MISO_PIN 3
 #define SPI_SCLK_PIN 4
+#define SPI_ROW_SIZE 5
 
-static uint8_t __spi_pinConfigurations[][5] = {
+static uint8_t __pinConfigurations[][SPI_ROW_SIZE] = {
 #if MCU_FAMILY == 8
 	#if MCU_PINS == 8
 		{ 0, 0x55, 0x54, 0x33, 0x32 },
-	#elif MCU_SERIES == 'H' && !defined(MCU_HAS_P1_2)
-		{ 0, 0x54, 0x13, 0x14, 0x15 },
-	#elif MCU_PINS >= 20
-		{ 0, 0x12, 0x13, 0x14, 0x15 },
+	#elif !(defined(GPIO_NO_P13) || defined(GPIO_NO_P14) || defined(GPIO_NO_P15))
+		#if MCU_SERIES == 'H' && defined(GPIO_NO_P12)
+			{ 0, 0x54, 0x13, 0x14, 0x15 },
+		#elif MCU_PINS >= 20
+			{ 0, 0x12, 0x13, 0x14, 0x15 },
+		#endif // MCU_SERIES == 'H' && defined(GPIO_NO_P12)
 	#endif // MCU_PINS == 8
 	
 	#if MCU_PINS >= 28
@@ -95,20 +98,21 @@ static uint8_t __spi_pinConfigurations[][5] = {
 // in high-impedance mode by default, so configuring the output pins
 // mode is *REQUIRED*.
 static void __spi_configurePins(SpiMode spiMode, uint8_t pinSwitch, GpioPortMode outputPinMode) {
-	for (uint8_t i = 0; i < (sizeof(__spi_pinConfigurations) / 5); i++) {
-		if (__spi_pinConfigurations[i][SPI_PIN_SWITCH] == pinSwitch) {
+	for (uint8_t i = 0; i < (sizeof(__pinConfigurations) / SPI_ROW_SIZE); i++) {
+		if (__pinConfigurations[i][SPI_PIN_SWITCH] == pinSwitch) {
+			P_SW1 = (P_SW1 & ~M_SPI_S) | ((pinSwitch << P_SPI_S) & M_SPI_S);
 			GpioConfig pinConfig = GPIO_PIN_CONFIG(GPIO_PORT3, GPIO_PIN0, outputPinMode);
 			uint8_t pinDefinition;
 			
 			switch (spiMode) {
 			case SPI_MASTER:
 				// Configure outputs
-				pinDefinition = __spi_pinConfigurations[i][SPI_MOSI_PIN];
+				pinDefinition = __pinConfigurations[i][SPI_MOSI_PIN];
 				pinConfig.port = (GpioPort) (pinDefinition >> 4);
 				pinConfig.pin = (GpioPin) (pinDefinition & 0x0f);
 				gpioConfigure(&pinConfig);
 				
-				pinDefinition = __spi_pinConfigurations[i][SPI_SCLK_PIN];
+				pinDefinition = __pinConfigurations[i][SPI_SCLK_PIN];
 				pinConfig.port = (GpioPort) (pinDefinition >> 4);
 				pinConfig.pin = (GpioPin) (pinDefinition & 0x0f);
 				gpioConfigure(&pinConfig);
@@ -116,7 +120,7 @@ static void __spi_configurePins(SpiMode spiMode, uint8_t pinSwitch, GpioPortMode
 				// Configure input
 				pinConfig.portMode = GPIO_BIDIRECTIONAL;
 				
-				pinDefinition = __spi_pinConfigurations[i][SPI_MISO_PIN];
+				pinDefinition = __pinConfigurations[i][SPI_MISO_PIN];
 				pinConfig.port = (GpioPort) (pinDefinition >> 4);
 				pinConfig.pin = (GpioPin) (pinDefinition & 0x0f);
 				gpioConfigure(&pinConfig);
@@ -124,7 +128,7 @@ static void __spi_configurePins(SpiMode spiMode, uint8_t pinSwitch, GpioPortMode
 			
 			case SPI_SLAVE:
 				// Configure output
-				pinDefinition = __spi_pinConfigurations[i][SPI_MISO_PIN];
+				pinDefinition = __pinConfigurations[i][SPI_MISO_PIN];
 				pinConfig.port = (GpioPort) (pinDefinition >> 4);
 				pinConfig.pin = (GpioPin) (pinDefinition & 0x0f);
 				gpioConfigure(&pinConfig);
@@ -132,12 +136,12 @@ static void __spi_configurePins(SpiMode spiMode, uint8_t pinSwitch, GpioPortMode
 				// Configure inputs
 				pinConfig.portMode = GPIO_BIDIRECTIONAL;
 				
-				pinDefinition = __spi_pinConfigurations[i][SPI_MOSI_PIN];
+				pinDefinition = __pinConfigurations[i][SPI_MOSI_PIN];
 				pinConfig.port = (GpioPort) (pinDefinition >> 4);
 				pinConfig.pin = (GpioPin) (pinDefinition & 0x0f);
 				gpioConfigure(&pinConfig);
 				
-				pinDefinition = __spi_pinConfigurations[i][SPI_SCLK_PIN];
+				pinDefinition = __pinConfigurations[i][SPI_SCLK_PIN];
 				pinConfig.port = (GpioPort) (pinDefinition >> 4);
 				pinConfig.pin = (GpioPin) (pinDefinition & 0x0f);
 				gpioConfigure(&pinConfig);
@@ -209,7 +213,6 @@ SpiSpeed spiSelectSpeed(uint32_t maxDeviceRate) {
 
 void spiConfigure(SpiMode spiMode, SpiBitOrder bitOrder, SpiPolarity polarity, SpiSpeed speed, uint8_t pinSwitch, GpioPortMode outputPinMode) {
 	__spi_configurePins(spiMode, pinSwitch, outputPinMode);
-	P_SW1 = (P_SW1 & ~M_SPI_S) | ((pinSwitch << P_SPI_S) & M_SPI_S);
 	__spi_mode = spiMode;
 	SPCTL = spiMode | bitOrder | polarity | speed;
 	IE2 = (spiMode == SPI_DISABLE)

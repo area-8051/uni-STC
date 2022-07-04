@@ -6,9 +6,9 @@
 #define MCU_PINS 20
 #define MCU_HAS_COMPARATOR
 #define ADC_CHANNELS 9
+#define ADC_BITS 10
 #define PWM_GROUPS 2
 #define PWM_CHANNELS 4
-#define MCU_HAS_P1_2
 
 #include <uni-STC/stcmcu.h>
 

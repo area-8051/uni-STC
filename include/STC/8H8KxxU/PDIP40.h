@@ -11,6 +11,7 @@
 #define MCU_HAS_RTC
 #define MCU_HAS_USB
 #define GPIO_HAS_INT_WK
+#define GPIO_NO_P12
 #define NB_UARTS 4
 #define PWM_GROUPS 2
 #define PWM_CHANNELS 4

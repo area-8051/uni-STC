@@ -37,6 +37,8 @@
  * 
  * Supported MCU families: STC12, STC15, STC8A, STC8G, STC8H.
  * 
+ * Dependencies: gpio-hal.
+ * 
  * **IMPORTANT:** In order to satisfy SDCC's requirements for ISR 
  * handling, this header file **MUST** be included in the C source 
  * file where main() is defined.
@@ -49,14 +51,15 @@
  * 
  *  Value |  SS  | MOSI | MISO | SCLK | Comments
  * -------+------+------+------+------+------------------------
- *    0   | P5.4 | P1.3 | P1.4 | P1.5 | !defined(MCU_HAS_P1_2)
+ *    0   | P5.4 | P1.3 | P1.4 | P1.5 | defined(GPIO_NO_P12)
  * -------+------+------+------+------+------------------------
- *    0   | P1.2 | P1.3 | P1.4 | P1.5 | defined(MCU_HAS_P1_2)
+ *    0   | P1.2 | P1.3 | P1.4 | P1.5 | defined(GPIO_NO_P13..15) && !defined(GPIO_NO_P12)
  *    1   | P2.2 | P2.3 | P2.4 | P2.5 | MCU_PINS >= 28
  *    2   | P5.4 | P4.0 | P4.1 | P4.3 | MCU_PINS >= 44
  *    3   | P3.5 | P3.4 | P3.3 | P3.2 |
  * 
- * Note: STC8H8, STC8H4 and STC8H1K08TR do NOT have pin P1.2.
+ * Note 1: STC8H8, STC8H4 and STC8H1K08TR do NOT have pin P1.2.
+ * Note 2: STC8H3 do NOT have P1.3, P1.4 and P1.5.
  * 
  * SPI pin configurations for STC8G
  * 

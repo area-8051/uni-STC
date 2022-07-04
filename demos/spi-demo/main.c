@@ -86,7 +86,7 @@ void main() {
 		SPI_MSB_FIRST, 
 		SPI_CLK_IDLE_LOW, 
 		spiSelectSpeed(MAX6675_MAX_SPEED), 
-		0, 
+		SPI_PIN_CONFIG, 
 		GPIO_BIDIRECTIONAL
 	);
 	

@@ -11,7 +11,9 @@
 #define PWM_GROUPS 2
 #define PWM_CHANNELS 4
 #define ADC_CHANNELS 12
-#define MCU_HAS_P1_2
+#define GPIO_NO_P13
+#define GPIO_NO_P14
+#define GPIO_NO_P15
 #define SPI_HAS_HIGH_SPEED
 
 #include <uni-STC/stcmcu.h>

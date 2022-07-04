@@ -48,10 +48,12 @@ static uint8_t __pinConfigurations[][SPI_ROW_SIZE] = {
 #if MCU_FAMILY == 8
 	#if MCU_PINS == 8
 		{ 0, 0x55, 0x54, 0x33, 0x32 },
-	#elif MCU_SERIES == 'H' && !defined(MCU_HAS_P1_2)
-		{ 0, 0x54, 0x13, 0x14, 0x15 },
-	#elif MCU_PINS >= 20
-		{ 0, 0x12, 0x13, 0x14, 0x15 },
+	#elif !(defined(GPIO_NO_P13) || defined(GPIO_NO_P14) || defined(GPIO_NO_P15))
+		#if MCU_SERIES == 'H' && defined(GPIO_NO_P12)
+			{ 0, 0x54, 0x13, 0x14, 0x15 },
+		#elif MCU_PINS >= 20
+			{ 0, 0x12, 0x13, 0x14, 0x15 },
+		#endif // MCU_SERIES == 'H' && defined(GPIO_NO_P12)
 	#endif // MCU_PINS == 8
 	
 	#if MCU_PINS >= 28

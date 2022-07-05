@@ -63,6 +63,11 @@
  * 
  * IMPORTANT3: when using interrupts, don't forget to declare your
  * interrupt service routine, this HAL module doesn't provide one.
+ * Its prototype must be either:
+ *     void __enhpwm_isr() ISR_PARAM(PWM2_INTERRUPT, 1);
+ * for the STC8G2K, or:
+ *     void __enhpwm_isr() ISR_PARAM(PWM0_INTERRUPT, 1);
+ * for all other MCU.
  */
 
 #include "gpio-hal.h"

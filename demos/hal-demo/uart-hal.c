@@ -160,6 +160,11 @@ uint8_t uartTransmitBufferFull(Uart uart) {
 	return uartBufferLength(outputBuffer(uart)) == UART_BUFFER_SIZE;
 }
 
+#ifndef M_S1_S
+// Suppress warning "unreferenced function argument"
+// when using STC12 with HAL_UARTS set to 1.
+#pragma disable_warning 85
+#endif // M_S1_S
 Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudRateTimer, UartMode mode, uint8_t pinSwitch) {
 	Timer_Status rc = TIMER_FREQUENCY_OK;
 	

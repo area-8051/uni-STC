@@ -43,7 +43,7 @@
  */
 #if MCU_FAMILY == 8
 
-#define DELAY_1ms ((unsigned int) (((MCU_FREQ / 1000UL) - 20UL) / 13UL))
+#define DELAY_1ms ((uint16_t) (((MCU_FREQ / 1000UL) - 20UL) / 13UL))
 /*
  * total_cycles = ms (13 n - (n div 256) + 17) - (ms div 256) + 10
  * total_cycles = delay (= 1e-3 s) * oscillator_frequency (= 2.4e7 Hz)
@@ -52,7 +52,7 @@
  * n = 1844 => error = -0.0333 %
  */
 
-#define DELAY_10us ((unsigned char) (((MCU_FREQ / 100000UL) - 16UL) / 6UL))
+#define DELAY_10us ((uint8_t) (((MCU_FREQ / 100000UL) - 16UL) / 6UL))
 /*
  * total_cycles = us (6 n + 11) + 8
  * total_cycles = delay (= 1e-5 s) * oscillator_frequency (= 2.4e7 Hz)
@@ -72,7 +72,7 @@
  */
 #if MCU_FAMILY == 15
 
-#define DELAY_1ms ((unsigned int) (((MCU_FREQ / 1000UL) - 30UL) / 18UL))
+#define DELAY_1ms ((uint16_t) (((MCU_FREQ / 1000UL) - 30UL) / 18UL))
 /*
  * total_cycles = ms (18 n + 2 (n div 256) + 25) + 2 (ms div 256) + 14
  * total_cycles = delay (= 1e-3 s) * oscillator_frequency (= 2.4e7 Hz)
@@ -81,7 +81,7 @@
  * n = 1331 => error = -0.0125 %
  */
 
-#define DELAY_10us ((unsigned char) (((MCU_FREQ / 100000UL) - 23UL) / 10UL))
+#define DELAY_10us ((uint8_t) (((MCU_FREQ / 100000UL) - 23UL) / 10UL))
 /*
  * total_cycles = us (10 n + 17) + 11
  * total_cycles = delay (= 1e-5 s) * oscillator_frequency (= 2.4e7 Hz)
@@ -101,7 +101,7 @@
  */
 #if MCU_FAMILY == 12
 
-#define DELAY_1ms ((unsigned int) (((MCU_FREQ / 1000UL) - 30UL) / 18UL))
+#define DELAY_1ms ((uint16_t) (((MCU_FREQ / 1000UL) - 30UL) / 18UL))
 /*
  * total_cycles = ms (19 n + 3 (n div 256) + 26) + 3 (ms div 256) + 14
  * total_cycles = delay (= 1e-3 s) * oscillator_frequency (in Hz)
@@ -109,7 +109,7 @@
  * we add 19/2 = 9 to the numerator, giving - 30UL instead of - 39UL.
  */
 
-#define DELAY_10us ((unsigned char) (((MCU_FREQ / 100000UL) - 23UL) / 10UL))
+#define DELAY_10us ((uint8_t) (((MCU_FREQ / 100000UL) - 23UL) / 10UL))
 /*
  * total_cycles = us (10 n + 16) + 10
  * total_cycles = delay (= 1e-5 s) * oscillator_frequency (in Hz)
@@ -129,9 +129,9 @@
 #if MCU_FAMILY == 90
 
 #if MCU_CYCLES == 6
-#define DELAY_1ms ((unsigned int) (((MCU_FREQ / 1000UL) - 114UL) / 72UL))
+#define DELAY_1ms ((uint16_t) (((MCU_FREQ / 1000UL) - 114UL) / 72UL))
 #else
-#define DELAY_1ms ((unsigned int) (((MCU_FREQ / 1000UL) - 228UL) / 144UL))
+#define DELAY_1ms ((uint16_t) (((MCU_FREQ / 1000UL) - 228UL) / 144UL))
 #endif // MCU_CYCLES == 6
 
 /*
@@ -141,9 +141,9 @@
  */
 
 #if MCU_CYCLES == 6
-#define DELAY_10us ((unsigned char) (((MCU_FREQ / 100000UL) - 84UL) / 36UL))
+#define DELAY_10us ((uint8_t) (((MCU_FREQ / 100000UL) - 84UL) / 36UL))
 #else
-#define DELAY_10us ((unsigned char) (((MCU_FREQ / 100000UL) - 168UL) / 72UL))
+#define DELAY_10us ((uint8_t) (((MCU_FREQ / 100000UL) - 168UL) / 72UL))
 #endif // MCU_CYCLES == 6
 
 /*
@@ -155,18 +155,18 @@
 #endif // MCU_FAMILY == 90
 // =====================================================================
 
-void delay1ms(unsigned int ms) {
-	for (unsigned int i = ms; i; i--) {
-		for (unsigned int n = DELAY_1ms; n; n--) {
+void delay1ms(uint16_t ms) {
+	for (uint16_t i = ms; i; i--) {
+		for (uint16_t n = DELAY_1ms; n; n--) {
 			__asm nop __endasm;
 			__asm nop __endasm;
 			__asm nop __endasm;
 		}
 	}
 }
-void delay10us(unsigned char us) {
-	for (unsigned char i = us; i; i--) {
-		for (unsigned char n = DELAY_10us; n; n--) {
+void delay10us(uint8_t us) {
+	for (uint8_t i = us; i; i--) {
+		for (uint8_t n = DELAY_10us; n; n--) {
 		}
 	}
 }

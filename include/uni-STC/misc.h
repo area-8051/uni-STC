@@ -153,9 +153,6 @@ SFR(P_SW1, 0xA2);
 	#endif
 #elif MCU_FAMILY == 12
 	// Bit masks for use with P_SW1
-	#define M_ADRJ 0x4
-	#define P_ADRJ 2
-	
 	#define M_GF2 0x8
 	#define P_GF2 3
 	

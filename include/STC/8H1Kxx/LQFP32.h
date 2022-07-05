@@ -7,6 +7,9 @@
 #define MCU_HAS_COMPARATOR
 #define ADC_CHANNELS 12
 #define ADC_BITS 10
+#define ADC_NO_CHANNEL12
+#define ADC_NO_CHANNEL13
+#define ADC_NO_CHANNEL14
 #define PWM_GROUPS 2
 #define PWM_CHANNELS 4
 

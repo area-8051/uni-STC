@@ -8,6 +8,42 @@
 #define _UNISTC_ADC_H
 
 #if defined(ADC_CHANNELS) && ADC_CHANNELS > 0
+	#ifndef ADC_BITS
+		#if MCU_FAMILY == 12
+			#define ADC_BITS 10
+		#endif // MCU_FAMILY == 12
+		
+		#if MCU_FAMILY == 15
+			#define ADC_BITS 10
+		#endif // MCU_FAMILY == 15
+		
+		#if MCU_FAMILY == 8
+			#if MCU_SERIES == 'G'
+				#define ADC_BITS 10
+			#else
+				#define ADC_BITS 12
+			#endif // MCU_SERIES == 'G'
+		#endif // MCU_FAMILY == 8
+	#endif // ADC_BITS
+	
+	#ifndef ADC_MAX_SAMPLE_RATE
+		#if MCU_FAMILY == 12
+			#define ADC_MAX_SAMPLE_RATE 250000UL
+		#endif // MCU_FAMILY == 12
+		
+		#if MCU_FAMILY == 15
+			#define ADC_MAX_SAMPLE_RATE 300000UL
+		#endif // MCU_FAMILY == 15
+		
+		#if MCU_FAMILY == 8
+			#if ADC_BITS == 10
+				#define ADC_MAX_SAMPLE_RATE 500000UL
+			#else
+				#define ADC_MAX_SAMPLE_RATE 800000UL
+			#endif // ADC_BITS == 10
+		#endif // MCU_FAMILY == 8
+	#endif // ADC_MAX_SAMPLE_RATE
+	
 	// SFR ADC_CONTR: ADC control
 	SFR(ADC_CONTR, 0xBC);
 	
@@ -25,14 +61,26 @@
 		#define P_ADC_SPEED 5
 	#endif // MCU_FAMILY == 12 || MCU_FAMILY == 15
 	
+	#if MCU_FAMILY == 12
+		// Bit mask for use with P_SW1
+		#define M_RESFMT 0x4
+		#define P_RESFMT 2
+	#endif // MCU_FAMILY == 12
+	
+	#if MCU_FAMILY == 15
+		// Bit mask for use with CLK_DIV
+		#define M_RESFMT 0x20
+		#define P_RESFMT 5
+	#endif // MCU_FAMILY == 15
+	
 	#if MCU_FAMILY == 8
 		#define M_ADC_CHS 0x0f
 		#define P_ADC_CHS 0
 		
-		#if MCU_SERIES == 'G'
+		#if MCU_SERIES == 'G' || MCU_SERIES == 'H' || (MCU_SERIES == 'A' && defined(MCU_HAS_DMA))
 			#define M_ADC_EPWMT 0x10
 			#define P_ADC_EPWMT 4
-		#endif // MCU_SERIES == 'G'
+		#endif // MCU_SERIES == 'G' || MCU_SERIES == 'H' || (MCU_SERIES == 'A' && defined(MCU_HAS_DMA))
 		
 		#define M_ADC_FLAG 0x20
 		#define P_ADC_FLAG 5

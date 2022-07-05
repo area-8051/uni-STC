@@ -9,6 +9,9 @@
 #define PWM_GROUPS 2
 #define PWM_CHANNELS 4
 #define ADC_CHANNELS 12
+#define ADC_NO_CHANNEL3
+#define ADC_NO_CHANNEL4
+#define ADC_NO_CHANNEL5
 #define GPIO_HAS_INT_WK
 #define GPIO_NO_P13
 #define GPIO_NO_P14

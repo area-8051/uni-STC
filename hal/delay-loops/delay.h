@@ -49,8 +49,8 @@
  * See the clock-cycles.ods spreadsheet for execution time calculations.
  */
 
-void delay1ms(unsigned int n);
+void delay1ms(uint16_t n);
 
-void delay10us(unsigned char n);
+void delay10us(uint8_t n);
 
 #endif // _DELAY_H

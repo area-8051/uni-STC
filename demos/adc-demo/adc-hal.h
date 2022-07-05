@@ -114,9 +114,10 @@ void adcConfigureChannel(ADC_Channel channel);
 void adcPowerOff();
 
 /**
- * Turn off ADC power.
+ * Turn on ADC power.
  * 
  * Called internally by adcInitialise().
+ * Can be called when leaving a power saving mode.
  */
 void adcPowerOn();
 

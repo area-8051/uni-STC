@@ -5,6 +5,7 @@
 #define MCU_SERIES 'A'
 #define MCU_PINS 48
 #define MCU_HAS_COMPARATOR
+#define COMPARATOR_4P2N
 #define MCU_HAS_MDU
 #define MCU_HAS_DMA
 #define MCU_HAS_LCM

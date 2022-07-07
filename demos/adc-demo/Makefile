@@ -86,7 +86,7 @@ UNISTC_DIR = ../../include
 SRCS = \
 	delay.c \
 	gpio-hal.c \
-	adc-hal.c \
+	adc-comp-hal.c \
 	serial-console.c \
 	timer-hal.c \
 	uart-buffer.c \

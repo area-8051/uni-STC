@@ -27,15 +27,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _ADC_HAL_H
-#define _ADC_HAL_H
+#ifndef _ADC_COMP_HAL_H
+#define _ADC_COMP_HAL_H
 
 /**
- * @file adc-hal.h
+ * @file adc-comp-hal.h
  * 
  * ADC abstraction layer definitions.
  * 
  * Supported MCU families: STC12, STC15, STC8.
+ * 
+ * Comparator abstraction layer definitions.
+ * 
+ * Supported MCU families: STC15, STC8.
  * 
  * Dependencies: gpio-hal, delay.
  */
@@ -137,4 +141,73 @@ uint16_t adcBlockingRead(ADC_Channel channel);
  */
 void adcStartConversion(ADC_Channel channel);
 
-#endif // _ADC_HAL_H
+typedef enum {
+	COMP_EDGE_RISING = 2,
+	COMP_EDGE_FALLING = 1,
+	COMP_EDGE_BOTH = 3,
+	COMP_EDGE_DISABLED = 0,
+} COMP_EdgeInterrupt;
+
+typedef enum {
+	POSITIVE_INPUT_P37 = 0,
+	#ifndef COMPARATOR_1P2N
+		POSITIVE_INPUT_ADC_IN = 3,
+	#endif // COMPARATOR_1P2N
+	#ifdef COMPARATOR_4P2N
+		POSITIVE_INPUT_P50 = 1,
+		POSITIVE_INPUT_P51 = 2,
+	#endif // COMPARATOR_4P2N
+} COMP_PositiveInput;
+
+typedef enum {
+	NEGATIVE_INPUT_INTERNAL_VREF = 0,
+	NEGATIVE_INPUT_P36 = 1,
+} COMP_NegativeInput;
+
+typedef enum {
+	COMP_HYSTERESIS_0 = 0,
+	COMP_HYSTERESIS_10mV = 1,
+	COMP_HYSTERESIS_20mV = 2,
+	COMP_HYSTERESIS_30mV = 3,
+} COMP_InputHysteresis;
+
+typedef enum {
+	COMP_OUTPUT_DISABLE = 0,
+	COMP_OUTPUT_NORMAL = 2,
+	COMP_OUTPUT_INVERT = 3,
+} COMP_OutputMode;
+
+typedef enum {
+	COMP_ANALOG_FILTER_OFF = 1,
+	COMP_ANALOG_FILTER_ON = 0,
+} COMP_AnalogFilter;
+
+typedef enum {
+	COMP_POSITIVE_LOWER_THAN_NEGATIVE = 0,
+	COMP_POSITIVE_HIGHER_THAN_NEGATIVE = 1,
+} COMP_Result;
+
+#define COMP_IGNORE_ADC_CHANNEL ADC_CHANNEL0
+#define COMP_DIGITAL_FILTER_OFF 0
+
+void compInitialise(
+	COMP_PositiveInput positiveInput,
+	// Ignored when positiveInput != POSITIVE_INPUT_ADC_IN.
+	ADC_Channel adcChannel,
+	COMP_NegativeInput negativeInput,
+	// Used on COMPARATOR_4P2N, ignored by other comparator versions.
+	COMP_InputHysteresis inputHysteresis,
+	COMP_OutputMode outputMode,
+	COMP_AnalogFilter analogFilter,
+	// Debounces comparator output during (digitalFilter + 2) system
+	// clocks when digitalFilter is in the range 1..63, disabled if 0.
+	uint8_t digitalFilter,
+	COMP_EdgeInterrupt interruptMode
+);
+
+/**
+ * Reads the comparator output value and clear interrupt flag.
+ */
+COMP_Result compRead();
+
+#endif // _ADC_COMP_HAL_H

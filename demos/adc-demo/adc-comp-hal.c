@@ -28,14 +28,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "adc-hal.h"
+#include "adc-comp-hal.h"
 #include "gpio-hal.h"
 #include "delay.h"
 
 /**
- * @file adc-hal.c
+ * @file adc-comp-hal.c
  * 
- * ADC abstraction layer implementation.
+ * ADC and comparator abstraction layer implementation.
  */
 
 void adcPowerOn() {
@@ -172,4 +172,57 @@ uint16_t adcBlockingRead(ADC_Channel channel) {
 
 void adcStartConversion(ADC_Channel channel) {
 	ADC_CONTR = (ADC_CONTR & ~M_ADC_CHS) | channel | M_ADC_START;
+}
+
+void compInitialise(
+	COMP_PositiveInput positiveInput,
+	// Ignored when positiveInput != POSITIVE_INPUT_ADC_IN.
+	ADC_Channel adcChannel,
+	COMP_NegativeInput negativeInput,
+	// Used on COMPARATOR_4P2N, ignored by other comparator versions.
+	COMP_InputHysteresis inputHysteresis,
+	COMP_OutputMode outputMode,
+	COMP_AnalogFilter analogFilter,
+	// Debounces comparator output during (digitalFilter + 2) system
+	// clocks when digitalFilter is in the range 1..63, disabled if 0.
+	uint8_t digitalFilter,
+	COMP_EdgeInterrupt interruptMode
+) {
+	if (positiveInput == POSITIVE_INPUT_ADC_IN) {
+		if (!(ADC_CONTR & M_ADC_POWER)) {
+			adcPowerOn();
+		}
+		
+		adcConfigureChannel(adcChannel);
+		ADC_CONTR = (ADC_CONTR & ~M_ADC_CHS) | adcChannel;
+	}
+	
+	CMPCR2 = ((outputMode & 1) << P_INVCMPO)
+		| (analogFilter << P_DISFLT)
+		| (digitalFilter & M_LCDTY);
+	
+	#ifdef COMPARATOR_4P2N
+		ENABLE_EXTENDED_SFR();
+		CMPEXCFG = (inputHysteresis << P_CHYS)
+			| (negativeInput << P_CMPNS)
+			| positiveInput;
+		DISABLE_EXTENDED_SFR();
+	#endif // COMPARATOR_4P2N
+	
+	uint8_t cmpcr1 = M_CMPEN
+		| (interruptMode << P_NIE)
+		| (outputMode != COMP_OUTPUT_DISABLE ? M_CMPOE : 0);
+	
+	#ifndef COMPARATOR_4P2N
+		cmpcr1 |= (positiveInput & 1) << P_PIS;
+		cmpcr1 |= negativeInput << P_NIS;
+	#endif // COMPARATOR_4P2N
+	
+	CMPCR1 = cmpcr1;
+}
+
+COMP_Result compRead() {
+	CMPCR1 &= ~M_CMPIF;
+	
+	return (COMP_Result) (CMPCR1 & M_CMPRES);
 }

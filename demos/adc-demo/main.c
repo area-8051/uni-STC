@@ -30,7 +30,7 @@
 #include "project-defs.h"
 #include "delay.h"
 
-#include "adc-hal.h"
+#include "adc-comp-hal.h"
 #include "uart-hal.h"
 #include "serial-console.h"
 #include <stdio.h>

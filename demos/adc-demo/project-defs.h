@@ -62,9 +62,7 @@
 #endif
 
 // You should connect a known voltage source on DEMO_ADC_CHANNEL,
-// but you may also leave it floating for the fun of it - or more 
-// seriously to assess the relevance of the least significant bits
-// of a floating ADC input as a source of entropy.
+// but you may also leave it floating for the fun of it.
 
 // On STC8, the value of channel 15 (internal voltage reference)
 // will also be displayed.

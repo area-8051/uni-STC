@@ -1,7 +1,8 @@
-Uses the SPI controller in master mode to read temperatures from a 
-MAX6675 (K-thermocouple-to-digital converter).
+Reads an ADC channel every 2 seconds and displays its value on the 
+serial console.
 
-Temperatures are sent at 57600 Baud to the serial console connected 
-to UART1 on P3.0 & P3.1.
+You should connect a known voltage source on ADC channel 0 (or 3 on 
+an STC8G1KxxA), but you may also leave it floating for the fun of it.
 
-MISO is connected to P1.4, SCLK to P1.5, and CS# to P1.6.
+On STC8, the value of channel 15 (internal voltage reference) will 
+also be displayed.

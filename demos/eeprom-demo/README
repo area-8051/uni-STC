@@ -1,0 +1,6 @@
+Demonstrates the use of the EEPROM HAL to store data (e.g. application 
+configuration).
+
+After a 10s delay to leave you enough time to start your terminal 
+emulator, the content of a memory buffer will be displayed after
+a few operations. We'll use a string for clarity.

@@ -1,0 +1,7 @@
+Blinks an LED using the watchdog timer.
+
+The LED's cathode must be connected to P5.4.
+
+The code is written to generate 4 long flashes followed by 4 short ones,
+but beacause we (deliberately) fail to clear the watchdog in time in 
+the second loop, you should see 4 long flashes and only 2 short flashes.

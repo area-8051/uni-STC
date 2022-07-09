@@ -22,8 +22,8 @@ See the projects under the demos/ directory for examples.
 Some peripheral support is incomplete (e.g. uart-hal doesn't support 
 9-bit mode) because I haven't had the need for all their features yet.
 
-All STC periperals aren't supported yet (e.g. enhenced and advanced PWM) 
-for the same reason.
+All STC periperals aren't supported yet (e.g. advanced PWM) for the 
+same reason.
 
 I'll add more as the need arises in the course of my projects.
 

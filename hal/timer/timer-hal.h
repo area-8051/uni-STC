@@ -79,26 +79,4 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
  * for SDCC to properly make their vector point at their address.
  */
 
-typedef enum {
-	WDT_SYSCLCK_DIV_24 = 0,
-	WDT_SYSCLCK_DIV_48,
-	WDT_SYSCLCK_DIV_96,
-	WDT_SYSCLCK_DIV_192,
-	WDT_SYSCLCK_DIV_384,
-	WDT_SYSCLCK_DIV_768,
-	WDT_SYSCLCK_DIV_1536,
-	WDT_SYSCLCK_DIV_3072,
-} WatchdogPrescaler;
-
-typedef enum {
-	WDT_DISABLED_IN_IDLE_MODE = 0,
-	WDT_ENABLED_IN_IDLE_MODE,
-} WatchdogIdleMode;
-
-// The WDT uses a 15-bit timer, so WDT time-out in seconds is:
-// (prescaler * 32768) / Fsysclk.
-void startWatchdog(WatchdogPrescaler prescaler, WatchdogIdleMode idleMode);
-
-void clearWatchdog();
-
 #endif // _TIMER_HAL_H

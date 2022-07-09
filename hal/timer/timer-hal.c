@@ -284,12 +284,3 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 	
 	return rc;
 }
-
-void startWatchdog(WatchdogPrescaler prescaler, WatchdogIdleMode idleMode) {
-	WDT_CONTR = M_EN_WDT | (prescaler << P_WDT_PS)
-		| (idleMode == WDT_ENABLED_IN_IDLE_MODE ? M_IDL_WDT : 0);
-}
-
-void clearWatchdog() {
-	WDT_CONTR |= M_CLR_WDT;
-}

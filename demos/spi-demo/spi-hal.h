@@ -142,6 +142,6 @@ void spiConfigure(SpiMode spiMode, SpiBitOrder bitOrder, SpiPolarity polarity, S
 void spiSend(uint8_t *buffer, size_t bufferSize, uint8_t *readyFlag);
 void spiReceive(uint8_t *buffer, size_t bufferSize, uint8_t *readyFlag);
 
-void __spi_isr() ISR_PARAM(SPI_INTERRUPT, 1);
+INTERRUPT_USING(__spi_isr, SPI_INTERRUPT, 1);
 
 #endif // _SPI_HAL_H

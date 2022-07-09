@@ -26,6 +26,9 @@ SFR(IAP_ADDRH, 0xC3);
 // SFR IAP_ADDRL: ISP/IAP flash address low
 SFR(IAP_ADDRL, 0xC4);
 
+// IAP_ADDR as an int
+SFR16E(IAP_ADDR, 0xC3C4);
+
 // SFR IAP_CMD: ISP/IAP flash command register
 SFR(IAP_CMD, 0xC5);
 #define M_CMD 0x03

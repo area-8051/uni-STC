@@ -102,7 +102,8 @@
 	// SFR LEDCKS: LED clock divide register
 	SFRX(LEDCKS, 0xFB04);
 	
-
+	// -----------------------------------------------------------------
+	
 	// SFR COM0_DA_L: Common anode mode display low
 	SFRX(COM0_DA_L, 0xFB10);
 	// SFR COM0_DA_H: Common anode mode display high
@@ -143,7 +144,8 @@
 	// SFR COM7_DA_H: Common anode mode display high
 	SFRX(COM7_DA_H, 0xFB1F);
 
-
+	// -----------------------------------------------------------------
+	
 	// SFR COM0_DC_L: Common cathode mode display low
 	SFRX(COM0_DC_L, 0xFB20);
 	// SFR COM0_DC_H: Common cathode mode display high

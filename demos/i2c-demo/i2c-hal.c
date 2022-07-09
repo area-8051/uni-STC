@@ -140,7 +140,7 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 		DISABLE_EXTENDED_SFR();
 	}
 
-	void __i2c_isr() ISR_PARAM(I2C_INTERRUPT, 1) {
+	INTERRUPT_USING(__i2c_isr, I2C_INTERRUPT, 1) {
 		uint8_t p_sw2 = P_SW2;
 		ENABLE_EXTENDED_SFR();
 		uint8_t flags = I2CSLST;

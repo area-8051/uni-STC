@@ -72,7 +72,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 /*
  * The prototype of timer <n>'s ISR is:
  * 
- * void __timer<n>_isr() ISR_PARAM(TIMER<n>_INTERRUPT, 1);
+ * INTERRUPT_USING(__timer<n>_isr, TIMER<n>_INTERRUPT, 1);
  * 
  * Remember that when ISR are defined in a separate source file,
  * they MUST also be declared in the source file defining main()

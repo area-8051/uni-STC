@@ -137,7 +137,7 @@ uint16_t adcBlockingRead(ADC_Channel channel);
  * There's no predefined interrupt service routine, you have to supply 
  * one with the following prototype:
  * 
- * void __adc_isr() ISR_PARAM(ADC_INTERRUPT, 1);
+ * INTERRUPT_USING(__adc_isr, ADC_INTERRUPT, 1);
  */
 void adcStartConversion(ADC_Channel channel);
 

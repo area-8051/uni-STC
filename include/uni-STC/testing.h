@@ -15,7 +15,7 @@
 	#define CRITICAL /**/
 	#define REENTRANT /**/
 	#define USE_BANK(registerBank) /**/
-	#define ISR_PARAM(interruptNumber, registerBank) /**/
+	#define INTERRUPT_USING(name, vector, regnum) void name()
 	// GCC & CLANG never inline functions unless optimisation is requested, 
 	// which is not the case by default, so we need to insist a little bit.
 	#define INLINE inline __attribute__((always_inline))
@@ -23,7 +23,6 @@
 	#define CRITICAL __critical
 	#define REENTRANT __reentrant
 	#define USE_BANK(registerBank) __using(registerBank)
-	#define ISR_PARAM(interruptNumber, registerBank) __interrupt(interruptNumber) __using(registerBank)
 	// With SDCC, we always optimise (generally for size), so no problem.
 	#define INLINE inline
 #endif // __TESTING__

@@ -12,6 +12,9 @@ SFR(DPL, 0x82);
 // SFR DPH: Data pointer (DPTR) high
 SFR(DPH, 0x83);
 
+// DPTR as an int
+SFR16(DP, 0x82);
+
 #if MCU_FAMILY == 8
 	#define MCU_HAS_DUAL_DPTR
 #endif // MCU_FAMILY == 8

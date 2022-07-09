@@ -333,7 +333,7 @@ Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baud
 	return rc;
 }
 
-void __uart1_isr() ISR_PARAM(UART1_INTERRUPT, 1) CRITICAL {
+INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 	if (S1CON & M_TI) {
 		S1CON &= ~M_TI;
 		
@@ -351,7 +351,7 @@ void __uart1_isr() ISR_PARAM(UART1_INTERRUPT, 1) CRITICAL {
 }
 
 #if HAL_UARTS >= 2
-	void __uart2_isr() ISR_PARAM(UART2_INTERRUPT, 1) CRITICAL {
+	INTERRUPT_USING(__uart2_isr, UART2_INTERRUPT, 1) CRITICAL {
 		if (S2CON & M_TI) {
 			S2CON &= ~M_TI;
 			
@@ -370,7 +370,7 @@ void __uart1_isr() ISR_PARAM(UART1_INTERRUPT, 1) CRITICAL {
 #endif // HAL_UARTS >= 2
 
 #if HAL_UARTS >= 3
-	void __uart3_isr() ISR_PARAM(UART3_INTERRUPT, 1) CRITICAL {
+	INTERRUPT_USING(__uart3_isr, UART3_INTERRUPT, 1) CRITICAL {
 		if (S3CON & M_TI) {
 			S3CON &= ~M_TI;
 			
@@ -387,7 +387,7 @@ void __uart1_isr() ISR_PARAM(UART1_INTERRUPT, 1) CRITICAL {
 		}
 	}
 
-	void __uart4_isr() ISR_PARAM(UART4_INTERRUPT, 1) CRITICAL {
+	INTERRUPT_USING(__uart4_isr, UART4_INTERRUPT, 1) CRITICAL {
 		if (S4CON & M_TI) {
 			S4CON &= ~M_TI;
 			

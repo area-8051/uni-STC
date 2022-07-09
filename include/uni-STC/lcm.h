@@ -59,6 +59,9 @@
 
 	// SFR LCMIDDATH: LCM interface data high
 	SFRX(LCMIDDATH, 0xFE55);
+
+	// LCMIDDAT as an int
+	SFR16LEX(LCMIDDAT, 0xFE54);
 	
 	// LCD module interface interrupt (usage in C => see STC8H TRM appendix R or STC8A8K64D4 TRM appendix P)
 	#define LCM_INTERRUPT 59

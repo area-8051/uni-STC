@@ -37,6 +37,9 @@
  * 
  * Supported MCU families: STC12, STC15, STC8A, STC8G.
  * 
+ * Dependencies: gpio-hal, timer-hal (only when using Timer 0 as clock 
+ * source for the PCA counter).
+ * 
  * **IMPORTANT:** In order to satisfy SDCC's requirements for ISR 
  * handling, this header file **MUST** be included in the C source 
  * file where main() is defined.
@@ -97,7 +100,7 @@ typedef enum {
  *   1   | P4.2 | P4.3 | P4.1
  */
 
-void __pca_isr() ISR_PARAM(PCA_INTERRUPT, 1);
+INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1);
 
 /**
  * Initialises the master counter of the counter array.

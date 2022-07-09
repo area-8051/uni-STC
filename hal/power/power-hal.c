@@ -40,14 +40,14 @@
 
 void enterIdleMode() {
 	PCON |= M_IDL;
-	__asm nop __endasm;
-	__asm nop __endasm;
+	NOP();
+	NOP();
 }
 
 void enterPowerDownMode() {
 	PCON |= M_PD;
-	__asm nop __endasm;
-	__asm nop __endasm;
+	NOP();
+	NOP();
 }
 
 #ifdef MCU_HAS_WAKE_UP_TIMER
@@ -70,7 +70,6 @@ void enterPowerDownMode() {
 		// Set the WKTEN bit
 		wakeUpCount |= 0x8000;
 		
-		WKTCL = wakeUpCount & 0xff;
-		WKTCH = wakeUpCount >> 8;
+		WKTC = wakeUpCount;
 	}
 #endif // MCU_HAS_WAKE_UP_TIMER

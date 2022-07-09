@@ -34,6 +34,10 @@
  * @file power-hal.h
  * 
  * Power management abstraction definitions.
+ * 
+ * Supported MCU families: STC12, STC15, STC8.
+ * 
+ * Dependencies: none.
  */
 
 // Only stops CPU

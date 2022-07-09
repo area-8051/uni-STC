@@ -96,6 +96,9 @@ SFR(T0L, 0x8A);
 // SFR TH0: Timer 0 high
 SFR(T0H, 0x8C);
 
+// Timer 0 as an int
+SFR16E(T0, 0x8C8A);
+
 // Timer 0 interrupt
 #define TIMER0_INTERRUPT 1
 #define TIMER0_VECTOR_ADDR 0x0B
@@ -114,6 +117,9 @@ SFR(T0H, 0x8C);
 	// SFR TH1: Timer 1 high
 	SFR(T1H, 0x8D);
 	
+	// Timer 1 as an int
+	SFR16E(T1, 0x8D8B);
+	
 	// Timer 1 interrupt
 	#define TIMER1_INTERRUPT 3
 	#define TIMER1_VECTOR_ADDR 0x1B
@@ -128,10 +134,13 @@ SFR(T0H, 0x8C);
 #endif // TIMER_HAS_T1
 
 #ifdef TIMER_HAS_T2
-	// SFR TL1: Timer 1 low
+	// SFR TL2: Timer 2 low
 	SFR(T2L, 0xD7);
-	// SFR TH1: Timer 1 high
+	// SFR TH2: Timer 2 high
 	SFR(T2H, 0xD6);
+	
+	// Timer 2 as an int
+	SFR16E(T2, 0xD6D7);
 #endif // TIMER_HAS_T2
 
 #ifdef TIMER_HAS_BRT
@@ -239,11 +248,17 @@ SFR(WDT_CONTR, 0xC1);
 	SFR(T4H, 0xD2);
 	// SFR T4L: Timer 4 low
 	SFR(T4L, 0xD3);
+	
+	// Timer 4 as an int
+	SFR16E(T4, 0xD2D3);
 
 	// SFR T3H: Timer 3 high
 	SFR(T3H, 0xD4);
 	// SFR T3L: Timer 3 low
 	SFR(T3L, 0xD5);
+	
+	// Timer 3 as an int
+	SFR16E(T3, 0xD4D5);
 
 	// Timer 3 interrupt
 	#define TIMER3_INTERRUPT 19
@@ -262,11 +277,6 @@ SFR(WDT_CONTR, 0xC1);
 #endif // TIMER_HAS_T3_T4
 
 #ifdef TIMER_HAS_T2
-	// SFR T2H: Timer 2 high
-	SFR(T2H, 0xD6);
-	// SFR T2L: Timer 2 low
-	SFR(T2L, 0xD7);
-	
 	// Timer 2 interrupt
 	#define TIMER2_INTERRUPT 12
 	#define TIMER2_VECTOR_ADDR 0x63

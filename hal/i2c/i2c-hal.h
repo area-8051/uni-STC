@@ -106,7 +106,7 @@ typedef enum {
 	void i2cOnDataSent(I2C_AckNak ack) USE_BANK(1);
 	void i2cOnStop() USE_BANK(1);
 
-	void __i2c_isr() ISR_PARAM(I2C_INTERRUPT, 1);
+	INTERRUPT_USING(__i2c_isr, I2C_INTERRUPT, 1);
 #else
 	// == MASTER mode ==================================================
 	

@@ -134,6 +134,9 @@
 	// SFR CH: PCA base timer high
 	SFR(CH, 0xF9);
 
+	// PCA base timer as an int
+	SFR16E(PCA_CTR, 0xF9E9);
+
 	// SFR CCAP0L: PCA module 0 capture register low
 	SFR(CCAP0L, 0xEA);
 
@@ -171,6 +174,25 @@
 			SFRX(CCAP3H, 0xFD56);
 		#else
 			SFR(CCAP3H, 0xFD);
+		#endif // PCA_CHANNEL3_XSFR
+	#endif // PCA_CHANNELS >= 4
+
+	// CCAP0 as an int
+	SFR16E(CCAP0, 0xFAEA);
+	// CCAP1 as an int
+	SFR16E(CCAP1, 0xFBEB);
+
+	#if PCA_CHANNELS >= 3
+		// CCAP2 as an int
+		SFR16E(CCAP2, 0xFCEC);
+	#endif // PCA_CHANNELS >= 3
+
+	#if PCA_CHANNELS >= 4
+		// CCAP3 as an int
+		#ifdef PCA_CHANNEL3_XSFR
+			SFR16LEX(CCAP3, 0xFD55);
+		#else
+			SFR16E(CCAP3, 0xFDED);
 		#endif // PCA_CHANNEL3_XSFR
 	#endif // PCA_CHANNELS >= 4
 

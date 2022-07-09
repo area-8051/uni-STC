@@ -244,6 +244,9 @@ SFR(BUS_SPEED, 0xA1);
 	// SFR WKTCH: Power-down wake-up timer control register high
 	SFR(WKTCH, 0xAB);
 	
+	// WKTC as an int
+	SFR16(WKTC, 0xAA);
+	
 	#define M_WKTEN 0x80
 	#define P_WKTEN 7
 #endif // MCU_HAS_WAKE_UP_TIMER

@@ -156,8 +156,7 @@ void pcaInitialise(PCA_ClockSource clockSource, PCA_CounterMode counterMode, PCA
 	
 	CMOD = (counterMode << P_CIDL) | (clockSource << P_CPS) | (overflowInterrupt << P_ECF);
 	CCON = 0;
-	CL = 0;
-	CH = 0;
+	PCA_CTR = 0;
 	CR = 1;
 }
 
@@ -177,23 +176,20 @@ void pcaStartCapture(PCA_Channel channel, GpioPortMode pinMode, PCA_EdgeTrigger 
 	switch (channel) {
 	case PCA_CHANNEL0:
 		CCAPM0 = ccapMode;
-		CCAP0L = 0;
-		CCAP0H = 0;
+		CCAP0 = 0;
 		break;
 		
 #if HAL_PCA_CHANNELS > 1
 	case PCA_CHANNEL1:
 		CCAPM1 = ccapMode;
-		CCAP1L = 0;
-		CCAP1H = 0;
+		CCAP1 = 0;
 		break;
 #endif // HAL_PCA_CHANNELS > 1
 		
 #if HAL_PCA_CHANNELS > 2
 	case PCA_CHANNEL2:
 		CCAPM2 = ccapMode;
-		CCAP2L = 0;
-		CCAP2H = 0;
+		CCAP2 = 0;
 		break;
 #endif // HAL_PCA_CHANNELS > 2
 		
@@ -204,8 +200,7 @@ void pcaStartCapture(PCA_Channel channel, GpioPortMode pinMode, PCA_EdgeTrigger 
 	#endif
 		
 		CCAPM3 = ccapMode;
-		CCAP3L = 0;
-		CCAP3H = 0;
+		CCAP3 = 0;
 		
 	#ifdef PCA_CHANNEL3_XSFR
 		DISABLE_EXTENDED_SFR();
@@ -214,8 +209,7 @@ void pcaStartCapture(PCA_Channel channel, GpioPortMode pinMode, PCA_EdgeTrigger 
 #endif // HAL_PCA_CHANNELS > 3
 	}
 	
-	CL = 0;
-	CH = 0;
+	PCA_CTR = 0;
 	CR = 1;
 }
 
@@ -295,7 +289,7 @@ static void __pcaConfigurePWM(uint8_t initialise, PCA_Channel channel, GpioPortM
 	
 	uint16_t reloadValue = maxValue - ((clocksHigh >= maxValue) ? (maxValue - 1) : clocksHigh);
 	uint8_t xccap = (reloadValue >> 8) & 3;
-	uint8_t ccap = reloadValue & 0xff;
+	uint8_t ccap = reloadValue;
 	// When using 10-bit PWM:
 	// (xccap << 4) defines bits 9 and 8 of the reload value (XCCAPnH)
 	// (xccap << 2) defines bits 9 and 8 of the comparison value (XCCAPnL)
@@ -382,23 +376,20 @@ void pcaStartTimer(PCA_Channel channel, GpioPortMode pinMode, PCA_OutputEnable p
 	switch (channel) {
 	case PCA_CHANNEL0:
 		CCAPM0 = ccapMode;
-		CCAP0L = __pca_timerValue[channel] & 0xff;
-		CCAP0H = __pca_timerValue[channel] >> 8;
+		CCAP0 = __pca_timerValue[channel];
 		break;
 		
 #if HAL_PCA_CHANNELS > 1
 	case PCA_CHANNEL1:
 		CCAPM1 = ccapMode;
-		CCAP1L = __pca_timerValue[channel] & 0xff;
-		CCAP1H = __pca_timerValue[channel] >> 8;
+		CCAP1 = __pca_timerValue[channel];
 		break;
 #endif // HAL_PCA_CHANNELS > 1
 		
 #if HAL_PCA_CHANNELS > 2
 	case PCA_CHANNEL2:
 		CCAPM2 = ccapMode;
-		CCAP2L = __pca_timerValue[channel] & 0xff;
-		CCAP2H = __pca_timerValue[channel] >> 8;
+		CCAP2 = __pca_timerValue[channel];
 		break;
 #endif // HAL_PCA_CHANNELS > 2
 		
@@ -409,8 +400,7 @@ void pcaStartTimer(PCA_Channel channel, GpioPortMode pinMode, PCA_OutputEnable p
 	#endif
 		
 		CCAPM3 = ccapMode;
-		CCAP3L = __pca_timerValue[channel] & 0xff;
-		CCAP3H = __pca_timerValue[channel] >> 8;
+		CCAP3 = __pca_timerValue[channel];
 		
 	#ifdef PCA_CHANNEL3_XSFR
 		DISABLE_EXTENDED_SFR();
@@ -420,7 +410,7 @@ void pcaStartTimer(PCA_Channel channel, GpioPortMode pinMode, PCA_OutputEnable p
 	}
 }
 
-void __pca_isr() ISR_PARAM(PCA_INTERRUPT, 1) CRITICAL {
+INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1) CRITICAL {
 	uint8_t ccapl = 0;
 	uint8_t ccaph = 0;
 	uint8_t channel = HAL_PCA_CHANNELS;
@@ -462,8 +452,7 @@ void __pca_isr() ISR_PARAM(PCA_INTERRUPT, 1) CRITICAL {
 		case PCA_TIMER:
 		case PCA_PULSE:
 			__pca_timerValue[channel] += __pca_timerPeriod[channel];
-			CCAP0L = __pca_timerValue[channel] & 0xff;
-			CCAP0H = __pca_timerValue[channel] >> 8;
+			CCAP0 = __pca_timerValue[channel];
 			break;
 		}
 	}
@@ -487,8 +476,7 @@ void __pca_isr() ISR_PARAM(PCA_INTERRUPT, 1) CRITICAL {
 		case PCA_TIMER:
 		case PCA_PULSE:
 			__pca_timerValue[channel] += __pca_timerPeriod[channel];
-			CCAP1L = __pca_timerValue[channel] & 0xff;
-			CCAP1H = __pca_timerValue[channel] >> 8;
+			CCAP1 = __pca_timerValue[channel];
 			break;
 		}
 	}
@@ -513,8 +501,7 @@ void __pca_isr() ISR_PARAM(PCA_INTERRUPT, 1) CRITICAL {
 		case PCA_TIMER:
 		case PCA_PULSE:
 			__pca_timerValue[channel] += __pca_timerPeriod[channel];
-			CCAP2L = __pca_timerValue[channel] & 0xff;
-			CCAP2H = __pca_timerValue[channel] >> 8;
+			CCAP2 = __pca_timerValue[channel];
 			break;
 		}
 	}
@@ -543,8 +530,7 @@ void __pca_isr() ISR_PARAM(PCA_INTERRUPT, 1) CRITICAL {
 		case PCA_TIMER:
 		case PCA_PULSE:
 			__pca_timerValue[channel] += __pca_timerPeriod[channel];
-			CCAP3L = __pca_timerValue[channel] & 0xff;
-			CCAP3H = __pca_timerValue[channel] >> 8;
+			CCAP3 = __pca_timerValue[channel];
 			break;
 		}
 		

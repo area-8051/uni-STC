@@ -40,6 +40,6 @@ void delay1us(unsigned char us) {
 		for (unsigned char n = 2; n; n--) {
 		}
 		
-		__asm nop __endasm;
+		NOP();
 	}
 }

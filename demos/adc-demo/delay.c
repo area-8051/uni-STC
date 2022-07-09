@@ -158,9 +158,9 @@
 void delay1ms(uint16_t ms) {
 	for (uint16_t i = ms; i; i--) {
 		for (uint16_t n = DELAY_1ms; n; n--) {
-			__asm nop __endasm;
-			__asm nop __endasm;
-			__asm nop __endasm;
+			NOP();
+			NOP();
+			NOP();
 		}
 	}
 }

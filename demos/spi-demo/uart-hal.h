@@ -35,6 +35,10 @@
  * 
  * UART abstraction layer definitions.
  * 
+ * Supported MCU families: STC12, STC15, STC8.
+ * 
+ * Dependencies: timer-hal, uart-buffer.
+ * 
  * **IMPORTANT:** In order to satisfy SDCC's requirements for ISR 
  * handling, this header file **MUST** be included in the C source 
  * file where main() is defined.
@@ -144,15 +148,15 @@ uint8_t uartSendCharacter(Uart uart, uint8_t c);
 uint8_t uartTransmitBufferEmpty(Uart uart);
 uint8_t uartTransmitBufferFull(Uart uart);
 
-void __uart1_isr() ISR_PARAM(UART1_INTERRUPT, 1);
+INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1);
 
 #if HAL_UARTS >= 2
-void __uart2_isr() ISR_PARAM(UART2_INTERRUPT, 1);
+INTERRUPT_USING(__uart2_isr, UART2_INTERRUPT, 1);
 #endif // HAL_UARTS >= 2
 
 #if HAL_UARTS >= 3
-void __uart3_isr() ISR_PARAM(UART3_INTERRUPT, 1);
-void __uart4_isr() ISR_PARAM(UART4_INTERRUPT, 1);
+INTERRUPT_USING(__uart3_isr, UART3_INTERRUPT, 1);
+INTERRUPT_USING(__uart4_isr, UART4_INTERRUPT, 1);
 #endif // HAL_UARTS >= 3
 
 #endif // _UART_HAL_H

@@ -6,7 +6,7 @@
 #define CRITICAL /**/
 #define REENTRANT /**/
 #define USE_BANK(registerBank) /**/
-#define ISR_PARAM(interruptNumber, registerBank) /**/
+#define INTERRUPT_USING(name, vector, regnum) void name()
 
 #define UART_BUFFER_SIZE 4
 

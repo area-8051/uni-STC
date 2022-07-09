@@ -68,8 +68,7 @@ typedef enum {
 } IAPCommand;
 
 static void iapExecute(uint16_t address, IAPCommand command) {
-	IAP_ADDRH = address >> 8;
-	IAP_ADDRL = address & 0xff;
+	IAP_ADDR = address;
 	IAP_CMD = command;
 	IAP_TRIG = 0x5a;
 	IAP_TRIG = 0xa5;
@@ -89,8 +88,7 @@ static void iapDisable() {
 	IAP_CONTR = 0;
 	IAP_CMD = 0;
 	IAP_TRIG = 0;
-	IAP_ADDRH = 0xff;
-	IAP_ADDRL = 0xff;
+	IAP_ADDR = 0xffff;
 }
 
 void eepromReadBlock(uint16_t address, uint8_t *data, uint16_t byteCount) {

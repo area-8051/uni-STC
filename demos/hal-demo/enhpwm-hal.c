@@ -94,14 +94,14 @@ void enhpwmInitialise(ENHPWM_ClockSource clockSource, uint16_t divisor, ENHPWM_I
 #if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
 	#if MCU_SERIES == 'A' // STC8A8KxxD4
 		PWM0CKS = clockSource;
-		PWM0CL = divisor & 0xff;
+		PWM0CL = divisor;
 		PWM0CH = divisor >> 8;
 		PWM0IF = 0;
 		DISABLE_EXTENDED_SFR();
 		PWMCFG01 = (PWMCFG01 & 0xf0) | (overflowInterrupt ? M_EPWM0CBI : 0) | M_PWM0CEN;
 	#else // STC8G2K
 		PWM2CKS = clockSource;
-		PWM2CL = divisor & 0xff;
+		PWM2CL = divisor;
 		PWM2CH = divisor >> 8;
 		PWM2IF = 0;
 		DISABLE_EXTENDED_SFR();
@@ -109,7 +109,7 @@ void enhpwmInitialise(ENHPWM_ClockSource clockSource, uint16_t divisor, ENHPWM_I
 	#endif // MCU_SERIES == 'A'
 #else // STC8A8KxxS4A12 and STC15W4K
 	PWM0CKS = clockSource;
-	PWM0CL = divisor & 0xff;
+	PWM0CL = divisor;
 	PWM0CH = divisor >> 8;
 	DISABLE_EXTENDED_SFR();
 	PWM0IF = 0;
@@ -287,70 +287,70 @@ void enhpwmSetDutyCycle(ENHPWM_Channel channel, uint16_t clocksHigh) {
 		switch (channel) {
 		case ENHPWM_Channel0:
 			PWM00T2H = clocksHigh >> 8;
-			PWM00T2L = clocksHigh & 0xff;
+			PWM00T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel1:
 			PWM01T2H = clocksHigh >> 8;
-			PWM01T2L = clocksHigh & 0xff;
+			PWM01T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel2:
 			PWM02T2H = clocksHigh >> 8;
-			PWM03T2L = clocksHigh & 0xff;
+			PWM03T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel3:
 			PWM03T2H = clocksHigh >> 8;
-			PWM03T2L = clocksHigh & 0xff;
+			PWM03T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel4:
 			PWM04T2H = clocksHigh >> 8;
-			PWM04T2L = clocksHigh & 0xff;
+			PWM04T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel5:
 			PWM05T2H = clocksHigh >> 8;
-			PWM05T2L = clocksHigh & 0xff;
+			PWM05T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel6:
 			PWM06T2H = clocksHigh >> 8;
-			PWM06T2L = clocksHigh & 0xff;
+			PWM06T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel7:
 			PWM07T2H = clocksHigh >> 8;
-			PWM07T2L = clocksHigh & 0xff;
+			PWM07T2L = clocksHigh;
 			break;
 		}
 	#else // STC8G2K
 		switch (channel) {
 		case ENHPWM_Channel0:
 			PWM20T2H = clocksHigh >> 8;
-			PWM20T2L = clocksHigh & 0xff;
+			PWM20T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel1:
 			PWM21T2H = clocksHigh >> 8;
-			PWM21T2L = clocksHigh & 0xff;
+			PWM21T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel2:
 			PWM22T2H = clocksHigh >> 8;
-			PWM23T2L = clocksHigh & 0xff;
+			PWM23T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel3:
 			PWM23T2H = clocksHigh >> 8;
-			PWM23T2L = clocksHigh & 0xff;
+			PWM23T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel4:
 			PWM24T2H = clocksHigh >> 8;
-			PWM24T2L = clocksHigh & 0xff;
+			PWM24T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel5:
 			PWM25T2H = clocksHigh >> 8;
-			PWM25T2L = clocksHigh & 0xff;
+			PWM25T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel6:
 			PWM26T2H = clocksHigh >> 8;
-			PWM26T2L = clocksHigh & 0xff;
+			PWM26T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel7:
 			PWM27T2H = clocksHigh >> 8;
-			PWM27T2L = clocksHigh & 0xff;
+			PWM27T2L = clocksHigh;
 			break;
 		}
 	#endif // MCU_SERIES == 'A'
@@ -358,36 +358,36 @@ void enhpwmSetDutyCycle(ENHPWM_Channel channel, uint16_t clocksHigh) {
 	switch (channel) {
 	case ENHPWM_Channel0:
 		PWM00T2H = clocksHigh >> 8;
-		PWM00T2L = clocksHigh & 0xff;
+		PWM00T2L = clocksHigh;
 		break;
 	case ENHPWM_Channel1:
 		PWM01T2H = clocksHigh >> 8;
-		PWM01T2L = clocksHigh & 0xff;
+		PWM01T2L = clocksHigh;
 		break;
 	case ENHPWM_Channel2:
 		PWM02T2H = clocksHigh >> 8;
-		PWM03T2L = clocksHigh & 0xff;
+		PWM03T2L = clocksHigh;
 		break;
 	case ENHPWM_Channel3:
 		PWM03T2H = clocksHigh >> 8;
-		PWM03T2L = clocksHigh & 0xff;
+		PWM03T2L = clocksHigh;
 		break;
 	case ENHPWM_Channel4:
 		PWM04T2H = clocksHigh >> 8;
-		PWM04T2L = clocksHigh & 0xff;
+		PWM04T2L = clocksHigh;
 		break;
 	case ENHPWM_Channel5:
 		PWM05T2H = clocksHigh >> 8;
-		PWM05T2L = clocksHigh & 0xff;
+		PWM05T2L = clocksHigh;
 		break;
 	#if PWM_CHANNELS > 6
 		case ENHPWM_Channel6:
 			PWM06T2H = clocksHigh >> 8;
-			PWM06T2L = clocksHigh & 0xff;
+			PWM06T2L = clocksHigh;
 			break;
 		case ENHPWM_Channel7:
 			PWM07T2H = clocksHigh >> 8;
-			PWM07T2L = clocksHigh & 0xff;
+			PWM07T2L = clocksHigh;
 			break;
 	#endif // PWM_CHANNELS > 6
 	}

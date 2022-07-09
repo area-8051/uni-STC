@@ -116,8 +116,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 				INT_CLKO &= ~M_T0CLKO;
 			}
 			
-			T0L = reloadValue & 0xff;
-			T0H = reloadValue >> 8;
+			T0 = reloadValue;
 #endif
 			
 			if (enableInterrupt == TIMER_INTERRUPT_ENABLE) {
@@ -155,8 +154,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			}
 			
 			// Set reload value
-			T1L = reloadValue & 0xff;
-			T1H = reloadValue >> 8;
+			T1 = reloadValue;
 	#endif // MCU_FAMILY == 12
 			
 			// Configure timer control
@@ -188,8 +186,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			}
 			
 			// Set reload value
-			T2L = reloadValue & 0xff;
-			T2H = reloadValue >> 8;
+			T2 = reloadValue;
 #endif // TIMER_HAS_T2
 
 #ifdef TIMER_HAS_BRT
@@ -238,8 +235,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			T4T3M = (sysclkDiv1) ? (T4T3M | M_T3x12) : (T4T3M & ~M_T3x12);
 			
 			// Set reload value
-			T3L = reloadValue & 0xff;
-			T3H = reloadValue >> 8;
+			T3 = reloadValue;
 			
 			if (enableInterrupt == TIMER_INTERRUPT_ENABLE) {
 				IE2 |= M_ET3;
@@ -268,8 +264,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			T4T3M = (sysclkDiv1) ? (T4T3M | M_T4x12) : (T4T3M & ~M_T4x12);
 			
 			// Set reload value
-			T4L = reloadValue & 0xff;
-			T4H = reloadValue >> 8;
+			T4 = reloadValue;
 			
 			if (enableInterrupt == TIMER_INTERRUPT_ENABLE) {
 				IE2 |= M_ET4;

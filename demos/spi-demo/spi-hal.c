@@ -237,7 +237,7 @@ void spiReceive(uint8_t *buffer, size_t bufferSize, uint8_t *readyFlag) {
 	spiSend(buffer, bufferSize, readyFlag);
 }
 
-void __spi_isr() ISR_PARAM(SPI_INTERRUPT, 1) {
+INTERRUPT_USING(__spi_isr, SPI_INTERRUPT, 1) {
 	SPSTAT |= M_SPIF | M_WCOL;
 	uint8_t data;
 	

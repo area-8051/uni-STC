@@ -100,7 +100,7 @@ typedef enum {
  *   1   | P4.2 | P4.3 | P4.1
  */
 
-void __pca_isr() ISR_PARAM(PCA_INTERRUPT, 1);
+INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1);
 
 /**
  * Initialises the master counter of the counter array.

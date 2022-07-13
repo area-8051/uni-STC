@@ -58,6 +58,8 @@
  *    1   | P2.5 | P2.4 | MCU_PINS >= 28
  *    2   | P7.7 | P7.6 | MCU_PINS == 64
  *    3   | P3.2 | P3.3 | 
+ * 
+ * Note: STC8H3 do NOT have P1.3, P1.4 and P1.5.
  */
 
 typedef enum {

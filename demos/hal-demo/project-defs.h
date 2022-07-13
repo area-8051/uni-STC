@@ -35,9 +35,18 @@
 #ifdef __TESTING__
 	#include <uni-STC/testing.h>
 #else
+	#ifdef BUILD_FOR_STC8G1K08A_DIP8
+		#include <STC/8G1KxxA/DIP8.h>
+		#define SMALL_FLASH
+	#endif
+	
 	#ifdef BUILD_FOR_STC8G1K08_TSSOP20
 		#include <STC/8G1Kxx/TSSOP20.h>
 		#define SMALL_FLASH
+	#endif
+	
+	#ifdef BUILD_FOR_STC8G1K17_DIP16
+		#include <STC/8G1Kxx/DIP16.h>
 	#endif
 	
 	#ifdef BUILD_FOR_STC8G2K64S4

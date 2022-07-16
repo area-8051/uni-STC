@@ -1,6 +1,15 @@
 #ifndef _STC8H8KXXU_PDIP40_H
 #define _STC8H8KXXU_PDIP40_H
 
+/**
+ * IMPORTANT
+ * 
+ * Check your chip version (A, B, or C) and see the STC8H Technical
+ * Reference Manual section 2.5.1 for differences between versions A
+ * and B, and Appendix T section T.4 for version B's errata fixed in 
+ * version C.
+ */
+
 #define MCU_FAMILY 8
 #define MCU_SERIES 'H'
 #define MCU_PINS 40

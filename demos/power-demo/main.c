@@ -49,6 +49,8 @@ void main() {
 
 	// Main loop -------------------------------------------------------
 	while (1) {
+		configureUnusedGpioPins(GPIO_PORT3, M_ALL_PINS);
+		configureUnusedGpioPins(GPIO_PORT5, 0xef);
 		enterPowerDownMode();
 		gpioWrite(&ledPin, !gpioRead(&ledPin));
 	}

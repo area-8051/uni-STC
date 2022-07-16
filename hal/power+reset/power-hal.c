@@ -50,6 +50,74 @@ void enterPowerDownMode() {
 	NOP();
 }
 
+void configureUnusedGpioPins(GpioPort port, uint8_t mask) {
+	switch (port) {
+#ifdef GPIO_HAS_P0
+	case GPIO_PORT0:
+		P0M1 &= ~mask;
+		P0M0 &= ~mask;
+		P0 |= mask;
+		break;
+#endif // GPIO_HAS_P0
+
+#ifdef GPIO_HAS_P1
+	case GPIO_PORT1:
+		P1M1 &= ~mask;
+		P1M0 &= ~mask;
+		P1 |= mask;
+		break;
+#endif // GPIO_HAS_P1
+
+#ifdef GPIO_HAS_P2
+	case GPIO_PORT2:
+		P2M1 &= ~mask;
+		P2M0 &= ~mask;
+		P2 |= mask;
+		break;
+#endif // GPIO_HAS_P2
+
+#ifdef GPIO_HAS_P3
+	case GPIO_PORT3:
+		P3M1 &= ~mask;
+		P3M0 &= ~mask;
+		P3 |= mask;
+		break;
+#endif // GPIO_HAS_P3
+
+#ifdef GPIO_HAS_P4
+	case GPIO_PORT4:
+		P4M1 &= ~mask;
+		P4M0 &= ~mask;
+		P4 |= mask;
+		break;
+#endif // GPIO_HAS_P4
+
+#ifdef GPIO_HAS_P5
+	case GPIO_PORT5:
+		P5M1 &= ~mask;
+		P5M0 &= ~mask;
+		P5 |= mask;
+		break;
+#endif // GPIO_HAS_P5
+
+#ifdef GPIO_HAS_P06
+	case GPIO_PORT6:
+		P6M1 &= ~mask;
+		P6M0 &= ~mask;
+		P6 |= mask;
+		break;
+#endif // GPIO_HAS_P6
+
+#ifdef GPIO_HAS_P7
+	case GPIO_PORT7:
+		P7M1 &= ~mask;
+		P7M0 &= ~mask;
+		P7 |= mask;
+		break;
+#endif // GPIO_HAS_P7
+	}
+}
+
 #ifdef MCU_HAS_WAKE_UP_TIMER
 	// The TRM says the exact frequency can be obtained from memory
 	// locations 0xf8 and 0xf9, but their content is always 0, so...

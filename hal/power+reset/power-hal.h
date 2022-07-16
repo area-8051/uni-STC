@@ -40,11 +40,37 @@
  * Dependencies: none.
  */
 
-// Only stops CPU
+/**
+ * Only stops CPU, any peripheral can wake up the MCU.
+ */
 void enterIdleMode();
 
-// Stops both CPU and peripherals
+/**
+ * Stops both CPU and peripherals. Only a limited subset of peripherals
+ * can wake up the MCU.
+ */
 void enterPowerDownMode();
+
+/**
+ * Before entering power-down mode, in order to reduce power consumption, 
+ * all I/O lines must be configured in a suitable mode.
+ * 
+ * In particular, all unused I/O lines left floating must be configured
+ * in quasi-bidirectional mode and their output set to a logical high.
+ * This also applies to I/O lines not wired to external pins on lower 
+ * pin count packages.
+ * 
+ * This is what this function is for. It belongs to this module because
+ * if the GPIO is not used at all, the GPIO HAL will not be part of the 
+ * project, and still, all available GPIO ports will have to be properly 
+ * configured.
+ * 
+ * "mask" defines which pins must be configured.
+ */
+
+#define M_ALL_PINS 0xff
+
+void configureUnusedGpioPins(GpioPort port, uint8_t mask);
 
 #ifdef MCU_HAS_WAKE_UP_TIMER
 	/*

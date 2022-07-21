@@ -264,18 +264,21 @@ Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baud
 			// For UART2, OWM_TIMER == TIMER2, so no need to 
 			// configure UART clock source.
 			
-			// Set pin configuration
-			P_SW2 = (P_SW2 & ~M_S2_S) | ((pinSwitch << P_S2_S) & M_S2_S);
-			
 			// Save mode for ISR
 			UART2_mode = mode;
 
 	#if MCU_FAMILY == 8 || MCU_FAMILY == 15
+			// Set pin configuration
+			P_SW2 = (P_SW2 & ~M_S2_S) | ((pinSwitch << P_S2_S) & M_S2_S);
+			
 			// Set UART mode and clear interrupt flag
 			S2CON = scon;
 	#endif // MCU_FAMILY == 8 || MCU_FAMILY == 15
 
 	#if MCU_FAMILY == 12
+			// Set pin configuration
+			P_SW1 = (P_SW1 & ~M_S2_S) | ((pinSwitch << P_S2_S) & M_S2_S);
+			
 			S2CON = scon | M_SM1; // Yes, that's not a mistake, see TRM.
 	#endif // MCU_FAMILY == 12
 			

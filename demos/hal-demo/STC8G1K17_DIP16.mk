@@ -130,7 +130,7 @@ doc:
 	doxygen doxygen.conf
 
 upload:
-	stcgal -a -p /dev/$(ISP_PORT) -t `echo "$(MCU_FREQ)" | rev | cut -c 4- | rev` $(FW_FILE)
+	stcgal -a -p /dev/$(ISP_PORT) -l 115200 -b 115200 -t `echo "$(MCU_FREQ)" | rev | cut -c 4- | rev` $(FW_FILE)
 
 console:
 	mate-terminal -t "$(PROJECT_NAME) console" -e "minicom -b $(CONSOLE_BAUDRATE) -D /dev/$(CONSOLE_PORT)"

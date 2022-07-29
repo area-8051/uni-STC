@@ -44,7 +44,7 @@ void __fifoInitialise(FifoBuffer *buffer, uint8_t allocatedSize) REENTRANT {
 	buffer->size = allocatedSize;
 	buffer->first = buffer->size;
 	buffer->last = buffer->size;
-	buffer->busy = 0;
+	buffer->status = 0;
 }
 
 uint8_t fifoLength(FifoBuffer *buffer) REENTRANT {

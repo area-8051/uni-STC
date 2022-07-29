@@ -46,7 +46,7 @@ typedef struct {
 	uint8_t size;
 	uint8_t first;
 	uint8_t last;
-	uint8_t busy;
+	uint8_t status;
 	// Must be last to allow reuse with different values for FIFO_BUFFER_SIZE
 	uint8_t data[FIFO_BUFFER_SIZE];
 } FifoBuffer;

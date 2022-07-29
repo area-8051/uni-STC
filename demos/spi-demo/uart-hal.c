@@ -46,6 +46,9 @@
  * TODO: 9-bit modes (parity & multi-machine) support.
  */
 
+#define STATUS_CLEAR   0
+#define STATUS_SENDING 1
+
 FifoBuffer UART1_inputBuffer;
 FifoBuffer UART1_outputBuffer;
 UartMode UART1_mode;
@@ -349,7 +352,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 		if (fifoLength(&UART1_outputBuffer) > 0) {
 			S1BUF = fifoRead(&UART1_outputBuffer);
 		} else {
-			UART1_outputBuffer.busy = 0;
+			UART1_outputBuffer.status = STATUS_CLEAR;
 		}
 	}
 
@@ -367,7 +370,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 			if (fifoLength(&UART2_outputBuffer) > 0) {
 				S2BUF = fifoRead(&UART2_outputBuffer);
 			} else {
-				UART2_outputBuffer.busy = 0;
+				UART2_outputBuffer.status = STATUS_CLEAR;
 			}
 		}
 
@@ -386,7 +389,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 			if (fifoLength(&UART3_outputBuffer) > 0) {
 				S3BUF = fifoRead(&UART3_outputBuffer);
 			} else {
-				UART3_outputBuffer.busy = 0;
+				UART3_outputBuffer.status = STATUS_CLEAR;
 			}
 		}
 
@@ -403,7 +406,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 			if (fifoLength(&UART4_outputBuffer) > 0) {
 				S4BUF = fifoRead(&UART4_outputBuffer);
 			} else {
-				UART4_outputBuffer.busy = 0;
+				UART4_outputBuffer.status = STATUS_CLEAR;
 			}
 		}
 
@@ -430,8 +433,8 @@ uint8_t uartSendCharacter(Uart uart, uint8_t c) {
 	FifoBuffer *buffer = outputBuffer(uart);
 	uint8_t result = fifoWrite(buffer, c);
 	
-	if (fifoLength(buffer) > 0 && !buffer->busy) {
-		buffer->busy = 1;
+	if (fifoLength(buffer) > 0 && buffer->status == STATUS_CLEAR) {
+		buffer->status = STATUS_SENDING;
 		
 		switch (uart) {
 		case UART1:

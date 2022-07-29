@@ -27,33 +27,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _UART_BUFFER_H
-#define _UART_BUFFER_H
+#ifndef _FIFO_BUFFER_H
+#define _FIFO_BUFFER_H
 
 /**
- * @file uart-buffer.h
+ * @file fifo-buffer.h
  * 
- * UART circular buffer definitions.
+ * FIFO circular buffer definitions.
+ * 
+ * Dependencies: none.
  */
 
-#ifndef UART_BUFFER_SIZE
-	#define UART_BUFFER_SIZE 16
-#endif // UART_BUFFER_SIZE
+#if !defined(FIFO_BUFFER_SIZE) || FIFO_BUFFER_SIZE < 1 || FIFO_BUFFER_SIZE > 255
+	#error "Must define FIFO_BUFFER_SIZE (range 1-255) before including fifo-buffer.h"
+#endif
 
 typedef struct {
-	uint8_t data[UART_BUFFER_SIZE];
+	uint8_t size;
 	uint8_t first;
 	uint8_t last;
 	uint8_t busy;
-} UartBuffer;
+	// Must be last to allow reuse with different values for FIFO_BUFFER_SIZE
+	uint8_t data[FIFO_BUFFER_SIZE];
+} FifoBuffer;
 
+void __fifoInitialise(FifoBuffer *buffer, uint8_t allocatedSize) REENTRANT;
 
-void uartBufferInitialise(UartBuffer *buffer) REENTRANT;
+uint8_t fifoLength(FifoBuffer *buffer) REENTRANT;
 
-uint8_t uartBufferLength(UartBuffer *buffer) REENTRANT;
+uint8_t fifoWrite(FifoBuffer *buffer, uint8_t data) REENTRANT;
 
-uint8_t uartBufferWrite(UartBuffer *buffer, uint8_t data) REENTRANT;
+uint8_t fifoRead(FifoBuffer *buffer) REENTRANT;
 
-uint8_t uartBufferRead(UartBuffer *buffer) REENTRANT;
+#define fifoInitialise(buffer) __fifoInitialise(buffer, FIFO_BUFFER_SIZE)
 
-#endif // _UART_BUFFER_H
+#endif // _FIFO_BUFFER_H

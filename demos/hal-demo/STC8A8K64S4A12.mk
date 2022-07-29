@@ -89,7 +89,7 @@ SRCS = \
 	pca-hal.c \
 	serial-console.c \
 	timer-hal.c \
-	uart-buffer.c \
+	fifo-buffer.c \
 	uart-hal.c \
 	main.c
 

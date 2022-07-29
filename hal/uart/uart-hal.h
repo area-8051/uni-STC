@@ -37,7 +37,7 @@
  * 
  * Supported MCU families: STC12, STC15, STC8.
  * 
- * Dependencies: timer-hal, uart-buffer.
+ * Dependencies: timer-hal, fifo-buffer.
  * 
  * **IMPORTANT:** In order to satisfy SDCC's requirements for ISR 
  * handling, this header file **MUST** be included in the C source 

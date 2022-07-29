@@ -26,10 +26,10 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
 
-PROJECT_NAME = uart-buffer-test
+PROJECT_NAME = fifo-buffer-test
 
 SRCS = \
-	../../uart-buffer.c \
+	../../fifo-buffer.c \
 	main.c
 
 CC = gcc

@@ -89,7 +89,7 @@ SRCS = \
 	pca-hal.c \
 	serial-console.c \
 	uart-hal.c \
-	uart-buffer.c \
+	fifo-buffer.c \
 	main.c
 
 # Toolchain-specific settings ------------------------------------------

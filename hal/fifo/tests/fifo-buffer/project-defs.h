@@ -8,6 +8,6 @@
 #define USE_BANK(registerBank) /**/
 #define INTERRUPT_USING(name, vector, regnum) void name()
 
-#define UART_BUFFER_SIZE 4
+#define FIFO_BUFFER_SIZE 4
 
 #endif // _PROJECT_DEFS_H

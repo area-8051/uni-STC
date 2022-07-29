@@ -28,41 +28,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "uart-buffer.h"
+#ifndef FIFO_BUFFER_SIZE
+	// Dummy value to satisfy sanity check in header.
+	#define FIFO_BUFFER_SIZE 1
+#endif
+#include "fifo-buffer.h"
 
 /**
- * @file uart-buffer.c
+ * @file fifo-buffer.c
  * 
- * UART circular buffer implementation.
+ * FIFO circular buffer implementation.
  */
 
-void uartBufferInitialise(UartBuffer *buffer) REENTRANT {
-	buffer->first = UART_BUFFER_SIZE;
-	buffer->last = UART_BUFFER_SIZE;
+void __fifoInitialise(FifoBuffer *buffer, uint8_t allocatedSize) REENTRANT {
+	buffer->size = allocatedSize;
+	buffer->first = buffer->size;
+	buffer->last = buffer->size;
 	buffer->busy = 0;
 }
 
-uint8_t uartBufferLength(UartBuffer *buffer) REENTRANT {
+uint8_t fifoLength(FifoBuffer *buffer) REENTRANT {
 	return (buffer->last >= buffer->first)
-		? (buffer->last == UART_BUFFER_SIZE
+		? (buffer->last == buffer->size
 			? 0
 			: (buffer->last - buffer->first + 1)
 		)
-		: (UART_BUFFER_SIZE - (buffer->first - buffer->last - 1));
+		: (buffer->size - (buffer->first - buffer->last - 1));
 }
 
-uint8_t uartBufferWrite(UartBuffer *buffer, uint8_t data) REENTRANT {
+uint8_t fifoWrite(FifoBuffer *buffer, uint8_t data) REENTRANT {
 	uint8_t rc = 0;
 	
-	if (uartBufferLength(buffer) < UART_BUFFER_SIZE) {
+	if (fifoLength(buffer) < buffer->size) {
 		buffer->last++;
 		
-		if (buffer->last >= UART_BUFFER_SIZE) {
+		if (buffer->last >= buffer->size) {
 			// Handles both buffer empty and wrap around cases.
 			buffer->last = 0;
 		}
 		
-		if (buffer->first == UART_BUFFER_SIZE) {
+		if (buffer->first == buffer->size) {
 			// Buffer was empty, initialise .first too.
 			buffer->first = 0;
 		}
@@ -74,21 +79,21 @@ uint8_t uartBufferWrite(UartBuffer *buffer, uint8_t data) REENTRANT {
 	return rc;
 }
 
-uint8_t uartBufferRead(UartBuffer *buffer) REENTRANT {
+uint8_t fifoRead(FifoBuffer *buffer) REENTRANT {
 	uint8_t result = 0;
 	
-	if (buffer->first != UART_BUFFER_SIZE) {
+	if (buffer->first != buffer->size) {
 		// Buffer is not empty, read first character.
 		result = buffer->data[buffer->first];
 		
 		if (buffer->first == buffer->last) {
 			// We've read the last character, mark buffer as empty.
-			buffer->first = UART_BUFFER_SIZE;
-			buffer->last = UART_BUFFER_SIZE;
+			buffer->first = buffer->size;
+			buffer->last = buffer->size;
 		} else {
 			buffer->first++;
 			
-			if (buffer->first == UART_BUFFER_SIZE) {
+			if (buffer->first == buffer->size) {
 				buffer->first = 0;
 			}
 		}

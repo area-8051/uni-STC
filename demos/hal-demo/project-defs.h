@@ -85,6 +85,7 @@
 	#ifdef BUILD_FOR_STC15W408AS_DIP16
 		#include <STC/15W4xxAS/DIP16.h>
 		#define SMALL_FLASH
+		#define SMALL_RAM
 	#endif
 	
 	#ifdef BUILD_FOR_STC12C5A56S2_PDIP40
@@ -160,11 +161,16 @@
 
 #define ADVPWM_GLOWING_GROUP   PWMA
 #define ADVPWM_GLOWING_CHANNEL PWM1P
-	
+
 #ifdef SMALL_FLASH
 	// Manage to fit in 8 KB flash...
 	#define HAL_UARTS 1
 	#define HAL_PCA_CHANNELS 1
+#endif // SMALL_FLASH
+
+#ifdef SMALL_RAM
+	// Manage to fit in 512 bytes RAM...
+	#define UART_BUFFER_SIZE 16
 #endif // SMALL_FLASH
 
 #endif // _PROJECT_DEFS_H

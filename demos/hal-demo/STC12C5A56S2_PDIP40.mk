@@ -66,7 +66,7 @@ PROJECT_NAME = hal-demo
 BUILD_FOR = BUILD_FOR_STC12C5A56S2_PDIP40
 MCU_FREQ = 11059200
 TARGET_ARCH = -mmcs51
-MEMORY_MODEL = --model-medium
+MEMORY_MODEL = --model-large
 MEMORY_SIZES = \
 	--xram-loc 0 \
 	--xram-size 1024 \
@@ -88,7 +88,7 @@ SRCS = \
 	pca-hal.c \
 	serial-console.c \
 	uart-hal.c \
-	uart-buffer.c \
+	fifo-buffer.c \
 	main.c
 
 # Toolchain-specific settings ------------------------------------------

@@ -29,11 +29,11 @@
  */
 
 #include "project-defs.h"
-#include "uart-buffer.h"
+#include "fifo-buffer.h"
 #include <stdlib.h>
 #include <stdio.h>
 
-UartBuffer buffer;
+FifoBuffer buffer;
 
 typedef enum {
 	READ,
@@ -88,22 +88,22 @@ static const char *test2str(int item) {
 }
 
 int main() {
-	uartBufferInitialise(&buffer);
+	fifoInitialise(&buffer);
 	
 	for (int item = 0; item < (sizeof(items) / sizeof(TestData)); item++) {
 		uint8_t result = 0;
 		
 		switch (items[item].test) {
 		case READ:
-			result = uartBufferRead(&buffer);
+			result = fifoRead(&buffer);
 			break;
 		
 		case WRITE:
-			result = uartBufferWrite(&buffer, items[item].data);
+			result = fifoWrite(&buffer, items[item].data);
 			break;
 		}
 		
-		uint8_t size = uartBufferLength(&buffer);
+		uint8_t size = fifoLength(&buffer);
 		printf("After item %2d: .test = %s  .first = %hhd  .last = %hhd  size = %hhd\n", item, test2str(item), buffer.first, buffer.last, size);
 		
 		switch (items[item].test) {

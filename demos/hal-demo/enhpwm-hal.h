@@ -151,18 +151,15 @@ void enhpwmInitialise(ENHPWM_ClockSource clockSource, uint16_t divisor, ENHPWM_I
 
 /**
  * Configures a PCA channel in PWM mode.
- * 
- * The duty cycle is defined by the number of clockSource pulses during 
- * which the PWM output must be high.
  */
-void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPortMode pinMode, ENHPWM_OutputLevel initialLevel, ENHPWM_InterruptOnEvent interruptOnEvent, uint16_t clocksHigh);
+void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPortMode pinMode, ENHPWM_OutputLevel initialLevel, ENHPWM_InterruptOnEvent interruptOnEvent, uint16_t flipPoint1, uint16_t flipPoint2);
 
 /**
- * Changes the duty cycle of a PWM channel.
+ * Changes the flip points of a PWM channel.
  * 
  * All other configuration parameters remain unchanged.
  */
-void enhpwmSetDutyCycle(ENHPWM_Channel channel, uint16_t clocksHigh);
+void enhpwmSetFlipPoints(ENHPWM_Channel channel, uint16_t flipPoint1, uint16_t flipPoint2);
 
 #if MCU_HAS_ENHANCED_PWM != '5'
 	// The STC15W4K doesn't have PWMxxHLD SFR

@@ -117,9 +117,169 @@ void enhpwmInitialise(ENHPWM_ClockSource clockSource, uint16_t divisor, ENHPWM_I
 #endif // MCU_HAS_ENHANCED_PWM == 'G'
 }
 
-void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPortMode pinMode, ENHPWM_OutputLevel initialLevel, ENHPWM_InterruptOnEvent interruptOnEvent, uint16_t clocksHigh) {
+static void __enhpwmSetFlipPoints(ENHPWM_Channel channel, uint16_t flipPoint1, uint16_t flipPoint2) {
+#if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
+	#if MCU_SERIES == 'A' // STC8A8KxxD4
+		switch (channel) {
+		case ENHPWM_Channel0:
+			PWM00T1H = flipPoint1 >> 8;
+			PWM00T1L = flipPoint1;
+			PWM00T2H = flipPoint2 >> 8;
+			PWM00T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel1:
+			PWM01T1H = flipPoint1 >> 8;
+			PWM01T1L = flipPoint1;
+			PWM01T2H = flipPoint2 >> 8;
+			PWM01T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel2:
+			PWM02T1H = flipPoint1 >> 8;
+			PWM02T1L = flipPoint1;
+			PWM02T2H = flipPoint2 >> 8;
+			PWM02T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel3:
+			PWM03T1H = flipPoint1 >> 8;
+			PWM03T1L = flipPoint1;
+			PWM03T2H = flipPoint2 >> 8;
+			PWM03T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel4:
+			PWM04T1H = flipPoint1 >> 8;
+			PWM04T1L = flipPoint1;
+			PWM04T2H = flipPoint2 >> 8;
+			PWM04T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel5:
+			PWM05T1H = flipPoint1 >> 8;
+			PWM05T1L = flipPoint1;
+			PWM05T2H = flipPoint2 >> 8;
+			PWM05T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel6:
+			PWM06T1H = flipPoint1 >> 8;
+			PWM06T1L = flipPoint1;
+			PWM06T2H = flipPoint2 >> 8;
+			PWM06T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel7:
+			PWM07T1H = flipPoint1 >> 8;
+			PWM07T1L = flipPoint1;
+			PWM07T2H = flipPoint2 >> 8;
+			PWM07T2L = flipPoint2;
+			break;
+		}
+	#else // STC8G2K
+		switch (channel) {
+		case ENHPWM_Channel0:
+			PWM20T1H = flipPoint1 >> 8;
+			PWM20T1L = flipPoint1;
+			PWM20T2H = flipPoint2 >> 8;
+			PWM20T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel1:
+			PWM21T1H = flipPoint1 >> 8;
+			PWM21T1L = flipPoint1;
+			PWM21T2H = flipPoint2 >> 8;
+			PWM21T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel2:
+			PWM22T1H = flipPoint1 >> 8;
+			PWM22T1L = flipPoint1;
+			PWM22T2H = flipPoint2 >> 8;
+			PWM22T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel3:
+			PWM23T1H = flipPoint1 >> 8;
+			PWM23T1L = flipPoint1;
+			PWM23T2H = flipPoint2 >> 8;
+			PWM23T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel4:
+			PWM24T1H = flipPoint1 >> 8;
+			PWM24T1L = flipPoint1;
+			PWM24T2H = flipPoint2 >> 8;
+			PWM24T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel5:
+			PWM25T1H = flipPoint1 >> 8;
+			PWM25T1L = flipPoint1;
+			PWM25T2H = flipPoint2 >> 8;
+			PWM25T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel6:
+			PWM26T1H = flipPoint1 >> 8;
+			PWM26T1L = flipPoint1;
+			PWM26T2H = flipPoint2 >> 8;
+			PWM26T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel7:
+			PWM27T1H = flipPoint1 >> 8;
+			PWM27T1L = flipPoint1;
+			PWM27T2H = flipPoint2 >> 8;
+			PWM27T2L = flipPoint2;
+			break;
+		}
+	#endif // MCU_SERIES == 'A'
+#else // STC8A8KxxS4A12 and STC15W4K
+	switch (channel) {
+	case ENHPWM_Channel0:
+		PWM00T1H = flipPoint1 >> 8;
+		PWM00T1L = flipPoint1;
+		PWM00T2H = flipPoint2 >> 8;
+		PWM00T2L = flipPoint2;
+		break;
+	case ENHPWM_Channel1:
+		PWM01T1H = flipPoint1 >> 8;
+		PWM01T1L = flipPoint1;
+		PWM01T2H = flipPoint2 >> 8;
+		PWM01T2L = flipPoint2;
+		break;
+	case ENHPWM_Channel2:
+		PWM02T1H = flipPoint1 >> 8;
+		PWM02T1L = flipPoint1;
+		PWM02T2H = flipPoint2 >> 8;
+		PWM02T2L = flipPoint2;
+		break;
+	case ENHPWM_Channel3:
+		PWM03T1H = flipPoint1 >> 8;
+		PWM03T1L = flipPoint1;
+		PWM03T2H = flipPoint2 >> 8;
+		PWM03T2L = flipPoint2;
+		break;
+	case ENHPWM_Channel4:
+		PWM04T1H = flipPoint1 >> 8;
+		PWM04T1L = flipPoint1;
+		PWM04T2H = flipPoint2 >> 8;
+		PWM04T2L = flipPoint2;
+		break;
+	case ENHPWM_Channel5:
+		PWM05T1H = flipPoint1 >> 8;
+		PWM05T1L = flipPoint1;
+		PWM05T2H = flipPoint2 >> 8;
+		PWM05T2L = flipPoint2;
+		break;
+	#if PWM_CHANNELS > 6
+		case ENHPWM_Channel6:
+			PWM06T1H = flipPoint1 >> 8;
+			PWM06T1L = flipPoint1;
+			PWM06T2H = flipPoint2 >> 8;
+			PWM06T2L = flipPoint2;
+			break;
+		case ENHPWM_Channel7:
+			PWM07T1H = flipPoint1 >> 8;
+			PWM07T1L = flipPoint1;
+			PWM07T2H = flipPoint2 >> 8;
+			PWM07T2L = flipPoint2;
+			break;
+	#endif // PWM_CHANNELS > 6
+	}
+#endif // MCU_HAS_ENHANCED_PWM == 'G'
+}
+
+void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPortMode pinMode, ENHPWM_OutputLevel initialLevel, ENHPWM_InterruptOnEvent interruptOnEvent, uint16_t flipPoint1, uint16_t flipPoint2) {
 	__configureOutput(channel, pinSwitch, pinMode);
-	enhpwmSetDutyCycle(channel, clocksHigh);
 	uint8_t channelCR = interruptOnEvent;
 	
 	#ifdef M_C_S
@@ -133,91 +293,60 @@ void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPortMode 
 	#endif // MCU_HAS_ENHANCED_PWM != '5'
 	
 	ENABLE_EXTENDED_SFR();
+	__enhpwmSetFlipPoints(channel, flipPoint1, flipPoint2);
 	
 #if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
 	#if MCU_SERIES == 'A' // STC8A8KxxD4
 		switch (channel) {
 		case ENHPWM_Channel0:
-			PWM00T1H = 0;
-			PWM00T1L = 0;
 			PWM00CR = channelCR;
 			break;
 		case ENHPWM_Channel1:
-			PWM01T1H = 0;
-			PWM01T1L = 0;
 			PWM01CR = channelCR;
 			break;
 		case ENHPWM_Channel2:
-			PWM02T1H = 0;
-			PWM02T1L = 0;
 			PWM02CR = channelCR;
 			break;
 		case ENHPWM_Channel3:
-			PWM03T1H = 0;
-			PWM03T1L = 0;
 			PWM03CR = channelCR;
 			break;
 		case ENHPWM_Channel4:
-			PWM04T1H = 0;
-			PWM04T1L = 0;
 			PWM04CR = channelCR;
 			break;
 		case ENHPWM_Channel5:
-			PWM05T1H = 0;
-			PWM05T1L = 0;
 			PWM05CR = channelCR;
 			break;
 		case ENHPWM_Channel6:
-			PWM06T1H = 0;
-			PWM06T1L = 0;
 			PWM06CR = channelCR;
 			break;
 		case ENHPWM_Channel7:
-			PWM07T1H = 0;
-			PWM07T1L = 0;
 			PWM07CR = channelCR;
 			break;
 		}
 	#else // STC8G2K
 		switch (channel) {
 		case ENHPWM_Channel0:
-			PWM20T1H = 0;
-			PWM20T1L = 0;
 			PWM20CR = channelCR;
 			break;
 		case ENHPWM_Channel1:
-			PWM21T1H = 0;
-			PWM21T1L = 0;
 			PWM21CR = channelCR;
 			break;
 		case ENHPWM_Channel2:
-			PWM22T1H = 0;
-			PWM22T1L = 0;
 			PWM22CR = channelCR;
 			break;
 		case ENHPWM_Channel3:
-			PWM23T1H = 0;
-			PWM23T1L = 0;
 			PWM23CR = channelCR;
 			break;
 		case ENHPWM_Channel4:
-			PWM24T1H = 0;
-			PWM24T1L = 0;
 			PWM24CR = channelCR;
 			break;
 		case ENHPWM_Channel5:
-			PWM25T1H = 0;
-			PWM25T1L = 0;
 			PWM25CR = channelCR;
 			break;
 		case ENHPWM_Channel6:
-			PWM26T1H = 0;
-			PWM26T1L = 0;
 			PWM26CR = channelCR;
 			break;
 		case ENHPWM_Channel7:
-			PWM27T1H = 0;
-			PWM27T1L = 0;
 			PWM27CR = channelCR;
 			break;
 		}
@@ -227,44 +356,28 @@ void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPortMode 
 #else // STC8A8KxxS4A12 and STC15W4K
 	switch (channel) {
 	case ENHPWM_Channel0:
-		PWM00T1H = 0;
-		PWM00T1L = 0;
 		PWM00CR = channelCR;
 		break;
 	case ENHPWM_Channel1:
-		PWM01T1H = 0;
-		PWM01T1L = 0;
 		PWM01CR = channelCR;
 		break;
 	case ENHPWM_Channel2:
-		PWM02T1H = 0;
-		PWM02T1L = 0;
 		PWM02CR = channelCR;
 		break;
 	case ENHPWM_Channel3:
-		PWM03T1H = 0;
-		PWM03T1L = 0;
 		PWM03CR = channelCR;
 		break;
 	case ENHPWM_Channel4:
-		PWM04T1H = 0;
-		PWM04T1L = 0;
 		PWM04CR = channelCR;
 		break;
 	case ENHPWM_Channel5:
-		PWM05T1H = 0;
-		PWM05T1L = 0;
 		PWM05CR = channelCR;
 		break;
 	#if PWM_CHANNELS > 6
 		case ENHPWM_Channel6:
-			PWM06T1H = 0;
-			PWM06T1L = 0;
 			PWM06CR = channelCR;
 			break;
 		case ENHPWM_Channel7:
-			PWM07T1H = 0;
-			PWM07T1L = 0;
 			PWM07CR = channelCR;
 			break;
 	#endif // PWM_CHANNELS > 6
@@ -279,119 +392,9 @@ void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPortMode 
 #endif // MCU_HAS_ENHANCED_PWM == 'G'
 }
 
-void enhpwmSetDutyCycle(ENHPWM_Channel channel, uint16_t clocksHigh) {
+void enhpwmSetFlipPoints(ENHPWM_Channel channel, uint16_t flipPoint1, uint16_t flipPoint2) {
 	ENABLE_EXTENDED_SFR();
-	
-#if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
-	#if MCU_SERIES == 'A' // STC8A8KxxD4
-		switch (channel) {
-		case ENHPWM_Channel0:
-			PWM00T2H = clocksHigh >> 8;
-			PWM00T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel1:
-			PWM01T2H = clocksHigh >> 8;
-			PWM01T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel2:
-			PWM02T2H = clocksHigh >> 8;
-			PWM03T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel3:
-			PWM03T2H = clocksHigh >> 8;
-			PWM03T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel4:
-			PWM04T2H = clocksHigh >> 8;
-			PWM04T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel5:
-			PWM05T2H = clocksHigh >> 8;
-			PWM05T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel6:
-			PWM06T2H = clocksHigh >> 8;
-			PWM06T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel7:
-			PWM07T2H = clocksHigh >> 8;
-			PWM07T2L = clocksHigh;
-			break;
-		}
-	#else // STC8G2K
-		switch (channel) {
-		case ENHPWM_Channel0:
-			PWM20T2H = clocksHigh >> 8;
-			PWM20T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel1:
-			PWM21T2H = clocksHigh >> 8;
-			PWM21T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel2:
-			PWM22T2H = clocksHigh >> 8;
-			PWM23T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel3:
-			PWM23T2H = clocksHigh >> 8;
-			PWM23T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel4:
-			PWM24T2H = clocksHigh >> 8;
-			PWM24T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel5:
-			PWM25T2H = clocksHigh >> 8;
-			PWM25T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel6:
-			PWM26T2H = clocksHigh >> 8;
-			PWM26T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel7:
-			PWM27T2H = clocksHigh >> 8;
-			PWM27T2L = clocksHigh;
-			break;
-		}
-	#endif // MCU_SERIES == 'A'
-#else // STC8A8KxxS4A12 and STC15W4K
-	switch (channel) {
-	case ENHPWM_Channel0:
-		PWM00T2H = clocksHigh >> 8;
-		PWM00T2L = clocksHigh;
-		break;
-	case ENHPWM_Channel1:
-		PWM01T2H = clocksHigh >> 8;
-		PWM01T2L = clocksHigh;
-		break;
-	case ENHPWM_Channel2:
-		PWM02T2H = clocksHigh >> 8;
-		PWM03T2L = clocksHigh;
-		break;
-	case ENHPWM_Channel3:
-		PWM03T2H = clocksHigh >> 8;
-		PWM03T2L = clocksHigh;
-		break;
-	case ENHPWM_Channel4:
-		PWM04T2H = clocksHigh >> 8;
-		PWM04T2L = clocksHigh;
-		break;
-	case ENHPWM_Channel5:
-		PWM05T2H = clocksHigh >> 8;
-		PWM05T2L = clocksHigh;
-		break;
-	#if PWM_CHANNELS > 6
-		case ENHPWM_Channel6:
-			PWM06T2H = clocksHigh >> 8;
-			PWM06T2L = clocksHigh;
-			break;
-		case ENHPWM_Channel7:
-			PWM07T2H = clocksHigh >> 8;
-			PWM07T2L = clocksHigh;
-			break;
-	#endif // PWM_CHANNELS > 6
-	}
-#endif // MCU_HAS_ENHANCED_PWM == 'G'
+	__enhpwmSetFlipPoints(channel, flipPoint1, flipPoint2);
 	DISABLE_EXTENDED_SFR();
 }
 

@@ -52,6 +52,8 @@ static GpioConfig blinkingPin = GPIO_PIN_CONFIG(GPIO_PORT3, BLINKING_PIN, GPIO_B
 static uint8_t blinkingState = 0;
 
 #ifdef MCU_HAS_PCA
+#define PCA_COUNTER_VALUE 255U
+
 // Luminance as per CIELAB scaled to 256 (8-bit PWM)
 static const uint8_t PCA_GLOWING_GRADIENT[] = {
 	1, 3, 5, 7, 10, 15, 20, 27, 34, 44, 54, 
@@ -72,7 +74,7 @@ void pcaOnInterrupt(PCA_Channel channel, uint16_t pulseLength) USE_BANK(1) {
 }
 
 void pcaUpdateGlowingDutyCycle() {
-	pcaSetPwmDutyCycle(PCA_GLOWING_CHANNEL, 255 - PCA_GLOWING_GRADIENT[pcaGlowingStep]);
+	pcaSetPwmDutyCycle(PCA_GLOWING_CHANNEL, PCA_COUNTER_VALUE - PCA_GLOWING_GRADIENT[pcaGlowingStep]);
 	int8_t newStep = pcaGlowingStep + pcaGlowingIncrement;
 	
 	if (newStep < 0 || newStep >= PCA_GLOWING_STEPS) {
@@ -86,6 +88,7 @@ void pcaUpdateGlowingDutyCycle() {
 // ---------------------------------------------------------------------
 
 #ifdef MCU_HAS_ENHANCED_PWM
+#define ENHPWM_COUNTER_VALUE 32767U
 
 static const uint16_t ENHPWM_GLOWING_GRADIENT[] = {
 	181, 342, 579, 907, 1340, 1893, 2579, 3415, 4414, 5590, 6960, 
@@ -98,7 +101,7 @@ static int8_t enhpwmGlowingStep = 0;
 static int8_t enhpwmGlowingIncrement = 1;
 
 void enhpwmUpdateGlowingDutyCycle() {
-	enhpwmSetDutyCycle(ENHPWM_GLOWING_CHANNEL, ENHPWM_GLOWING_GRADIENT[enhpwmGlowingStep]);
+	enhpwmSetFlipPoints(ENHPWM_GLOWING_CHANNEL, 0, ENHPWM_COUNTER_VALUE - ENHPWM_GLOWING_GRADIENT[enhpwmGlowingStep]);
 	int8_t newStep = enhpwmGlowingStep + enhpwmGlowingIncrement;
 	
 	if (newStep < 0 || newStep >= ENHPWM_GLOWING_STEPS) {
@@ -112,6 +115,8 @@ void enhpwmUpdateGlowingDutyCycle() {
 // ---------------------------------------------------------------------
 
 #ifdef MCU_HAS_ADVANCED_PWM
+#define ADVPWM_COUNTER_VALUE 65535U
+
 static const uint16_t ADVPWM_GLOWING_GRADIENT[] = {
 	363, 684, 1159, 1814, 2680, 3785, 5159, 6830, 8827, 11181, 13919, 
 	17072, 20668, 24736, 29306, 34407, 40069, 46319, 53187, 60703, 
@@ -123,7 +128,7 @@ static int8_t advpwmGlowingStep = 0;
 static int8_t advpwmGlowingIncrement = 1;
 
 void advpwmUpdateGlowingDutyCycle() {
-//	advpwmSetDutyCycle(ADVPWM_GLOWING_GROUP, ADVPWM_GLOWING_CHANNEL, ADVPWM_GLOWING_GRADIENT[advpwmGlowingStep]);
+//	enhpwmSetFlipPoints(ADVPWM_GLOWING_GROUP, ADVPWM_GLOWING_CHANNEL, 0, ADVPWM_COUNTER_VALUE - ADVPWM_GLOWING_GRADIENT[advpwmGlowingStep]);
 	int8_t newStep = advpwmGlowingStep + advpwmGlowingIncrement;
 	
 	if (newStep < 0 || newStep >= ADVPWM_GLOWING_STEPS) {
@@ -199,21 +204,22 @@ void main() {
 		GPIO_BIDIRECTIONAL, 
 		MAKE_PCA_PWM_BITS(PCA_GLOWING_PWM_BITS), 
 		PCA_EDGE_NONE, 
-		255 - PCA_GLOWING_GRADIENT[0]
+		PCA_COUNTER_VALUE - PCA_GLOWING_GRADIENT[0]
 	);
 #endif // MCU_HAS_PCA
 
 // ---------------------------------------------------------------------
 
 #ifdef MCU_HAS_ENHANCED_PWM
-	enhpwmInitialise(ENHPWM_SYSCLK_DIV_7, 32767, ENHPWM_INTERRUPT_DISABLE);
+	enhpwmInitialise(ENHPWM_SYSCLK_DIV_7, ENHPWM_COUNTER_VALUE, ENHPWM_INTERRUPT_DISABLE);
 	enhpwmStartChannel(
 		ENHPWM_GLOWING_CHANNEL, 
 		ENHPWM_GLOWING_PIN_CONFIG, 
 		GPIO_BIDIRECTIONAL, 
 		ENHPWM_LOW, 
 		ENHPWM_INTERRUPT_EVENT_NONE, 
-		ENHPWM_GLOWING_GRADIENT[0]
+		0,
+		ENHPWM_COUNTER_VALUE - ENHPWM_GLOWING_GRADIENT[0]
 	);
 #endif // MCU_HAS_ENHANCED_PWM
 

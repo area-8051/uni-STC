@@ -161,12 +161,30 @@ uint8_t uartReceiveBufferFull(Uart uart) {
 	return fifoLength(inputBuffer(uart)) == FIFO_BUFFER_SIZE;
 }
 
+uint8_t uartReceiveBufferBytesUsed(Uart uart) {
+	return fifoLength(inputBuffer(uart));
+}
+
+uint8_t uartReceiveBufferBytesFree(Uart uart) {
+	FifoBuffer *buffer = inputBuffer(uart);
+	return buffer->size - fifoLength(buffer);
+}
+
 uint8_t uartTransmitBufferEmpty(Uart uart) {
 	return fifoLength(outputBuffer(uart)) == 0;
 }
 
 uint8_t uartTransmitBufferFull(Uart uart) {
 	return fifoLength(outputBuffer(uart)) == FIFO_BUFFER_SIZE;
+}
+
+uint8_t uartTransmitBufferBytesUsed(Uart uart) {
+	return fifoLength(outputBuffer(uart));
+}
+
+uint8_t uartTransmitBufferBytesFree(Uart uart) {
+	FifoBuffer *buffer = outputBuffer(uart);
+	return buffer->size - fifoLength(buffer);
 }
 
 #ifndef M_S1_S

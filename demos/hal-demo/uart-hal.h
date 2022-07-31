@@ -143,10 +143,14 @@ uint8_t uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudRateT
 uint8_t uartGetCharacter(Uart uart);
 uint8_t uartReceiveBufferEmpty(Uart uart);
 uint8_t uartReceiveBufferFull(Uart uart);
+uint8_t uartReceiveBufferBytesUsed(Uart uart);
+uint8_t uartReceiveBufferBytesFree(Uart uart);
 
 uint8_t uartSendCharacter(Uart uart, uint8_t c);
 uint8_t uartTransmitBufferEmpty(Uart uart);
 uint8_t uartTransmitBufferFull(Uart uart);
+uint8_t uartTransmitBufferBytesUsed(Uart uart);
+uint8_t uartTransmitBufferBytesFree(Uart uart);
 
 INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1);
 

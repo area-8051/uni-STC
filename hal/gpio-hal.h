@@ -40,6 +40,19 @@
  * Dependencies: none.
  */
 
+#ifdef BASIC_GPIO_HAL
+	// Useful to save on flash space when advanced features aren't used.
+	#ifdef GPIO_HAS_PU_NCS
+		#undef GPIO_HAS_PU_NCS
+	#endif
+	#ifdef GPIO_HAS_SR_DR_IE
+		#undef GPIO_HAS_SR_DR_IE
+	#endif
+	#ifdef GPIO_HAS_INT_WK
+		#undef GPIO_HAS_INT_WK
+	#endif
+#endif
+
 typedef enum {
 	GPIO_DISABLED = 0,
 	GPIO_ENABLED = 1,

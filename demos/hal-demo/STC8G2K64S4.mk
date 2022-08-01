@@ -31,7 +31,7 @@
 # Besides make, his project requires: 
 #
 # - sdcc
-# - stcgal 
+# - stcgal-patched
 # - minicom
 # - doxygen
 
@@ -49,104 +49,59 @@
 # Upload executable to MCU:
 #   make upload
 #
-# Force rebuilding dependencies:
-#   make depend
-#
 # Open serial console in new window:
 #   make console
 #
 # Clean project (remove all build files):
 #   make clean
 
-# Project-specific settings --------------------------------------------
+# Target MCU settings --------------------------------------------------
 
-PROJECT_NAME = hal-demo
+# Note: using a system clock around 24MHz works with all MCU
+# having an internal RC oscillator.
+MCU_FREQ := 23961600
 
 # Tested on STC8G2K64S4-36I-LQFP48
-
-BUILD_FOR = BUILD_FOR_STC8G2K64S4
-MCU_FREQ = 23961600
-TARGET_ARCH = -mmcs51
-MEMORY_MODEL = --model-large
-MEMORY_SIZES = \
+MEMORY_SIZES := \
 	--xram-loc 0 \
-	--xram-size 2048 \
+	--xram-size 8192 \
 	--stack-size 128 \
 	--code-size 65536
 
-CONSOLE_BAUDRATE = 115200
-CONSOLE_PORT = ttyUSB0
+MEMORY_MODEL := --model-large
 
-ISP_PORT = ttyUSB0
+HAS_DUAL_DPTR := y
 
-# TODO: change to your installation directory.
-UNISTC_DIR = ../../include
+# Define UNISTC_DIR, HAL_DIR, and MAKE_DIR -----------------------------
 
-SRCS = \
-	timer-hal.c \
-	delay.c \
-	enhpwm-hal.c \
-	gpio-hal.c \
-	pca-hal.c \
-	serial-console.c \
-	uart-hal.c \
-	fifo-buffer.c \
+include ../directories.mk
+
+# Project settings -----------------------------------------------------
+
+PROJECT_NAME := hal-demo
+
+PROJECT_FLAGS = -DBUILD_FOR_STC8G2K64S4
+
+SRCS := \
+	$(HAL_DIR)/delay.c \
+	$(HAL_DIR)/enhpwm-hal.c \
+	$(HAL_DIR)/fifo-buffer.c \
+	$(HAL_DIR)/gpio-hal.c \
+	$(HAL_DIR)/pca-hal.c \
+	$(HAL_DIR)/serial-console.c \
+	$(HAL_DIR)/timer-hal.c \
+	$(HAL_DIR)/uart-hal.c \
 	main.c
 
-# Toolchain-specific settings ------------------------------------------
+CONSOLE_BAUDRATE := 57600
+CONSOLE_PORT := ttyUSB0
 
-AS = sdas8051
-CC = sdcc
-ASFLAGS = -plosgffw
-CFLAGS = -DMCU_FREQ=$(MCU_FREQ)UL $(TARGET_ARCH) $(MEMORY_MODEL) -I$(UNISTC_DIR) -D$(BUILD_FOR)
-LDFLAGS = $(TARGET_ARCH) $(MEMORY_MODEL) $(MEMORY_SIZES)
+ISP_PORT := ttyUSB0
 
-ifeq ($(BUILD_MODE),debug)
-	CFLAGS += --debug
-	BUILD_DIR = debug
-else
-	CFLAGS += --opt-code-speed
-	BUILD_DIR = release
-endif
+# ----------------------------------------------------------------------
 
-BUILD_ROOT = build
-
-OBJDIR = $(BUILD_ROOT)/$(BUILD_DIR)
-FW_FILE = $(OBJDIR)/$(PROJECT_NAME).ihx
-DEP_FILE = $(OBJDIR)/dependencies
-
-OBJS = $(patsubst %.c, $(OBJDIR)/%.rel, $(SRCS))
-
-# Rules ----------------------------------------------------------------
-
-.PHONY: all clean doc upload console
-
-all: $(DEP_FILE) $(FW_FILE)
-
-
-clean:
-	rm -rf $(BUILD_ROOT)
-
-doc:
-	doxygen doxygen.conf
-
-upload:
-	stcgal -a -p /dev/$(ISP_PORT) -l 115200 -b 115200 -t `echo "$(MCU_FREQ)" | rev | cut -c 4- | rev` $(FW_FILE)
-
-console:
-	mate-terminal -t "$(PROJECT_NAME) console" -e "minicom -b $(CONSOLE_BAUDRATE) -D /dev/$(CONSOLE_PORT)"
+include $(MAKE_DIR)/include1.mk
 
 -include $(DEP_FILE)
 
-$(DEP_FILE): $(SRCS)
-	mkdir -p $(OBJDIR)
-	$(CC) $(CFLAGS) -MM $< >> $(DEP_FILE)
-
-$(FW_FILE):	$(OBJS) $(OBJDIR)/crtxinit.rel
-	$(CC) $(LDFLAGS) -o $@ $^
-
-$(OBJDIR)/crtxinit.rel:	crtxinit.asm
-	$(AS) $(ASFLAGS) $@ $<
-
-$(OBJDIR)/%.rel:	%.c
-	$(CC) $(CFLAGS) -o $@ -c $<
+include $(MAKE_DIR)/include2.mk

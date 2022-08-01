@@ -47,6 +47,8 @@
 	
 	#ifdef BUILD_FOR_STC8G1K17_DIP16
 		#include <STC/8G1Kxx/DIP16.h>
+		// Uncomment to build using the medium memory model.
+		//#define SMALL_RAM
 	#endif
 	
 	#ifdef BUILD_FOR_STC8G2K64S4

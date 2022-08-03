@@ -10,6 +10,7 @@
 #define PWM_GROUPS 6
 #define PWM_CHANNELS 8
 #define ADC_CHANNELS 15
+#define NB_TIMERS 5
 
 #include <uni-STC/stcmcu.h>
 

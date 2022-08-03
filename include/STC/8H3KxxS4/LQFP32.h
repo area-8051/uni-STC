@@ -18,6 +18,7 @@
 #define ADC_NO_CHANNEL4
 #define ADC_NO_CHANNEL5
 #define SPI_HAS_HIGH_SPEED
+#define NB_TIMERS 5
 
 #include <uni-STC/stcmcu.h>
 

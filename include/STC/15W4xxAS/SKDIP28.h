@@ -7,6 +7,7 @@
 #define MCU_HAS_COMPARATOR
 #define PCA_CHANNELS 3
 #define ADC_CHANNELS 8
+#define NB_TIMERS 2
 
 #include <uni-STC/stcmcu.h>
 

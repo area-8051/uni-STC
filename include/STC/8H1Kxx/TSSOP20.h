@@ -15,6 +15,7 @@
 #define ADC_NO_CHANNEL7
 #define PWM_GROUPS 2
 #define PWM_CHANNELS 4
+#define NB_TIMERS 3
 
 #include <uni-STC/stcmcu.h>
 

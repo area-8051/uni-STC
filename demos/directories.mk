@@ -26,6 +26,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
 
-UNISTC_DIR := ../../include
-HAL_DIR := ../../hal/src
-MAKE_DIR := ../../hal/make
+UNISTC_ROOT_DIR := ../..
+UNISTC_DIR := $(UNISTC_ROOT_DIR)/include
+HAL_DIR := $(UNISTC_ROOT_DIR)/hal/src
+MAKE_DIR := $(UNISTC_ROOT_DIR)/hal/make

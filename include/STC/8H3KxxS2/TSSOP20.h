@@ -17,6 +17,7 @@
 #define GPIO_NO_P14
 #define GPIO_NO_P15
 #define SPI_HAS_HIGH_SPEED
+#define NB_TIMERS 5
 
 #include <uni-STC/stcmcu.h>
 

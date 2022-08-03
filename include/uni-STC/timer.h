@@ -19,9 +19,17 @@
 // All MCU have T0, T2 and WDT. Other timers might be available 
 // depending on the number of pins and MCU family.
 
-#if MCU_PINS > 8
+#ifndef NB_TIMERS
+	#error "NB_TIMER must be defined in the MCU configuration header."
+#endif
+
+#if NB_TIMERS > 2
 	#define TIMER_HAS_T1
-#endif // MCU_PINS > 8
+#endif
+
+#if NB_TIMERS >= 5
+	#define TIMER_HAS_T3_T4
+#endif
 
 #if MCU_FAMILY == 12
 	#define TIMER_HAS_BRT
@@ -31,10 +39,6 @@
 
 #if MCU_FAMILY == 8
 	#define TIMER_HAS_AUXINTIF
-	
-	#if MCU_PINS > 20
-		#define TIMER_HAS_T3_T4
-	#endif // MCU_PINS > 20
 	
 	#if MCU_SERIES == 'G'
 		#define TIMER_HAS_PRESCALERS

@@ -199,11 +199,22 @@ Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baud
 	// expected to be of type Uart1_9BitMode_Clock and is derived from
 	// sysclk instead of a timer.
 	if (uart != UART1 || mode == UART_8N1) {
-		Timer timer = (baudRateTimer == UART_USE_TIMER2)
+		Timer timer;
+		
+#ifdef TIMER_HAS_T1
+		timer = (baudRateTimer == UART_USE_TIMER2)
 			? TIMER2
 			: ((Timer) uart);
 			// There's a reason why UART numbers start at 1
 			// while timer numbers start at 0!  :)
+#else
+		// If the target MCU doesn't have timer 1, the only possible
+		// baud rate generator is timer 2.
+		timer = TIMER2;
+#endif // TIMER_HAS_T1
+		
+		// Note: on the STC12, TIMER2 is the BRT timer.
+		// The timer HAL makes this transparent for the developer.
 		rc = startTimer(
 			timer, 
 			baudRateToSysclkDivisor(baudRate), 

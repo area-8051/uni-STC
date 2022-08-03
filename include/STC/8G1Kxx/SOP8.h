@@ -5,6 +5,7 @@
 #define MCU_SERIES 'G'
 #define MCU_PINS 8
 #define MCU_HAS_MDU
+#define NB_TIMERS 2
 
 #include <uni-STC/stcmcu.h>
 

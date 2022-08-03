@@ -26,6 +26,7 @@
 #define PWM_CHANNELS 4
 #define ADC_CHANNELS 15
 #define SPI_HAS_HIGH_SPEED
+#define NB_TIMERS 5
 
 #include <uni-STC/stcmcu.h>
 

@@ -6,6 +6,7 @@
 #define MCU_PINS 20
 #define MCU_HAS_COMPARATOR
 #define ADC_CHANNELS 15
+#define NB_TIMERS 3
 
 #include <uni-STC/stcmcu.h>
 

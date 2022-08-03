@@ -7,6 +7,7 @@
 #define MCU_HAS_MDU
 #define MCU_HAS_PCA
 #define ADC_CHANNELS 6
+#define NB_TIMERS 2
 
 #include <uni-STC/stcmcu.h>
 

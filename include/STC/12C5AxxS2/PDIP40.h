@@ -6,6 +6,7 @@
 #define MCU_PINS 40
 #define MCU_HAS_DUAL_DPTR
 #define ADC_CHANNELS 8
+#define NB_TIMERS 3
 
 #include <uni-STC/stcmcu.h>
 

@@ -35,28 +35,38 @@
  * 
  * PCA abstraction definitions.
  * 
- * Supported MCU families: STC12, STC15, STC8A, STC8G.
+ * Supported MCU:
  * 
- * Dependencies: gpio-hal, timer-hal (only when using Timer 0 as clock 
- * source for the PCA counter).
+ *     STC12*
+ *     STC15*
+ *     STC8A*
+ *     STC8G*
+ * 
+ * Dependencies:
+ * 
+ *     gpio-hal
+ *     timer-hal (only when using Timer 0 as clock source)
+ * 
+ * Optional macros:
+ * 
+ *     HAL_PCA_SEGMENT (default: __idata) defines where the HAL's 
+ *     state information will be stored. Impacts ISR execution time.
+ * 
+ *     HAL_PCA_CHANNELS (default: PCA_CHANNELS) defines how many PCA
+ *     channels will be supported by the HAL. Useful to reduce both
+ *     flash and RAM footprint.
  * 
  * **IMPORTANT:** In order to satisfy SDCC's requirements for ISR 
  * handling, this header file **MUST** be included in the C source 
  * file where main() is defined.
  */
 
-#include "gpio-hal.h"
+#include "hal-defs.h"
 
 typedef enum {
 	PCA_CONTINUOUS = 0,
 	PCA_ONE_SHOT = 1,
 } PCA_CaptureMode;
-
-typedef enum {
-	FREQUENCY_OK = 0,
-	FREQUENCY_TOO_HIGH,
-	FREQUENCY_TOO_LOW,
-} PCA_TimerStatus;
 
 /**
  * PCA pin configurations for STC8G *except* STC8G1K08A and STC8G1K08T
@@ -111,7 +121,7 @@ INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1);
  * 
  * CCP = Compare / Capture / PWM
  */
-void pcaInitialise(PCA_ClockSource clockSource, PCA_CounterMode counterMode, PCA_InterruptEnable overflowInterrupt, uint8_t pinSwitch);
+void pcaInitialise(PCA_ClockSource clockSource, CounterControl counterMode, InterruptEnable overflowInterrupt, uint8_t pinSwitch);
 
 /**
  * Configures a PCA channel to measure the width of a pulse.
@@ -121,7 +131,7 @@ void pcaInitialise(PCA_ClockSource clockSource, PCA_CounterMode counterMode, PCA
  * 
  * shiftBits > 23 makes no sense, but be aware no check is made.
  */
-void pcaStartCapture(PCA_Channel channel, GpioPortMode pinMode, PCA_EdgeTrigger trigger, PCA_CaptureMode captureMode, uint8_t shiftBits);
+void pcaStartCapture(PCA_Channel channel, GpioPinMode pinMode, PCA_EdgeTrigger trigger, PCA_CaptureMode captureMode, uint8_t shiftBits);
 
 /**
  * Configures a PCA channel in PWM mode.
@@ -129,7 +139,7 @@ void pcaStartCapture(PCA_Channel channel, GpioPortMode pinMode, PCA_EdgeTrigger 
  * The duty cycle is defined by the number of clockSource pulses during 
  * which the PWM output must be high.
  */
-void pcaStartPwm(PCA_Channel channel, GpioPortMode pinMode, PCA_PWM_Bits bits, PCA_EdgeTrigger interruptTrigger, uint16_t clocksHigh);
+void pcaStartPwm(PCA_Channel channel, GpioPinMode pinMode, PCA_PWM_Bits bits, PCA_EdgeTrigger interruptTrigger, uint16_t clocksHigh);
 
 /**
  * Changes the duty cycle of a PWM channel.
@@ -143,7 +153,7 @@ void pcaSetPwmDutyCycle(PCA_Channel channel, uint16_t clocksHigh);
  * 
  * timerPeriod is expressed as a number of clockSource pulses.
  */
-void pcaStartTimer(PCA_Channel channel, GpioPortMode pinMode, PCA_OutputEnable pulseOutput, uint16_t timerPeriod);
+void pcaStartTimer(PCA_Channel channel, GpioPinMode pinMode, OutputEnable pulseOutput, uint16_t timerPeriod);
 
 /**
  * MUST be implemented by the application, even when not used.

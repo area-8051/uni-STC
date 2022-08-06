@@ -29,12 +29,17 @@
  */
 #include "project-defs.h"
 #include "i2c-hal.h"
+#include "gpio-hal.h"
 
 /**
  * @file i2c-hal.c
  * 
  * I2C abstraction implementation.
  */
+
+#ifndef I2C_SEGMENT
+	#define I2C_SEGMENT __idata
+#endif
 
 #define I2C_PIN_SWITCH 0
 #define I2C_SCL_PIN 1
@@ -55,7 +60,7 @@
  *    3   | P3.2 | P3.3 | 
  */
 
-static uint8_t __pinConfigurations[][I2C_ROW_SIZE] = {
+static const __code uint8_t __pinConfigurations[][I2C_ROW_SIZE] = {
 #if MCU_PINS == 8
 	{ 0, 0x32, 0x33 },
 	{ 1, 0x54, 0x55 },
@@ -82,7 +87,7 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 	for (uint8_t i = 0; i < (sizeof(__pinConfigurations) / I2C_ROW_SIZE); i++) {
 		if (__pinConfigurations[i][I2C_PIN_SWITCH] == pinSwitch) {
 			P_SW2 = (P_SW2 & ~M_I2C_S) | ((pinSwitch << P_I2C_S) & M_I2C_S);
-			GpioConfig pinConfig = GPIO_PIN_CONFIG(GPIO_PORT3, GPIO_PIN0, GPIO_OPEN_DRAIN);
+			GpioConfig pinConfig = GPIO_PIN_CONFIG(GPIO_PORT3, GPIO_PIN0, GPIO_OPEN_DRAIN_MODE);
 			uint8_t pinDefinition;
 			
 			pinDefinition = __pinConfigurations[i][I2C_SDA_PIN];
@@ -94,7 +99,7 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 			pinConfig.port = (GpioPort) (pinDefinition >> 4);
 			pinConfig.pin = (GpioPin) (pinDefinition & 0x0f);
 #ifdef I2C_IS_SLAVE
-			pinConfig.portMode = GPIO_BIDIRECTIONAL
+			pinConfig.portMode = GPIO_BIDIRECTIONAL_MODE;
 #endif // I2C_IS_SLAVE
 			gpioConfigure(&pinConfig);
 			break;
@@ -105,11 +110,11 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 #ifdef I2C_IS_SLAVE
 	// == SLAVE mode ===================================================
 	
-	static uint8_t __i2c_startReceived = 0;
+	static volatile I2C_SEGMENT bool __i2c_startReceived = false;
 	
 	void i2cInitialiseSlave(uint8_t pinSwitch, uint8_t slaveIdX2) {
 		__i2c_configurePins(pinSwitch);
-		__i2c_startReceived = 0;
+		__i2c_startReceived = false;
 		ENABLE_EXTENDED_SFR();
 		// Set slave address (or "promiscuous" mode, i.e. bit 0 = 1)
 		I2CSLADR = slaveIdX2;
@@ -148,7 +153,7 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 		if (flags & M_STOIF) {
 			I2CSLST &= ~M_STOIF;
 			P_SW2 = p_sw2;
-			__i2c_startReceived = 0;
+			__i2c_startReceived = false;
 			i2cOnStop();
 		} else if (flags & M_TXIF) {
 			I2CSLST &= ~M_TXIF;
@@ -161,7 +166,7 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 			P_SW2 = p_sw2;
 			
 			if (__i2c_startReceived) {
-				__i2c_startReceived = 0;
+				__i2c_startReceived = false;
 				i2cOnCommandReceived(byte >> 1, (I2C_Command) (byte & 1));
 			} else {
 				i2cOnDataReceived(byte);
@@ -169,7 +174,7 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 		} else if (flags & M_STAIF) {
 			I2CSLST &= ~M_STAIF;
 			P_SW2 = p_sw2;
-			__i2c_startReceived = 1;
+			__i2c_startReceived = true;
 		}
 	}
 #else

@@ -42,7 +42,7 @@ void main() {
 		CONSOLE_PIN_CONFIG
 	);
 	
-	adcInitialise(ADC_ALIGN_RIGHT, ADC_INTERRUPT_DISABLE);
+	adcInitialise(ADC_ALIGN_RIGHT, DISABLE_INTERRUPT);
 	adcConfigureChannel(DEMO_ADC_CHANNEL);
 	
 	// Enable interrupts -----------------------------------------------

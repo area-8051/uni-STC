@@ -28,10 +28,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#ifndef FIFO_BUFFER_SIZE
-	// Dummy value to satisfy sanity check in header.
-	#define FIFO_BUFFER_SIZE 1
-#endif
 #include "fifo-buffer.h"
 
 /**
@@ -40,14 +36,7 @@
  * FIFO circular buffer implementation.
  */
 
-void __fifoInitialise(FifoBuffer *buffer, uint8_t allocatedSize) REENTRANT {
-	buffer->size = allocatedSize;
-	buffer->first = buffer->size;
-	buffer->last = buffer->size;
-	buffer->status = 0;
-}
-
-uint8_t fifoLength(FifoBuffer *buffer) REENTRANT {
+uint8_t __fifoLength(FifoState *buffer) REENTRANT {
 	return (buffer->last >= buffer->first)
 		? (buffer->last == buffer->size
 			? 0
@@ -56,48 +45,51 @@ uint8_t fifoLength(FifoBuffer *buffer) REENTRANT {
 		: (buffer->size - (buffer->first - buffer->last - 1));
 }
 
-uint8_t fifoWrite(FifoBuffer *buffer, uint8_t data) REENTRANT {
-	uint8_t rc = 0;
+bool fifoWrite(FifoState *buffer, const uint8_t *data, uint8_t count) REENTRANT {
+	bool rc = fifoBytesFree(buffer) >= count;
 	
-	if (fifoLength(buffer) < buffer->size) {
-		buffer->last++;
-		
-		if (buffer->last >= buffer->size) {
-			// Handles both buffer empty and wrap around cases.
-			buffer->last = 0;
+	if (rc) {
+		for (uint8_t n = 0; n < count; n++) {
+			buffer->last++;
+			
+			if (buffer->last >= buffer->size) {
+				// Handles both buffer empty and wrap around cases.
+				buffer->last = 0;
+			}
+			
+			if (buffer->first == buffer->size) {
+				// Buffer was empty, initialise .first too.
+				buffer->first = 0;
+			}
+			
+			buffer->data[buffer->last] = data[n];
 		}
-		
-		if (buffer->first == buffer->size) {
-			// Buffer was empty, initialise .first too.
-			buffer->first = 0;
-		}
-		
-		buffer->data[buffer->last] = data;
-		rc = 1;
 	}
 	
 	return rc;
 }
 
-uint8_t fifoRead(FifoBuffer *buffer) REENTRANT {
-	uint8_t result = 0;
+bool fifoRead(FifoState *buffer, uint8_t *data, uint8_t count) REENTRANT {
+	bool rc = fifoBytesUsed(buffer) >= count;
 	
-	if (buffer->first != buffer->size) {
-		// Buffer is not empty, read first character.
-		result = buffer->data[buffer->first];
-		
-		if (buffer->first == buffer->last) {
-			// We've read the last character, mark buffer as empty.
-			buffer->first = buffer->size;
-			buffer->last = buffer->size;
-		} else {
-			buffer->first++;
+	if (rc) {
+		for (uint8_t n = 0; n < count; n++) {
+			// Buffer is not empty, read first character.
+			data[n] = buffer->data[buffer->first];
 			
-			if (buffer->first == buffer->size) {
-				buffer->first = 0;
+			if (buffer->first == buffer->last) {
+				// We've read the last character, mark buffer as empty.
+				buffer->first = buffer->size;
+				buffer->last = buffer->size;
+			} else {
+				buffer->first++;
+				
+				if (buffer->first == buffer->size) {
+					buffer->first = 0;
+				}
 			}
 		}
 	}
 	
-	return result;
+	return rc;
 }

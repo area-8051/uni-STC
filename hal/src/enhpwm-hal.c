@@ -29,6 +29,7 @@
  */
 #include "project-defs.h"
 #include "enhpwm-hal.h"
+#include "gpio-hal.h"
 
 /**
  * @file enhpwm-hal.c
@@ -36,7 +37,7 @@
  * 15-bit enhanced PWM abstraction implementation.
  */
 
-static const uint8_t __pinConfigurations[][PWM_CHANNELS] = {
+static const __code uint8_t __pinConfigurations[][PWM_CHANNELS] = {
 #if MCU_HAS_ENHANCED_PWM == '5'
 	// STC15W4K
 	{ 0x37, 0x22, 0x21, 0x23, 0x16, 0x17 }, 
@@ -61,17 +62,17 @@ static const uint8_t __pinConfigurations[][PWM_CHANNELS] = {
 // On the STC8G2K* and the STC8A8KxxD4, GPIO ports are configured
 // in high-impedance mode by default, so configuring the channel 
 // output pin mode is *REQUIRED*.
-static void __configureOutput(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPortMode pinMode) {
+static void __configureOutput(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPinMode pinMode) {
 	if (pinSwitch >= PIN_CONFIG_MAX) {
 		pinSwitch = 0;
 	}
 	
 	switch (pinMode) {
-	case GPIO_BIDIRECTIONAL:
-	case GPIO_PUSH_PULL:
+	case GPIO_BIDIRECTIONAL_MODE:
+	case GPIO_PUSH_PULL_MODE:
 		break;
 	default:
-		pinMode = GPIO_BIDIRECTIONAL;
+		pinMode = GPIO_BIDIRECTIONAL_MODE;
 		break;
 	}
 	
@@ -82,7 +83,7 @@ static void __configureOutput(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPor
 	gpioConfigure(&pinConfig);
 }
 
-void enhpwmInitialise(ENHPWM_ClockSource clockSource, uint16_t divisor, ENHPWM_InterruptEnable overflowInterrupt) {
+void enhpwmInitialise(ENHPWM_ClockSource clockSource, uint16_t divisor, InterruptEnable overflowInterrupt) {
 #if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
 	#if MCU_SERIES == 'A' // STC8A8KxxD4
 		PWMSET |= M_ENPWM0;
@@ -278,7 +279,7 @@ static void __enhpwmSetFlipPoints(ENHPWM_Channel channel, uint16_t flipPoint1, u
 #endif // MCU_HAS_ENHANCED_PWM == 'G'
 }
 
-void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPortMode pinMode, ENHPWM_OutputLevel initialLevel, ENHPWM_InterruptOnEvent interruptOnEvent, uint16_t flipPoint1, uint16_t flipPoint2) {
+void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPinMode pinMode, ENHPWM_OutputLevel initialLevel, ENHPWM_InterruptOnEvent interruptOnEvent, uint16_t flipPoint1, uint16_t flipPoint2) {
 	__configureOutput(channel, pinSwitch, pinMode);
 	uint8_t channelCR = interruptOnEvent;
 	

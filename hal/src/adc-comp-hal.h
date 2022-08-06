@@ -35,14 +35,26 @@
  * 
  * ADC abstraction layer definitions.
  * 
- * Supported MCU families: STC12, STC15, STC8.
+ * Supported MCU:
+ * 
+ *     STC12*
+ *     STC15*
+ *     STC8*
  * 
  * Comparator abstraction layer definitions.
  * 
- * Supported MCU families: STC15, STC8.
+ * Supported MCU:
  * 
- * Dependencies: gpio-hal, delay.
+ *     STC15*
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     gpio-hal
+ *     delay
  */
+
+#include "hal-defs.h"
 
 typedef enum {
 	ADC_ALIGN_LEFT = 0,
@@ -92,15 +104,10 @@ typedef enum {
 #endif // MCU_FAMILY == 8
 } ADC_Channel;
 
-typedef enum {
-	ADC_INTERRUPT_DISABLE = 0,
-	ADC_INTERRUPT_ENABLE = 1,
-} ADC_InterruptEnable;
-
 /**
  * ADC initialisation.
  */
-void adcInitialise(ADC_Alignment resultAlignment, ADC_InterruptEnable useInterrupts);
+void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts);
 
 /**
  * ADC input pin configuration.

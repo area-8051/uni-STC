@@ -35,7 +35,16 @@
  * 
  * 15-bit enhanced PWM abstraction definitions.
  * 
- * Supported MCU: STC15W4KxxS4, STC8A8KxxS4A12, STC8A8KxxD4, STC8G2K*.
+ * Supported MCU:
+ * 
+ *     STC15W4KxxS4
+ *     STC8A8KxxS4A12
+ *     STC8A8KxxD4
+ *     STC8G2K*
+ * 
+ * Dependencies:
+ * 
+ *     gpio-hal
  * 
  * IMPORTANT1: on the STC8G2K*, only PWM20..27 are supported, and 
  * correspond to ENHPWM_Channel0..7 respectively.
@@ -69,7 +78,7 @@
  *     INTERRUPT_USING(__enhpwm_isr, PWM0_INTERRUPT, 1);
  */
 
-#include "gpio-hal.h"
+#include "hal-defs.h"
 
 typedef enum {
 	ENHPWM_SYSCLK_DIV_1 = 0,
@@ -112,11 +121,6 @@ typedef enum {
 } ENHPWM_InterruptOnEvent;
 
 typedef enum {
-	ENHPWM_INTERRUPT_DISABLE = 0,
-	ENHPWM_INTERRUPT_ENABLE = 1,
-} ENHPWM_InterruptEnable;
-
-typedef enum {
 	ENHPWM_LOW = 0,
 	ENHPWM_HIGH = 1,
 } ENHPWM_OutputLevel;
@@ -147,12 +151,12 @@ typedef enum {
 /**
  * Initialises and starts the master counter.
  */
-void enhpwmInitialise(ENHPWM_ClockSource clockSource, uint16_t divisor, ENHPWM_InterruptEnable overflowInterrupt);
+void enhpwmInitialise(ENHPWM_ClockSource clockSource, uint16_t divisor, InterruptEnable overflowInterrupt);
 
 /**
  * Configures a PCA channel in PWM mode.
  */
-void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPortMode pinMode, ENHPWM_OutputLevel initialLevel, ENHPWM_InterruptOnEvent interruptOnEvent, uint16_t flipPoint1, uint16_t flipPoint2);
+void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPinMode pinMode, ENHPWM_OutputLevel initialLevel, ENHPWM_InterruptOnEvent interruptOnEvent, uint16_t flipPoint1, uint16_t flipPoint2);
 
 /**
  * Changes the flip points of a PWM channel.

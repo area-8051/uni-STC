@@ -35,39 +35,32 @@
  * 
  * Timer abstraction definitions.
  * 
- * Supported MCU families: STC12, STC15, STC8.
+ * Supported MCU:
  * 
- * Dependencies: none.
+ *     STC12*
+ *     STC15*
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     none
  */
+
+#include "hal-defs.h"
 
 typedef enum {
 	// Frequency or Baud rate, of course.
 	TIMER_FREQUENCY_OK = 0,
 	TIMER_FREQUENCY_TOO_HIGH,
 	TIMER_FREQUENCY_TOO_LOW,
-} Timer_Status;
-
-typedef enum {
-	TIMER_OUTPUT_DISABLE = 0,
-	TIMER_OUTPUT_ENABLE,
-} Timer_Output;
-
-typedef enum {
-	TIMER_INTERRUPT_DISABLE = 0,
-	TIMER_INTERRUPT_ENABLE,
-} Timer_Interrupt;
-
-// Timers 0 & 1 only (ignored for the others).
-typedef enum {
-	TIMER_FREE_RUNNING = 0,
-	TIMER_GATE_CONTROL
-} Timer_Control;
+} TimerStatus;
 
 uint32_t baudRateToSysclkDivisor(uint32_t baudRate);
 
 uint32_t frequencyToSysclkDivisor(uint32_t frequency);
 
-Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enableOutput, Timer_Interrupt enableInterrupt, Timer_Control timerControl);
+// timerControl affects Timers 0 & 1 only (ignored for the others).
+TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableOutput, InterruptEnable enableInterrupt, CounterControl timerControl);
 
 /*
  * The prototype of timer <n>'s ISR is:

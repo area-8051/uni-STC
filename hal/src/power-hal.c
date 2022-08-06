@@ -34,8 +34,6 @@
  * @file power-hal.c
  * 
  * Power management abstraction implementation for STC12, STC15 and STC8.
- * 
- * TODO: add clock control.
  */
 
 void enterIdleMode() {

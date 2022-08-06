@@ -25,6 +25,7 @@
 
 #include <compiler.h>
 
+#include <uni-STC/uni-STC.h>
 #include <uni-STC/adc.h>
 #include <uni-STC/comparator.h>
 #include <uni-STC/dma.h>
@@ -47,7 +48,6 @@
 #include <uni-STC/touchkey.h>
 #include <uni-STC/uart.h>
 #include <uni-STC/usb.h>
-#include <uni-STC/testing.h>
 
 #ifndef MCU_FREQ
 	#error "The MCU_FREQ macro must be defined (e.g. 24000000UL)"

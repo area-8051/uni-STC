@@ -34,8 +34,6 @@
  * @file timer-hal.c
  * 
  * Timer abstraction implementation for STC12, STC15 and STC8.
- * 
- * TODO: add startCounter().
  */
 
 #if MCU_FAMILY == 12
@@ -49,7 +47,7 @@ uint32_t baudRateToSysclkDivisor(uint32_t baudRate) {
 	
 #if MCU_FAMILY == 12
 	// STC12 timers seem to work as documented only in 8-bit mode.
-	// This is only an issue for T1 since BRT is 8-bit only.
+	// This is only an issue for T0 and T1 since BRT is 8-bit only.
 	divisor = (MCU_FREQ / baudRate / 32UL);
 #elif MCU_FAMILY == 8 && MCU_SERIES == 'A' && !defined(MCU_HAS_DMA)
 	// A peculiarity of the STC8A8K64S4A12...
@@ -66,8 +64,8 @@ uint32_t frequencyToSysclkDivisor(uint32_t frequency) {
 	return MCU_FREQ / frequency;
 }
 
-Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enableOutput, Timer_Interrupt enableInterrupt, Timer_Control timerControl) {
-	Timer_Status rc = TIMER_FREQUENCY_OK;
+TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableOutput, InterruptEnable enableInterrupt, CounterControl timerControl) {
+	TimerStatus rc = TIMER_FREQUENCY_OK;
 	uint8_t sysclkDiv1 = 1;
 	
 	if (sysclkDivisor == 0) {
@@ -102,7 +100,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			// On the STC12, we'll use mode 2 (8-bit auto-reload timer).
 			TMOD |= 2;
 			
-			if (enableOutput == TIMER_OUTPUT_ENABLE) {
+			if (enableOutput == ENABLE_OUTPUT) {
 				WAKE_CLKO |= M_T0CLKO;
 			} else {
 				WAKE_CLKO &= ~M_T0CLKO;
@@ -110,7 +108,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			
 			T0H = T0L = reloadValue;
 #else
-			if (enableOutput == TIMER_OUTPUT_ENABLE) {
+			if (enableOutput == ENABLE_OUTPUT) {
 				INT_CLKO |= M_T0CLKO;
 			} else {
 				INT_CLKO &= ~M_T0CLKO;
@@ -119,7 +117,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			T0 = reloadValue;
 #endif
 			
-			if (enableInterrupt == TIMER_INTERRUPT_ENABLE) {
+			if (enableInterrupt == ENABLE_INTERRUPT) {
 				IE1 |= M_ET0;
 			} else {
 				IE1 &= ~M_ET0;
@@ -135,7 +133,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			// Configure T1 as an 8-bit auto-reload timer (mode 2)
 			TMOD = (TMOD & 0x0f) | (2 << P_T1_M);
 			
-			if (enableOutput == TIMER_OUTPUT_ENABLE) {
+			if (enableOutput == ENABLE_OUTPUT) {
 				WAKE_CLKO |= M_T1CLKO;
 			} else {
 				WAKE_CLKO &= ~M_T1CLKO;
@@ -147,7 +145,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			// Configure T1 as a 16-bit auto-reload timer (mode 0)
 			TMOD &= 0x0f;
 			
-			if (enableOutput == TIMER_OUTPUT_ENABLE) {
+			if (enableOutput == ENABLE_OUTPUT) {
 				INT_CLKO |= M_T1CLKO;
 			} else {
 				INT_CLKO &= ~M_T1CLKO;
@@ -163,7 +161,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			// Configure prescaling
 			AUXR = (sysclkDiv1) ? (AUXR | M_T1x12) : (AUXR & ~M_T1x12);
 			
-			if (enableInterrupt == TIMER_INTERRUPT_ENABLE) {
+			if (enableInterrupt == ENABLE_INTERRUPT) {
 				IE1 |= M_ET1;
 			} else {
 				IE1 &= ~M_ET1;
@@ -179,7 +177,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			// Configure T2 in timer mode
 			AUXR &= ~M_T2_C_T;
 			
-			if (enableOutput == TIMER_OUTPUT_ENABLE) {
+			if (enableOutput == ENABLE_OUTPUT) {
 				INT_CLKO |= M_T2CLKO;
 			} else {
 				INT_CLKO &= ~M_T2CLKO;
@@ -190,7 +188,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 #endif // TIMER_HAS_T2
 
 #ifdef TIMER_HAS_BRT
-			if (enableOutput == TIMER_OUTPUT_ENABLE) {
+			if (enableOutput == ENABLE_OUTPUT) {
 				WAKE_CLKO |= M_BRTCLKO;
 			} else {
 				WAKE_CLKO &= ~M_BRTCLKO;
@@ -204,7 +202,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			AUXR = (sysclkDiv1) ? (AUXR | M_T2x12) : (AUXR & ~M_T2x12);
 			
 #ifdef TIMER_HAS_T2
-			if (enableInterrupt == TIMER_INTERRUPT_ENABLE) {
+			if (enableInterrupt == ENABLE_INTERRUPT) {
 				IE2 |= M_ET2;
 			} else {
 				IE2 &= ~M_ET2;
@@ -225,7 +223,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			// Configure T3 in timer mode
 			T4T3M &= ~M_T3_C_T;
 			
-			if (enableOutput == TIMER_OUTPUT_ENABLE) {
+			if (enableOutput == ENABLE_OUTPUT) {
 				T4T3M |= M_T3CLKO;
 			} else {
 				T4T3M &= ~M_T3CLKO;
@@ -237,14 +235,16 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			// Set reload value
 			T3 = reloadValue;
 			
-			if (enableInterrupt == TIMER_INTERRUPT_ENABLE) {
+			if (enableInterrupt == ENABLE_INTERRUPT) {
 				IE2 |= M_ET3;
 			} else {
 				IE2 &= ~M_ET3;
 			}
 			
+#ifdef TIMER_HAS_AUXINTIF
 			// Clear interrupt flag
 			AUXINTIF &= ~M_T3IF;
+#endif // TIMER_HAS_AUXINTIF
 			
 			// Start timer
 			T4T3M |= M_T3R;
@@ -254,7 +254,7 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			// Configure T4 in timer mode
 			T4T3M &= ~M_T4_C_T;
 			
-			if (enableOutput == TIMER_OUTPUT_ENABLE) {
+			if (enableOutput == ENABLE_OUTPUT) {
 				T4T3M |= M_T4CLKO;
 			} else {
 				T4T3M &= ~M_T4CLKO;
@@ -266,14 +266,16 @@ Timer_Status startTimer(Timer timer, uint32_t sysclkDivisor, Timer_Output enable
 			// Set reload value
 			T4 = reloadValue;
 			
-			if (enableInterrupt == TIMER_INTERRUPT_ENABLE) {
+			if (enableInterrupt == ENABLE_INTERRUPT) {
 				IE2 |= M_ET4;
 			} else {
 				IE2 &= ~M_ET4;
 			}
 			
+#ifdef TIMER_HAS_AUXINTIF
 			// Clear interrupt flag
 			AUXINTIF &= ~M_T4IF;
+#endif // TIMER_HAS_AUXINTIF
 			
 			// Start timer
 			T4T3M |= M_T4R;

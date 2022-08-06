@@ -29,6 +29,11 @@
  */
 #include "project-defs.h"
 #include "pca-hal.h"
+#include "gpio-hal.h"
+
+#ifndef HAL_PCA_SEGMENT
+	#define HAL_PCA_SEGMENT __idata
+#endif
 
 /**
  * @file pca-hal.c
@@ -36,7 +41,7 @@
  * PCA abstraction implementation.
  */
 
-static uint8_t __pca_pinConfigurations[][PCA_CHANNELS + 1] = {
+static const __code uint8_t __pca_pinConfigurations[][PCA_CHANNELS + 1] = {
 #if MCU_FAMILY == 8 && MCU_SERIES == 'G' && MCU_PINS > 8
 	// PCA pin configurations for STC8G *except* STC8G1K08A
 	{ 0x11, 0x10, 0x37, 0x12, }, 
@@ -103,28 +108,42 @@ typedef enum {
 
 typedef union {
 	struct {
-		uint8_t ccapl;
-		uint8_t ccaph;
+		uint16_t ccap;
 		uint8_t cnt;
 		uint8_t zero;
-	} fields;
-	uint32_t count;
-} PCA_CaptureCount;
+	} capture;
+	struct {
+		uint16_t value;
+		uint16_t period;
+	} timer;
+	uint32_t value;
+} PCA_ChannelData;
 
+typedef struct {
+	PCA_ChannelMode mode;
+	union {
+		struct {
+			PCA_CaptureMode mode:1;
+			uint8_t shiftBits:5;
+		} capture;
+		struct {
+			PCA_PWM_Bits bits;
+		} pwm;
+	} settings;
+} PCA_ChannelConfig;
+
+// Access to __pca_pinSwitch is not timing-critical,
+// so let's leave it in the default memory segment.
 static uint8_t __pca_pinSwitch;
-static PCA_CaptureCount __pca_captureStartCount[HAL_PCA_CHANNELS];
-static PCA_CaptureCount __pca_captureEndCount[HAL_PCA_CHANNELS];
-static uint16_t __pca_timerPeriod[HAL_PCA_CHANNELS];
-static uint16_t __pca_timerValue[HAL_PCA_CHANNELS];
-static uint8_t __pca_captureOverflowCounter[HAL_PCA_CHANNELS];
-static uint8_t __pca_captureShiftBits[HAL_PCA_CHANNELS];
-static PCA_CaptureMode __pca_captureMode[HAL_PCA_CHANNELS];
-static PCA_ChannelMode __pca_channelMode[HAL_PCA_CHANNELS];
+
+static HAL_PCA_SEGMENT uint8_t __pca_overflowCounter[HAL_PCA_CHANNELS];
+static HAL_PCA_SEGMENT PCA_ChannelData __pca_channelData[HAL_PCA_CHANNELS];
+static HAL_PCA_SEGMENT PCA_ChannelConfig __pca_channelConfig[HAL_PCA_CHANNELS];
 
 // On all STC8G, STC8H and the STC8A8K64D4, GPIO ports are configured
 // in high-impedance mode by default, so configuring the channel output
 // pin mode is *REQUIRED*.
-static void __pca_configureChannelOutput(PCA_Channel channel, GpioPortMode pinMode) {
+static void __pca_configureChannelOutput(PCA_Channel channel, GpioPinMode pinMode) {
 	uint8_t channelPin = __pca_pinConfigurations[__pca_pinSwitch][channel];
 	GpioPort port = (GpioPort) (channelPin >> 4);
 	GpioPin pin = (GpioPin) (channelPin & 0x0f);
@@ -142,16 +161,16 @@ inline uint8_t __pca_ccapMode(PCA_ChannelMode channelMode, PCA_EdgeTrigger inter
 	return channelMode
 		| (interruptTrigger << P_CAPN)
 		| (((interruptTrigger != PCA_EDGE_NONE)
-			? PCA_INTERRUPT_ENABLE 
-			: PCA_INTERRUPT_DISABLE) << P_EECF);
+			? ENABLE_INTERRUPT 
+			: DISABLE_INTERRUPT) << P_EECF);
 }
 
-void pcaInitialise(PCA_ClockSource clockSource, PCA_CounterMode counterMode, PCA_InterruptEnable overflowInterrupt, uint8_t pinSwitch) {
+void pcaInitialise(PCA_ClockSource clockSource, CounterControl counterMode, InterruptEnable overflowInterrupt, uint8_t pinSwitch) {
 	__pca_pinSwitch = pinSwitch;
 	P_SW1 = (P_SW1 & ~M_CCP_S) | ((pinSwitch << P_CCP_S) & M_CCP_S);
 	
 	for (uint8_t channel = 0; channel < PCA_CHANNELS; channel++) {
-		__pca_channelMode[channel] = PCA_UNUSED;
+		__pca_channelConfig[channel].mode = PCA_UNUSED;
 	}
 	
 	CMOD = (counterMode << P_CIDL) | (clockSource << P_CPS) | (overflowInterrupt << P_ECF);
@@ -160,16 +179,15 @@ void pcaInitialise(PCA_ClockSource clockSource, PCA_CounterMode counterMode, PCA
 	CR = 1;
 }
 
-void pcaStartCapture(PCA_Channel channel, GpioPortMode pinMode, PCA_EdgeTrigger trigger, PCA_CaptureMode captureMode, uint8_t shiftBits) {
+void pcaStartCapture(PCA_Channel channel, GpioPinMode pinMode, PCA_EdgeTrigger trigger, PCA_CaptureMode captureMode, uint8_t shiftBits) {
 	CR = 0;
 	__pca_configureChannelOutput(channel, pinMode);
 	
-	__pca_captureOverflowCounter[channel] = 0;
-	__pca_captureStartCount[channel].count = 0;
-	__pca_captureEndCount[channel].count = 0;
-	__pca_captureShiftBits[channel] = shiftBits;
-	__pca_captureMode[channel] = captureMode;
-	__pca_channelMode[channel] = PCA_CAPTURE;
+	__pca_overflowCounter[channel] = 0;
+	__pca_channelData[channel].value = 0;
+	__pca_channelConfig[channel].settings.capture.shiftBits = shiftBits;
+	__pca_channelConfig[channel].settings.capture.mode = captureMode;
+	__pca_channelConfig[channel].mode = PCA_CAPTURE;
 	
 	uint8_t ccapMode = __pca_ccapMode(PCA_CAPTURE, trigger);
 	
@@ -217,51 +235,7 @@ void pcaStartCapture(PCA_Channel channel, GpioPortMode pinMode, PCA_EdgeTrigger 
 	// Suppress warning "unreferenced function argument"
 	#pragma disable_warning 85
 #endif // MCU_FAMILY == 12
-static void __pcaConfigurePWM(uint8_t initialise, PCA_Channel channel, GpioPortMode pinMode, PCA_PWM_Bits pwmBits, PCA_EdgeTrigger interruptTrigger, uint16_t clocksHigh) {
-	__pca_channelMode[channel] = PCA_PWM;
-	
-#if MCU_FAMILY == 12
-	PCA_PWM_Bits bits = PCA_8BIT_PWM;
-	uint16_t maxValue = 256;
-#else
-	PCA_PWM_Bits bits = pwmBits;
-
-	if (initialise) {
-		__pca_configureChannelOutput(channel, pinMode);
-	} else {
-		switch (channel) {
-		case PCA_CHANNEL0:
-			bits = (PCA_PWM_Bits) ((PCA_PWM0 & M_EBS) >> P_EBS);
-			break;
-
-	#if HAL_PCA_CHANNELS > 1
-		case PCA_CHANNEL1:
-			bits = (PCA_PWM_Bits) ((PCA_PWM1 & M_EBS) >> P_EBS);
-			break;
-	#endif // HAL_PCA_CHANNELS > 1
-
-	#if HAL_PCA_CHANNELS > 2
-		case PCA_CHANNEL2:
-			bits = (PCA_PWM_Bits) ((PCA_PWM2 & M_EBS) >> P_EBS);
-			break;
-	#endif // HAL_PCA_CHANNELS > 2
-
-	#if HAL_PCA_CHANNELS > 3
-		case PCA_CHANNEL3:
-		#ifdef PCA_CHANNEL3_XSFR
-			ENABLE_EXTENDED_SFR();
-		#endif
-		
-			bits = (PCA_PWM_Bits) ((PCA_PWM3 & M_EBS) >> P_EBS);
-		
-		#ifdef PCA_CHANNEL3_XSFR
-			DISABLE_EXTENDED_SFR();
-		#endif
-			break;
-	#endif // HAL_PCA_CHANNELS > 3
-		}
-	}
-
+static void __pcaConfigurePWM(bool initialise, PCA_Channel channel, PCA_PWM_Bits bits, PCA_EdgeTrigger interruptTrigger, uint16_t clocksHigh) {
 	uint16_t maxValue = 0;
 	
 	switch (bits) {
@@ -285,7 +259,6 @@ static void __pcaConfigurePWM(uint8_t initialise, PCA_Channel channel, GpioPortM
 		break;
 	#endif // PCA_HAS_10BIT_PWM
 	}
-#endif // MCU_FAMILY == 12
 	
 	uint16_t reloadValue = maxValue - ((clocksHigh >= maxValue) ? (maxValue - 1) : clocksHigh);
 	uint8_t xccap = (reloadValue >> 8) & 3;
@@ -294,7 +267,7 @@ static void __pcaConfigurePWM(uint8_t initialise, PCA_Channel channel, GpioPortM
 	// (xccap << 4) defines bits 9 and 8 of the reload value (XCCAPnH)
 	// (xccap << 2) defines bits 9 and 8 of the comparison value (XCCAPnL)
 	uint8_t pcaPwm = (bits << P_EBS) | (xccap << P_XCCAPH) | (xccap << P_XCCAPL);
-	uint8_t ccapMode = __pca_ccapMode(PCA_PWM, interruptTrigger);
+	uint8_t ccapMode = initialise ? __pca_ccapMode(PCA_PWM, interruptTrigger) : 0;
 	
 	switch (channel) {
 	case PCA_CHANNEL0:
@@ -357,39 +330,54 @@ static void __pcaConfigurePWM(uint8_t initialise, PCA_Channel channel, GpioPortM
 	}
 }
 
-void pcaStartPwm(PCA_Channel channel, GpioPortMode pinMode, PCA_PWM_Bits bits, PCA_EdgeTrigger interruptTrigger, uint16_t clocksHigh) {
-	__pcaConfigurePWM(1, channel, pinMode, bits, interruptTrigger, clocksHigh);
+void pcaStartPwm(PCA_Channel channel, GpioPinMode pinMode, PCA_PWM_Bits bits, PCA_EdgeTrigger interruptTrigger, uint16_t clocksHigh) {
+	__pca_configureChannelOutput(channel, pinMode);
+	__pca_channelConfig[channel].mode = PCA_PWM;
+	__pca_channelConfig[channel].settings.pwm.bits = bits;
+	__pcaConfigurePWM(
+		true,
+		channel, 
+		bits, 
+		interruptTrigger, 
+		clocksHigh
+	);
 }
 
 void pcaSetPwmDutyCycle(PCA_Channel channel, uint16_t clocksHigh) {
-	__pcaConfigurePWM(0, channel, GPIO_BIDIRECTIONAL, 0, PCA_EDGE_NONE, clocksHigh);
+	__pcaConfigurePWM(
+		false,
+		channel, 
+		__pca_channelConfig[channel].settings.pwm.bits, 
+		PCA_EDGE_NONE, // No longer used once PWM channel is started.
+		clocksHigh
+	);
 }
 
-void pcaStartTimer(PCA_Channel channel, GpioPortMode pinMode, PCA_OutputEnable pulseOutput, uint16_t timerPeriod) {
+void pcaStartTimer(PCA_Channel channel, GpioPinMode pinMode, OutputEnable pulseOutput, uint16_t timerPeriod) {
 	__pca_configureChannelOutput(channel, pinMode);
 	
-	__pca_timerPeriod[channel] = timerPeriod;
-	__pca_timerValue[channel] = __pca_timerPeriod[channel];
-	uint8_t ccapMode = (pulseOutput == PCA_OUTPUT_ENABLE) ? PCA_PULSE : PCA_TIMER;
-	__pca_channelMode[channel] = ccapMode;
+	__pca_channelData[channel].timer.period = timerPeriod;
+	__pca_channelData[channel].timer.value = timerPeriod;
+	uint8_t ccapMode = (pulseOutput == ENABLE_OUTPUT) ? PCA_PULSE : PCA_TIMER;
+	__pca_channelConfig[channel].mode = ccapMode;
 	
 	switch (channel) {
 	case PCA_CHANNEL0:
 		CCAPM0 = ccapMode;
-		CCAP0 = __pca_timerValue[channel];
+		CCAP0 = timerPeriod;
 		break;
 		
 #if HAL_PCA_CHANNELS > 1
 	case PCA_CHANNEL1:
 		CCAPM1 = ccapMode;
-		CCAP1 = __pca_timerValue[channel];
+		CCAP1 = timerPeriod;
 		break;
 #endif // HAL_PCA_CHANNELS > 1
 		
 #if HAL_PCA_CHANNELS > 2
 	case PCA_CHANNEL2:
 		CCAPM2 = ccapMode;
-		CCAP2 = __pca_timerValue[channel];
+		CCAP2 = timerPeriod;
 		break;
 #endif // HAL_PCA_CHANNELS > 2
 		
@@ -400,7 +388,7 @@ void pcaStartTimer(PCA_Channel channel, GpioPortMode pinMode, PCA_OutputEnable p
 	#endif
 		
 		CCAPM3 = ccapMode;
-		CCAP3 = __pca_timerValue[channel];
+		CCAP3 = timerPeriod;
 		
 	#ifdef PCA_CHANNEL3_XSFR
 		DISABLE_EXTENDED_SFR();
@@ -411,26 +399,23 @@ void pcaStartTimer(PCA_Channel channel, GpioPortMode pinMode, PCA_OutputEnable p
 }
 
 INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1) CRITICAL {
-	uint8_t ccapl = 0;
-	uint8_t ccaph = 0;
+	uint16_t ccap = 0;
 	uint8_t channel = HAL_PCA_CHANNELS;
-	PCA_CaptureCount width;
-	uint16_t duration = 0;
 	
 	if (CF) {
 		CF = 0;
-		__pca_captureOverflowCounter[PCA_CHANNEL0]++;
+		__pca_overflowCounter[PCA_CHANNEL0]++;
 		
 #if HAL_PCA_CHANNELS > 1
-		__pca_captureOverflowCounter[PCA_CHANNEL1]++;
+		__pca_overflowCounter[PCA_CHANNEL1]++;
 #endif // HAL_PCA_CHANNELS > 1
 		
 #if HAL_PCA_CHANNELS > 2
-		__pca_captureOverflowCounter[PCA_CHANNEL2]++;
+		__pca_overflowCounter[PCA_CHANNEL2]++;
 #endif // HAL_PCA_CHANNELS > 2
 
 #if HAL_PCA_CHANNELS > 3
-		__pca_captureOverflowCounter[PCA_CHANNEL3]++;
+		__pca_overflowCounter[PCA_CHANNEL3]++;
 #endif // HAL_PCA_CHANNELS > 3
 	}
 	
@@ -438,21 +423,20 @@ INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1) CRITICAL {
 		CCF0 = 0;
 		channel = PCA_CHANNEL0;
 		
-		switch (__pca_channelMode[channel]) {
+		switch (__pca_channelConfig[channel].mode) {
 		case PCA_CAPTURE:
-			ccapl = CCAP0L;
-			ccaph = CCAP0H;
+			ccap = CCAP0;
 			
-			if (__pca_captureMode[channel] == PCA_ONE_SHOT) {
+			if (__pca_channelConfig[channel].settings.capture.mode == PCA_ONE_SHOT) {
 				CCAPM0 = 0;
-				__pca_channelMode[channel] = PCA_UNUSED;
+				__pca_channelConfig[channel].mode = PCA_UNUSED;
 			}
 			break;
 		
 		case PCA_TIMER:
 		case PCA_PULSE:
-			__pca_timerValue[channel] += __pca_timerPeriod[channel];
-			CCAP0 = __pca_timerValue[channel];
+			__pca_channelData[channel].timer.value += __pca_channelData[channel].timer.period;
+			CCAP0 = __pca_channelData[channel].timer.value;
 			break;
 		}
 	}
@@ -462,21 +446,20 @@ INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1) CRITICAL {
 		CCF1 = 0;
 		channel = PCA_CHANNEL1;
 		
-		switch (__pca_channelMode[channel]) {
+		switch (__pca_channelConfig[channel].mode) {
 		case PCA_CAPTURE:
-			ccapl = CCAP1L;
-			ccaph = CCAP1H;
+			ccap = CCAP1;
 			
-			if (__pca_captureMode[channel] == PCA_ONE_SHOT) {
+			if (__pca_channelConfig[channel].settings.capture.mode == PCA_ONE_SHOT) {
 				CCAPM1 = 0;
-				__pca_channelMode[channel] = PCA_UNUSED;
+				__pca_channelConfig[channel].mode = PCA_UNUSED;
 			}
 			break;
 		
 		case PCA_TIMER:
 		case PCA_PULSE:
-			__pca_timerValue[channel] += __pca_timerPeriod[channel];
-			CCAP1 = __pca_timerValue[channel];
+			__pca_channelData[channel].timer.value += __pca_channelData[channel].timer.period;
+			CCAP1 = __pca_channelData[channel].timer.value;
 			break;
 		}
 	}
@@ -487,21 +470,20 @@ INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1) CRITICAL {
 		CCF2 = 0;
 		channel = PCA_CHANNEL2;
 		
-		switch (__pca_channelMode[channel]) {
+		switch (__pca_channelConfig[channel].mode) {
 		case PCA_CAPTURE:
-			ccapl = CCAP2L;
-			ccaph = CCAP2H;
+			ccap = CCAP2;
 			
-			if (__pca_captureMode[channel] == PCA_ONE_SHOT) {
+			if (__pca_channelConfig[channel].settings.capture.mode == PCA_ONE_SHOT) {
 				CCAPM2 = 0;
-				__pca_channelMode[channel] = PCA_UNUSED;
+				__pca_channelConfig[channel].mode = PCA_UNUSED;
 			}
 			break;
 		
 		case PCA_TIMER:
 		case PCA_PULSE:
-			__pca_timerValue[channel] += __pca_timerPeriod[channel];
-			CCAP2 = __pca_timerValue[channel];
+			__pca_channelData[channel].timer.value += __pca_channelData[channel].timer.period;
+			CCAP2 = __pca_channelData[channel].timer.value;
 			break;
 		}
 	}
@@ -516,21 +498,20 @@ INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1) CRITICAL {
 		ENABLE_EXTENDED_SFR();
 	#endif
 		
-		switch (__pca_channelMode[channel]) {
+		switch (__pca_channelConfig[channel].mode) {
 		case PCA_CAPTURE:
-			ccapl = CCAP3L;
-			ccaph = CCAP3H;
+			ccap = CCAP3;
 			
-			if (__pca_captureMode[channel] == PCA_ONE_SHOT) {
+			if (__pca_channelConfig[channel].settings.capture.mode == PCA_ONE_SHOT) {
 				CCAPM3 = 0;
-				__pca_channelMode[channel] = PCA_UNUSED;
+				__pca_channelConfig[channel].mode = PCA_UNUSED;
 			}
 			break;
 		
 		case PCA_TIMER:
 		case PCA_PULSE:
-			__pca_timerValue[channel] += __pca_timerPeriod[channel];
-			CCAP3 = __pca_timerValue[channel];
+			__pca_channelData[channel].timer.value += __pca_channelData[channel].timer.period;
+			CCAP3 = __pca_channelData[channel].timer.value;
 			break;
 		}
 		
@@ -541,24 +522,28 @@ INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1) CRITICAL {
 #endif // HAL_PCA_CHANNELS > 3
 	
 	if (channel < HAL_PCA_CHANNELS) {
-		switch (__pca_channelMode[channel]) {
+		PCA_ChannelData width;
+		PCA_ChannelData newCount;
+		uint32_t startCount;
+		uint16_t duration;
+		
+		switch (__pca_channelConfig[channel].mode) {
 		case PCA_CAPTURE:
-			__pca_captureStartCount[channel].count = __pca_captureEndCount[channel].count;
-			__pca_captureEndCount[channel].fields.ccapl = ccapl;
-			__pca_captureEndCount[channel].fields.ccaph = ccaph;
-			__pca_captureEndCount[channel].fields.cnt = __pca_captureOverflowCounter[channel];
-			__pca_captureEndCount[channel].fields.zero = 0;
+			startCount = __pca_channelData[channel].value;
+			newCount.capture.ccap = ccap;
+			newCount.capture.cnt = __pca_overflowCounter[channel];
+			newCount.capture.zero = 0;
+			width.value = (newCount.value - __pca_channelData[channel].value) >> __pca_channelConfig[channel].settings.capture.shiftBits;
+			__pca_channelData[channel].value = newCount.value;
 			
-			width.count = (__pca_captureEndCount[channel].count - __pca_captureStartCount[channel].count) >> __pca_captureShiftBits[channel];
 			// 0xffff means "maximum value and above".
-			duration = width.fields.cnt ? 0xffff : ((uint16_t) width.count);
-			
+			duration = width.capture.cnt ? 0xffff : ((uint16_t) width.value);
 			pcaOnInterrupt(channel, duration);
 			break;
 		
 		case PCA_PWM:
 		case PCA_TIMER:
-			pcaOnInterrupt(channel, duration);
+			pcaOnInterrupt(channel, 0);
 			break;
 		}
 	}

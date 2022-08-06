@@ -39,13 +39,16 @@
 #include "delay.h"
 #include <stdio.h>
 
-static Uart __serialConsoleUart;
+#ifndef SERIAL_CONSOLE_SEGMENT
+	// Default to the memory model's segment.
+	#define SERIAL_CONSOLE_SEGMENT
+#endif
+
+static SERIAL_CONSOLE_SEGMENT Uart __serialConsoleUart;
 
 #ifdef TIMER_HAS_T1
 	#define CONSOLE_TIMER UART_USE_OWN_TIMER
 #else
-	// We're using an 8-pin MCU, so only 2 timers are available,
-	// T0 (for PCA) and T2 (for UART).
 	#define CONSOLE_TIMER UART_USE_TIMER2
 #endif // TIMER_HAS_T1
 
@@ -56,20 +59,11 @@ void serialConsoleInitialise(Uart uart, uint32_t baudRate, uint8_t pinConfigurat
 }
 
 int putchar(int c) {
-	while (!uartSendCharacter(__serialConsoleUart, c)) {
-		delay1ms(1);
-	}
+	uartSendCharacter(__serialConsoleUart, c, BLOCKING);
 	
 	return c;
 }
 
 int getchar() {
-	// Blocking character input.
-	uint8_t result;
-	
-	do {
-		result = uartGetCharacter(__serialConsoleUart);
-	} while (!result);
-	
-	return result;
+	return uartGetCharacter(__serialConsoleUart, BLOCKING);
 }

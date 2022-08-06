@@ -35,30 +35,62 @@
  * 
  * FIFO circular buffer definitions.
  * 
- * Dependencies: none.
+ * Supported MCU:
+ * 
+ *     STC12*
+ *     STC15*
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     none
  */
-
-#if !defined(FIFO_BUFFER_SIZE) || FIFO_BUFFER_SIZE < 1 || FIFO_BUFFER_SIZE > 255
-	#error "Must define FIFO_BUFFER_SIZE (range 1-255) before including fifo-buffer.h"
-#endif
 
 typedef struct {
 	uint8_t size;
 	uint8_t first;
 	uint8_t last;
 	uint8_t status;
-	// Must be last to allow reuse with different values for FIFO_BUFFER_SIZE
-	uint8_t data[FIFO_BUFFER_SIZE];
-} FifoBuffer;
+	uint8_t *data;
+} FifoState;
 
-void __fifoInitialise(FifoBuffer *buffer, uint8_t allocatedSize) REENTRANT;
+// Declares a FifoState variable and its buffer.
+#define FIFO_BUFFER(variableName, bufferSize, segment) \
+	static segment uint8_t variableName ## Data[bufferSize]; \
+	segment FifoState variableName = { \
+		.size = bufferSize, \
+		.first = bufferSize, \
+		.last = bufferSize, \
+		.status = 0, \
+		.data = variableName ## Data, \
+	};
 
-uint8_t fifoLength(FifoBuffer *buffer) REENTRANT;
+uint8_t __fifoLength(FifoState *fifo) REENTRANT;
 
-uint8_t fifoWrite(FifoBuffer *buffer, uint8_t data) REENTRANT;
+bool fifoWrite(FifoState *fifo, const uint8_t *data, uint8_t count) REENTRANT;
 
-uint8_t fifoRead(FifoBuffer *buffer) REENTRANT;
+bool fifoRead(FifoState *fifo, uint8_t *data, uint8_t count) REENTRANT;
 
-#define fifoInitialise(buffer) __fifoInitialise(buffer, FIFO_BUFFER_SIZE)
+INLINE void fifoClear(FifoState *fifo) {
+	fifo->first = fifo->size;
+	fifo->last = fifo->size;
+	fifo->status = 0;
+}
+
+INLINE bool fifoIsEmpty(FifoState *fifo) {
+	return __fifoLength(fifo) == 0;
+}
+
+INLINE bool fifoIsFull(FifoState *fifo) {
+	return __fifoLength(fifo) == fifo->size;
+}
+
+INLINE uint8_t fifoBytesUsed(FifoState *fifo) {
+	return __fifoLength(fifo);
+}
+
+INLINE uint8_t fifoBytesFree(FifoState *fifo) {
+	return fifo->size - __fifoLength(fifo);
+}
 
 #endif // _FIFO_BUFFER_H

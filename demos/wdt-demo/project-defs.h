@@ -30,13 +30,10 @@
 #ifndef _PROJECT_DEFS_H
 #define _PROJECT_DEFS_H
 
-#include <stdlib.h>
-#include <stdint.h>
-
-#ifdef __TESTING__
-	#include <uni-STC/testing.h>
-#else
+#ifdef __SDCC
 	#include <STC/8G1Kxx/TSSOP20.h>
-#endif // __TESTING__
+#else
+	#include <uni-STC/uni-STC.h>
+#endif // __SDCC
 
 #endif // _PROJECT_DEFS_H

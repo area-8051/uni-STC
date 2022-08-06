@@ -27,17 +27,43 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _PROJECT_DEFS_H
-#define _PROJECT_DEFS_H
+#ifndef _HAL_DEFS_H
+#define _HAL_DEFS_H
 
-#ifdef __SDCC
-	#include <STC/8A8KxxD4/LQFP48.h>
-#else
-	#include <uni-STC/uni-STC.h>
-#endif // __SDCC
+/**
+ * @file hal-defs.h
+ * 
+ * Definitions applicable to all HAL modules.
+ * 
+ * Supported MCU:
+ * 
+ *     STC12*
+ *     STC15*
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     none
+ */
 
-#define CONSOLE_UART   UART1
-#define CONSOLE_SPEED  57600
-#define CONSOLE_PIN_CONFIG 0
+typedef enum {
+	NON_BLOCKING = 0,
+	BLOCKING = 1,
+} BlockingOperation;
 
-#endif // _PROJECT_DEFS_H
+typedef enum {
+	DISABLE_INTERRUPT = 0,
+	ENABLE_INTERRUPT = 1,
+} InterruptEnable;
+
+typedef enum {
+	DISABLE_OUTPUT = 0,
+	ENABLE_OUTPUT = 1,
+} OutputEnable;
+
+typedef enum {
+	FREE_RUNNING = 0,
+	EXTERNALY_ENABLED = 1,
+} CounterControl;
+
+#endif // _HAL_DEFS_H

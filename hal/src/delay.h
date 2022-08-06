@@ -35,9 +35,15 @@
  * 
  * Calibrated delay loops: definitions.
  * 
- * Supported MCU families: STC12, STC15, STC8.
+ * Supported MCU:
  * 
- * Dependencies: none.
+ *     STC12*
+ *     STC15*
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     none
  * 
  * Achieving microsecond delays on an MCS-51 is only possible with code 
  * specifically hand-crafted for a given MCU at a given frequency.

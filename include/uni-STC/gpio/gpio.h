@@ -140,16 +140,16 @@
 #endif // GPIO_HAS_INT_WK
 
 typedef enum {
-	GPIO_BIDIRECTIONAL = 0,
-	GPIO_PUSH_PULL = 1,
-	GPIO_HIGH_IMPEDANCE = 2,
-	GPIO_OPEN_DRAIN = 3,
-} GpioPortMode;
+	GPIO_BIDIRECTIONAL_MODE = 0,
+	GPIO_PUSH_PULL_MODE = 1,
+	GPIO_HIGH_IMPEDANCE_MODE = 2,
+	GPIO_OPEN_DRAIN_MODE = 3,
+} GpioPinMode;
 
 #ifdef GPIO_HAS_SR_DR_IE
 	typedef enum {
-		GPIO_FAST_TRANSITIONS = 0,
-		GPIO_SLOW_TRANSITIONS = 1,
+		GPIO_HIGH_SLEW_RATE = 0,
+		GPIO_LOW_SLEW_RATE = 1,
 	} GpioSlewRate;
 
 	typedef enum {
@@ -164,7 +164,7 @@ typedef enum {
 		GPIO_RISING_EDGE = 1,
 		GPIO_LOW_LEVEL = 2,
 		GPIO_HIGH_LEVEL = 3,
-	} GpioInterruptMode;
+	} GpioInterruptTrigger;
 #endif // GPIO_HAS_INT_WK
 
 typedef enum {

@@ -35,16 +35,25 @@
  * 
  * SPI abstraction definitions.
  * 
- * Supported MCU families: STC12, STC15, STC8A, STC8G, STC8H.
+ * Supported MCU:
  * 
- * Dependencies: gpio-hal.
+ *     STC12*
+ *     STC15*
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     gpio-hal
+ * 
+ * Optional macros:
+ * 
+ *     SPI_SEGMENT (default: __idata) defines where the HAL's state
+ *     information will be stored. Impacts ISR execution time.
  * 
  * **IMPORTANT:** In order to satisfy SDCC's requirements for ISR 
  * handling, this header file **MUST** be included in the C source 
  * file where main() is defined.
  */
-
-#include "gpio-hal.h"
 
 /*
  * SPI pin configurations for STC8H
@@ -138,9 +147,9 @@ typedef enum {
 } SpiSpeed;
 
 SpiSpeed spiSelectSpeed(uint32_t maxDeviceRate);
-void spiConfigure(SpiMode spiMode, SpiBitOrder bitOrder, SpiPolarity polarity, SpiSpeed speed, uint8_t pinSwitch, GpioPortMode outputPinMode);
-void spiSend(uint8_t *buffer, size_t bufferSize, uint8_t *readyFlag);
-void spiReceive(uint8_t *buffer, size_t bufferSize, uint8_t *readyFlag);
+void spiConfigure(SpiMode spiMode, SpiBitOrder bitOrder, SpiPolarity polarity, SpiSpeed speed, uint8_t pinSwitch, GpioPinMode outputPinMode);
+void spiSend(uint8_t *buffer, size_t bufferSize, bool *readyFlag);
+void spiReceive(uint8_t *buffer, size_t bufferSize, bool *readyFlag);
 
 INTERRUPT_USING(__spi_isr, SPI_INTERRUPT, 1);
 

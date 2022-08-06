@@ -35,16 +35,25 @@
  * 
  * I2C abstraction definitions.
  * 
- * Supported MCU families: STC8.
+ * Supported MCU:
  * 
- * Dependencies: none.
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     gpio-hal
+ * 
+ * Optional macros:
+ * 
+ *     I2C_SEGMENT (default: __idata) defines where the HAL's state
+ *     information will be stored. Limited impact on ISR execution
+ *     time. Insignificant impact on RAM footprint, unless moving
+ *     a single byte here and there would help.
  * 
  * **IMPORTANT:** In order to satisfy SDCC's requirements for ISR 
  * handling, this header file **MUST** be included in the C source 
  * file where main() is defined.
  */
-
-#include "gpio-hal.h"
 
 /*
  * I2C pin configurations (STC8 only)

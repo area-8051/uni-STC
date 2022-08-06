@@ -35,9 +35,23 @@
  * 
  * Serial console support.
  * 
- * Supported MCU families: STC12, STC15, STC8.
+ * Supported MCU:
  * 
- * Dependencies: uart-hal.
+ *     STC12*
+ *     STC15*
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     uart-hal
+ *     timer-hal
+ * 
+ * Optional macros:
+ * 
+ *     SERIAL_CONSOLE_SEGMENT (default: the memory model's default 
+ *     segment) defines where the HAL's state information will be
+ *     stored. Impact is insignificant unless moving a single byte
+ *     here and there would help.
  * 
  * In order to redirect all stdio.h functions to the chosen serial port:
  * 

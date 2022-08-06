@@ -30,11 +30,11 @@
 #ifndef _PROJECT_DEFS_H
 #define _PROJECT_DEFS_H
 
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
-#ifdef __TESTING__
-	#include <uni-STC/testing.h>
-#else
+#ifdef __SDCC
 	#ifdef BUILD_FOR_STC8G1K08A_DIP8
 		#include <STC/8G1KxxA/DIP8.h>
 		#define SMALL_FLASH
@@ -93,7 +93,9 @@
 	#ifdef BUILD_FOR_STC12C5A56S2_PDIP40
 		#include <STC/12C5AxxS2/PDIP40.h>
 	#endif
-#endif // __TESTING__
+#else
+	#include <uni-STC/uni-STC.h>
+#endif // __SDCC
 
 // INSIDE THE MAIN LOOP
 

@@ -38,7 +38,7 @@
 #include "power-hal.h"
 
 // All STC MCU have P5.4
-static GpioConfig ledPin = GPIO_PIN_CONFIG(GPIO_PORT5, GPIO_PIN4, GPIO_BIDIRECTIONAL);
+static GpioConfig ledPin = GPIO_PIN_CONFIG(GPIO_PORT5, GPIO_PIN4, GPIO_BIDIRECTIONAL_MODE);
 
 void main() {
 	gpioConfigure(&ledPin);

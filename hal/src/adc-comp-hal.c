@@ -50,7 +50,7 @@ void adcPowerOff() {
 	ADC_CONTR &= ~M_ADC_POWER;
 }
 
-void adcInitialise(ADC_Alignment resultAlignment, ADC_InterruptEnable useInterrupts) {
+void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts) {
 	#if MCU_FAMILY == 12
 		P_SW1 = resultAlignment ? (P_SW1 | M_RESFMT) : (P_SW1 & ~M_RESFMT);
 	#elif MCU_FAMILY == 15
@@ -102,14 +102,14 @@ void adcInitialise(ADC_Alignment resultAlignment, ADC_InterruptEnable useInterru
 	
 	ADC_CONTR &= ~M_ADC_FLAG;
 	
-	if (useInterrupts == ADC_INTERRUPT_ENABLE) {
+	if (useInterrupts == ENABLE_INTERRUPT) {
 		IE1 |= M_EADC;
 	}
 	
 	adcPowerOn();
 }
 
-static const uint8_t __adcPins[] = {
+static const __code uint8_t __adcPins[] = {
 	// 0xff means "do NOT configure GPIO pin".
 	// I didn't use a macro to keep arrays aligned, and because it's only used in adcConfigureChannel().
 	#if MCU_FAMILY == 8 && MCU_SERIES == 'H'
@@ -144,9 +144,9 @@ void adcConfigureChannel(ADC_Channel channel) {
 		// Set GPIO pin to high-impedance mode
 		GpioPort port = (GpioPort) (channelPin >> 4);
 		GpioPin pin = (GpioPin) (channelPin & 0x0f);
-		GpioConfig pinConfig = GPIO_PIN_CONFIG(port, pin, GPIO_HIGH_IMPEDANCE);
+		GpioConfig pinConfig = GPIO_PIN_CONFIG(port, pin, GPIO_HIGH_IMPEDANCE_MODE);
 #ifdef GPIO_HAS_SR_DR_IE
-		pinConfig.digitalInput = GPIO_DISABLED;
+		pinConfig.digitalInput = DISABLE_GPIO_DIGITAL_INPUT;
 #endif // GPIO_HAS_SR_DR_IE
 		gpioConfigure(&pinConfig);
 		

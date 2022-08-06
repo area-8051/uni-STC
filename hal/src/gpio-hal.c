@@ -41,11 +41,11 @@ static uint8_t __gpio_setBits(uint8_t portValue, uint8_t cfgValue, GpioConfig *g
 }
 
 static uint8_t __isOutput(GpioConfig *gpioConfig) {
-	return gpioConfig->portMode == GPIO_BIDIRECTIONAL || gpioConfig->portMode == GPIO_PUSH_PULL || gpioConfig->portMode == GPIO_OPEN_DRAIN;
+	return gpioConfig->pinMode == GPIO_BIDIRECTIONAL_MODE || gpioConfig->pinMode == GPIO_PUSH_PULL_MODE || gpioConfig->pinMode == GPIO_OPEN_DRAIN_MODE;
 }
 
 static uint8_t __isInput(GpioConfig *gpioConfig) {
-	return gpioConfig->portMode == GPIO_BIDIRECTIONAL || gpioConfig->portMode == GPIO_HIGH_IMPEDANCE;
+	return gpioConfig->pinMode == GPIO_BIDIRECTIONAL_MODE || gpioConfig->pinMode == GPIO_HIGH_IMPEDANCE_MODE;
 }
 
 void gpioConfigure(GpioConfig *gpioConfig) {
@@ -66,8 +66,8 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 
 #ifdef GPIO_HAS_P0
 	case GPIO_PORT0:
-		P0M1 = __gpio_setBits(P0M1, gpioConfig->portMode & 2, gpioConfig);
-		P0M0 = __gpio_setBits(P0M0, gpioConfig->portMode & 1, gpioConfig);
+		P0M1 = __gpio_setBits(P0M1, gpioConfig->pinMode & 2, gpioConfig);
+		P0M0 = __gpio_setBits(P0M0, gpioConfig->pinMode & 1, gpioConfig);
 		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
@@ -87,11 +87,11 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 #endif // GPIO_HAS_SR_DR_IE
 		
 #ifdef GPIO_HAS_INT_WK
-		P0IM1 = __gpio_setBits(P0IM1, gpioConfig->interruptMode & 2, gpioConfig);
-		P0IM0 = __gpio_setBits(P0IM0, gpioConfig->interruptMode & 1, gpioConfig);
+		P0IM1 = __gpio_setBits(P0IM1, gpioConfig->interruptTrigger & 2, gpioConfig);
+		P0IM0 = __gpio_setBits(P0IM0, gpioConfig->interruptTrigger & 1, gpioConfig);
 		P0INTF &= gpioConfig->__clearMask;
-		P0INTE = __gpio_setBits(P0INTE, gpioConfig->interrupts, gpioConfig);
-		P0WKUE = __gpio_setBits(P0WKUE, gpioConfig->wakeUp, gpioConfig);
+		P0INTE = __gpio_setBits(P0INTE, gpioConfig->pinInterrupt, gpioConfig);
+		P0WKUE = __gpio_setBits(P0WKUE, gpioConfig->wakeUpInterrupt, gpioConfig);
 #endif // GPIO_HAS_INT_WK
 	
 		DISABLE_EXTENDED_SFR();
@@ -102,8 +102,8 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 
 #ifdef GPIO_HAS_P1
 	case GPIO_PORT1:
-		P1M1 = __gpio_setBits(P1M1, gpioConfig->portMode & 2, gpioConfig);
-		P1M0 = __gpio_setBits(P1M0, gpioConfig->portMode & 1, gpioConfig);
+		P1M1 = __gpio_setBits(P1M1, gpioConfig->pinMode & 2, gpioConfig);
+		P1M0 = __gpio_setBits(P1M0, gpioConfig->pinMode & 1, gpioConfig);
 		ENABLE_EXTENDED_SFR();
 		
 #ifdef GPIO_HAS_PU_NCS
@@ -123,11 +123,11 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 #endif // GPIO_HAS_SR_DR_IE
 		
 #ifdef GPIO_HAS_INT_WK
-		P1IM1 = __gpio_setBits(P1IM1, gpioConfig->interruptMode & 2, gpioConfig);
-		P1IM0 = __gpio_setBits(P1IM0, gpioConfig->interruptMode & 1, gpioConfig);
+		P1IM1 = __gpio_setBits(P1IM1, gpioConfig->interruptTrigger & 2, gpioConfig);
+		P1IM0 = __gpio_setBits(P1IM0, gpioConfig->interruptTrigger & 1, gpioConfig);
 		P1INTF &= gpioConfig->__clearMask;
-		P1INTE = __gpio_setBits(P1INTE, gpioConfig->interrupts, gpioConfig);
-		P1WKUE = __gpio_setBits(P1WKUE, gpioConfig->wakeUp, gpioConfig);
+		P1INTE = __gpio_setBits(P1INTE, gpioConfig->pinInterrupt, gpioConfig);
+		P1WKUE = __gpio_setBits(P1WKUE, gpioConfig->wakeUpInterrupt, gpioConfig);
 #endif // GPIO_HAS_INT_WK
 		
 		DISABLE_EXTENDED_SFR();
@@ -138,8 +138,8 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 
 #ifdef GPIO_HAS_P2
 	case GPIO_PORT2:
-		P2M1 = __gpio_setBits(P2M1, gpioConfig->portMode & 2, gpioConfig);
-		P2M0 = __gpio_setBits(P2M0, gpioConfig->portMode & 1, gpioConfig);
+		P2M1 = __gpio_setBits(P2M1, gpioConfig->pinMode & 2, gpioConfig);
+		P2M0 = __gpio_setBits(P2M0, gpioConfig->pinMode & 1, gpioConfig);
 		ENABLE_EXTENDED_SFR();
 		
 #ifdef GPIO_HAS_PU_NCS
@@ -159,11 +159,11 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 #endif // GPIO_HAS_SR_DR_IE
 		
 #ifdef GPIO_HAS_INT_WK
-		P2IM1 = __gpio_setBits(P2IM1, gpioConfig->interruptMode & 2, gpioConfig);
-		P2IM0 = __gpio_setBits(P2IM0, gpioConfig->interruptMode & 1, gpioConfig);
+		P2IM1 = __gpio_setBits(P2IM1, gpioConfig->interruptTrigger & 2, gpioConfig);
+		P2IM0 = __gpio_setBits(P2IM0, gpioConfig->interruptTrigger & 1, gpioConfig);
 		P2INTF &= gpioConfig->__clearMask;
-		P2INTE = __gpio_setBits(P2INTE, gpioConfig->interrupts, gpioConfig);
-		P2WKUE = __gpio_setBits(P2WKUE, gpioConfig->wakeUp, gpioConfig);
+		P2INTE = __gpio_setBits(P2INTE, gpioConfig->pinInterrupt, gpioConfig);
+		P2WKUE = __gpio_setBits(P2WKUE, gpioConfig->wakeUpInterrupt, gpioConfig);
 #endif // GPIO_HAS_INT_WK
 		
 		DISABLE_EXTENDED_SFR();
@@ -173,8 +173,8 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 // -- P3 ----------------------------------
 
 	case GPIO_PORT3:
-		P3M1 = __gpio_setBits(P3M1, gpioConfig->portMode & 2, gpioConfig);
-		P3M0 = __gpio_setBits(P3M0, gpioConfig->portMode & 1, gpioConfig);
+		P3M1 = __gpio_setBits(P3M1, gpioConfig->pinMode & 2, gpioConfig);
+		P3M0 = __gpio_setBits(P3M0, gpioConfig->pinMode & 1, gpioConfig);
 		ENABLE_EXTENDED_SFR();
 		
 #ifdef GPIO_HAS_PU_NCS
@@ -194,11 +194,11 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 #endif // GPIO_HAS_SR_DR_IE
 		
 #ifdef GPIO_HAS_INT_WK
-		P3IM1 = __gpio_setBits(P3IM1, gpioConfig->interruptMode & 2, gpioConfig);
-		P3IM0 = __gpio_setBits(P3IM0, gpioConfig->interruptMode & 1, gpioConfig);
+		P3IM1 = __gpio_setBits(P3IM1, gpioConfig->interruptTrigger & 2, gpioConfig);
+		P3IM0 = __gpio_setBits(P3IM0, gpioConfig->interruptTrigger & 1, gpioConfig);
 		P3INTF &= gpioConfig->__clearMask;
-		P3INTE = __gpio_setBits(P3INTE, gpioConfig->interrupts, gpioConfig);
-		P3WKUE = __gpio_setBits(P3WKUE, gpioConfig->wakeUp, gpioConfig);
+		P3INTE = __gpio_setBits(P3INTE, gpioConfig->pinInterrupt, gpioConfig);
+		P3WKUE = __gpio_setBits(P3WKUE, gpioConfig->wakeUpInterrupt, gpioConfig);
 #endif // GPIO_HAS_INT_WK
 		
 		DISABLE_EXTENDED_SFR();
@@ -208,8 +208,8 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 
 #ifdef GPIO_HAS_P4
 	case GPIO_PORT4:
-		P4M1 = __gpio_setBits(P4M1, gpioConfig->portMode & 2, gpioConfig);
-		P4M0 = __gpio_setBits(P4M0, gpioConfig->portMode & 1, gpioConfig);
+		P4M1 = __gpio_setBits(P4M1, gpioConfig->pinMode & 2, gpioConfig);
+		P4M0 = __gpio_setBits(P4M0, gpioConfig->pinMode & 1, gpioConfig);
 		ENABLE_EXTENDED_SFR();
 		
 #ifdef GPIO_HAS_PU_NCS
@@ -229,11 +229,11 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 #endif // GPIO_HAS_SR_DR_IE
 		
 #ifdef GPIO_HAS_INT_WK
-		P4IM1 = __gpio_setBits(P4IM1, gpioConfig->interruptMode & 2, gpioConfig);
-		P4IM0 = __gpio_setBits(P4IM0, gpioConfig->interruptMode & 1, gpioConfig);
+		P4IM1 = __gpio_setBits(P4IM1, gpioConfig->interruptTrigger & 2, gpioConfig);
+		P4IM0 = __gpio_setBits(P4IM0, gpioConfig->interruptTrigger & 1, gpioConfig);
 		P4INTF &= gpioConfig->__clearMask;
-		P4INTE = __gpio_setBits(P4INTE, gpioConfig->interrupts, gpioConfig);
-		P4WKUE = __gpio_setBits(P4WKUE, gpioConfig->wakeUp, gpioConfig);
+		P4INTE = __gpio_setBits(P4INTE, gpioConfig->pinInterrupt, gpioConfig);
+		P4WKUE = __gpio_setBits(P4WKUE, gpioConfig->wakeUpInterrupt, gpioConfig);
 #endif // GPIO_HAS_INT_WK
 		
 		DISABLE_EXTENDED_SFR();
@@ -243,8 +243,8 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 // -- P5 ----------------------------------
 
 	case GPIO_PORT5:
-		P5M1 = __gpio_setBits(P5M1, gpioConfig->portMode & 2, gpioConfig);
-		P5M0 = __gpio_setBits(P5M0, gpioConfig->portMode & 1, gpioConfig);
+		P5M1 = __gpio_setBits(P5M1, gpioConfig->pinMode & 2, gpioConfig);
+		P5M0 = __gpio_setBits(P5M0, gpioConfig->pinMode & 1, gpioConfig);
 		ENABLE_EXTENDED_SFR();
 		
 #ifdef GPIO_HAS_PU_NCS
@@ -264,11 +264,11 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 #endif // GPIO_HAS_SR_DR_IE
 		
 #ifdef GPIO_HAS_INT_WK
-		P5IM1 = __gpio_setBits(P5IM1, gpioConfig->interruptMode & 2, gpioConfig);
-		P5IM0 = __gpio_setBits(P5IM0, gpioConfig->interruptMode & 1, gpioConfig);
+		P5IM1 = __gpio_setBits(P5IM1, gpioConfig->interruptTrigger & 2, gpioConfig);
+		P5IM0 = __gpio_setBits(P5IM0, gpioConfig->interruptTrigger & 1, gpioConfig);
 		P5INTF &= gpioConfig->__clearMask;
-		P5INTE = __gpio_setBits(P5INTE, gpioConfig->interrupts, gpioConfig);
-		P5WKUE = __gpio_setBits(P5WKUE, gpioConfig->wakeUp, gpioConfig);
+		P5INTE = __gpio_setBits(P5INTE, gpioConfig->pinInterrupt, gpioConfig);
+		P5WKUE = __gpio_setBits(P5WKUE, gpioConfig->wakeUpInterrupt, gpioConfig);
 #endif // GPIO_HAS_INT_WK
 		
 		DISABLE_EXTENDED_SFR();
@@ -278,8 +278,8 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 
 #ifdef GPIO_HAS_P6
 	case GPIO_PORT6:
-		P6M1 = __gpio_setBits(P6M1, gpioConfig->portMode & 2, gpioConfig);
-		P6M0 = __gpio_setBits(P6M0, gpioConfig->portMode & 1, gpioConfig);
+		P6M1 = __gpio_setBits(P6M1, gpioConfig->pinMode & 2, gpioConfig);
+		P6M0 = __gpio_setBits(P6M0, gpioConfig->pinMode & 1, gpioConfig);
 		ENABLE_EXTENDED_SFR();
 		
 #ifdef GPIO_HAS_PU_NCS
@@ -299,11 +299,11 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 #endif // GPIO_HAS_SR_DR_IE
 		
 #ifdef GPIO_HAS_INT_WK
-		P6IM1 = __gpio_setBits(P6IM1, gpioConfig->interruptMode & 2, gpioConfig);
-		P6IM0 = __gpio_setBits(P6IM0, gpioConfig->interruptMode & 1, gpioConfig);
+		P6IM1 = __gpio_setBits(P6IM1, gpioConfig->interruptTrigger & 2, gpioConfig);
+		P6IM0 = __gpio_setBits(P6IM0, gpioConfig->interruptTrigger & 1, gpioConfig);
 		P6INTF &= gpioConfig->__clearMask;
-		P6INTE = __gpio_setBits(P6INTE, gpioConfig->interrupts, gpioConfig);
-		P6WKUE = __gpio_setBits(P6WKUE, gpioConfig->wakeUp, gpioConfig);
+		P6INTE = __gpio_setBits(P6INTE, gpioConfig->pinInterrupt, gpioConfig);
+		P6WKUE = __gpio_setBits(P6WKUE, gpioConfig->wakeUpInterrupt, gpioConfig);
 #endif // GPIO_HAS_INT_WK
 		
 		DISABLE_EXTENDED_SFR();
@@ -314,8 +314,8 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 
 #ifdef GPIO_HAS_P7
 	case GPIO_PORT7:
-		P7M1 = __gpio_setBits(P7M1, gpioConfig->portMode & 2, gpioConfig);
-		P7M0 = __gpio_setBits(P7M0, gpioConfig->portMode & 1, gpioConfig);
+		P7M1 = __gpio_setBits(P7M1, gpioConfig->pinMode & 2, gpioConfig);
+		P7M0 = __gpio_setBits(P7M0, gpioConfig->pinMode & 1, gpioConfig);
 		ENABLE_EXTENDED_SFR();
 		
 #ifdef GPIO_HAS_PU_NCS
@@ -335,11 +335,11 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 #endif // GPIO_HAS_SR_DR_IE
 		
 #ifdef GPIO_HAS_INT_WK
-		P7IM1 = __gpio_setBits(P7IM1, gpioConfig->interruptMode & 2, gpioConfig);
-		P7IM0 = __gpio_setBits(P7IM0, gpioConfig->interruptMode & 1, gpioConfig);
+		P7IM1 = __gpio_setBits(P7IM1, gpioConfig->interruptTrigger & 2, gpioConfig);
+		P7IM0 = __gpio_setBits(P7IM0, gpioConfig->interruptTrigger & 1, gpioConfig);
 		P7INTF &= gpioConfig->__clearMask;
-		P7INTE = __gpio_setBits(P7INTE, gpioConfig->interrupts, gpioConfig);
-		P7WKUE = __gpio_setBits(P7WKUE, gpioConfig->wakeUp, gpioConfig);
+		P7INTE = __gpio_setBits(P7INTE, gpioConfig->pinInterrupt, gpioConfig);
+		P7WKUE = __gpio_setBits(P7WKUE, gpioConfig->wakeUpInterrupt, gpioConfig);
 #endif // GPIO_HAS_INT_WK
 		
 		DISABLE_EXTENDED_SFR();

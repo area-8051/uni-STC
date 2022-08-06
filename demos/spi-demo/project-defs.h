@@ -30,14 +30,11 @@
 #ifndef _PROJECT_DEFS_H
 #define _PROJECT_DEFS_H
 
-#include <stdlib.h>
-#include <stdint.h>
-
-#ifdef __TESTING__
-	#include <uni-STC/testing.h>
-#else
+#ifdef __SDCC
 	#include <STC/8A8KxxD4/LQFP48.h>
-#endif // __TESTING__
+#else
+	#include <uni-STC/uni-STC.h>
+#endif // __SDCC
 
 #define CONSOLE_UART   UART1
 #define CONSOLE_SPEED  57600

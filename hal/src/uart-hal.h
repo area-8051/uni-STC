@@ -35,9 +35,40 @@
  * 
  * UART abstraction layer definitions.
  * 
- * Supported MCU families: STC12, STC15, STC8.
+ * Supported MCU:
  * 
- * Dependencies: timer-hal, fifo-buffer.
+ *     STC12*
+ *     STC15*
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     timer-hal
+ *     fifo-buffer
+ * 
+ * Optional global macros:
+ * 
+ *     UART_DEFAULT_SEGMENT (default: __pdata) defines where the HAL's 
+ *     state information will be stored, unless overridden per-UART.
+ *     Impacts ISR execution time.
+ * 
+ *     HAL_UARTS (default: NB_UARTS) defines how many UART will be 
+ *     supported by the HAL. Useful to reduce both flash and RAM 
+ *     footprint.
+ * 
+ *     UART_DEFAULT_BUFFER_SIZE (default: 16) defines the default size
+ *     for UART RX and TX buffers. Impacts RAM footprint.
+ * 
+ * Optional per-UART macros, with <n> in [1, HAL_UARTS]:
+ * 
+ *     UART<n>_TX_BUFFER_SIZE (default: UART_DEFAULT_BUFFER_SIZE)
+ *     defines the size of UART<n>'s transmit buffer.
+ * 
+ *     UART<n>_RX_BUFFER_SIZE (default: UART_DEFAULT_BUFFER_SIZE)
+ *     defines the size of UART<n>'s receive buffer.
+ * 
+ *     UART<n>_SEGMENT (default: UART_DEFAULT_SEGMENT) defines where
+ *     the HAL's state information for UART<n> will be stored.
  * 
  * **IMPORTANT:** In order to satisfy SDCC's requirements for ISR 
  * handling, this header file **MUST** be included in the C source 
@@ -45,7 +76,7 @@
  */
 
 /*
- * By default, all available UARTs are exposed through the HAL
+ * By default, all available UARTs are exposed through the HAL.
  * However, should you need to reduce your application's RAM or
  * flash usage, you can define the HAL_UARTS macro to expose less
  * UARTs, e.g. setting HAL_UARTS to 2 on an MCU with 4 UARTs would
@@ -59,6 +90,7 @@
 	#define HAL_UARTS NB_UARTS
 #endif
 
+#include "hal-defs.h"
 #include "timer-hal.h"
 
 typedef enum {
@@ -137,30 +169,30 @@ typedef enum {
  *   1   | P5.2 | P5.3
  * 
  */
+#include "fifo-buffer.h"
 
-uint8_t uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudRateTimer, UartMode mode, uint8_t pinSwitch);
+FifoState *uartReceiveBuffer(Uart uart) REENTRANT;
+FifoState *uartTransmitBuffer(Uart uart) REENTRANT;
 
-uint8_t uartGetCharacter(Uart uart);
-uint8_t uartReceiveBufferEmpty(Uart uart);
-uint8_t uartReceiveBufferFull(Uart uart);
-uint8_t uartReceiveBufferBytesUsed(Uart uart);
-uint8_t uartReceiveBufferBytesFree(Uart uart);
+TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudRateTimer, UartMode mode, uint8_t pinSwitch);
 
-uint8_t uartSendCharacter(Uart uart, uint8_t c);
-uint8_t uartTransmitBufferEmpty(Uart uart);
-uint8_t uartTransmitBufferFull(Uart uart);
-uint8_t uartTransmitBufferBytesUsed(Uart uart);
-uint8_t uartTransmitBufferBytesFree(Uart uart);
+uint8_t uartGetCharacter(Uart uart, BlockingOperation blocking);
+
+bool uartGetBlock(Uart uart, uint8_t *data, uint8_t size, BlockingOperation blocking);
+
+bool uartSendCharacter(Uart uart, uint8_t c, BlockingOperation blocking);
+
+bool uartSendBlock(Uart uart, uint8_t *data, uint8_t size, BlockingOperation blocking);
 
 INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1);
 
 #if HAL_UARTS >= 2
-INTERRUPT_USING(__uart2_isr, UART2_INTERRUPT, 1);
+	INTERRUPT_USING(__uart2_isr, UART2_INTERRUPT, 1);
 #endif // HAL_UARTS >= 2
 
 #if HAL_UARTS >= 3
-INTERRUPT_USING(__uart3_isr, UART3_INTERRUPT, 1);
-INTERRUPT_USING(__uart4_isr, UART4_INTERRUPT, 1);
+	INTERRUPT_USING(__uart3_isr, UART3_INTERRUPT, 1);
+	INTERRUPT_USING(__uart4_isr, UART4_INTERRUPT, 1);
 #endif // HAL_UARTS >= 3
 
 #endif // _UART_HAL_H

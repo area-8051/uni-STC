@@ -30,13 +30,13 @@
 #include "project-defs.h"
 #include "uart-hal.h"
 
-#ifndef UART_BUFFER_SIZE
-	#define UART_BUFFER_SIZE 32
+#ifndef UART_DEFAULT_BUFFER_SIZE
+	#define UART_DEFAULT_BUFFER_SIZE 16
 #endif
 
-#define FIFO_BUFFER_SIZE UART_BUFFER_SIZE
-#include "fifo-buffer.h"
-#include <stdlib.h>
+#ifndef UART_DEFAULT_SEGMENT
+	#define UART_DEFAULT_SEGMENT __pdata
+#endif
 
 /**
  * @file uart-hal.c
@@ -49,47 +49,91 @@
 #define STATUS_CLEAR   0
 #define STATUS_SENDING 1
 
-FifoBuffer UART1_inputBuffer;
-FifoBuffer UART1_outputBuffer;
-UartMode UART1_mode;
+#ifndef UART1_TX_BUFFER_SIZE
+	#define UART1_TX_BUFFER_SIZE UART_DEFAULT_BUFFER_SIZE
+#endif
+
+#ifndef UART1_RX_BUFFER_SIZE
+	#define UART1_RX_BUFFER_SIZE UART_DEFAULT_BUFFER_SIZE
+#endif
+
+#ifndef UART1_SEGMENT
+	#define UART1_SEGMENT UART_DEFAULT_SEGMENT
+#endif
+
+FIFO_BUFFER(UART1_receiveBuffer, UART1_RX_BUFFER_SIZE, UART1_SEGMENT)
+FIFO_BUFFER(UART1_transmitBuffer, UART1_TX_BUFFER_SIZE, UART1_SEGMENT)
 
 #if HAL_UARTS >= 2
-	FifoBuffer UART2_inputBuffer;
-	FifoBuffer UART2_outputBuffer;
-	UartMode UART2_mode;
+	#ifndef UART2_TX_BUFFER_SIZE
+		#define UART2_TX_BUFFER_SIZE UART_DEFAULT_BUFFER_SIZE
+	#endif
+
+	#ifndef UART2_RX_BUFFER_SIZE
+		#define UART2_RX_BUFFER_SIZE UART_DEFAULT_BUFFER_SIZE
+	#endif
+
+	#ifndef UART2_SEGMENT
+		#define UART2_SEGMENT UART_DEFAULT_SEGMENT
+	#endif
+
+	FIFO_BUFFER(UART2_receiveBuffer, UART2_RX_BUFFER_SIZE, UART2_SEGMENT)
+	FIFO_BUFFER(UART2_transmitBuffer, UART2_TX_BUFFER_SIZE, UART2_SEGMENT)
 #endif // HAL_UARTS >= 2
 
 #if HAL_UARTS >= 3
-	FifoBuffer UART3_inputBuffer;
-	FifoBuffer UART3_outputBuffer;
-	UartMode UART3_mode;
+	#ifndef UART3_TX_BUFFER_SIZE
+		#define UART3_TX_BUFFER_SIZE UART_DEFAULT_BUFFER_SIZE
+	#endif
 
-	FifoBuffer UART4_inputBuffer;
-	FifoBuffer UART4_outputBuffer;
-	UartMode UART4_mode;
+	#ifndef UART3_RX_BUFFER_SIZE
+		#define UART3_RX_BUFFER_SIZE UART_DEFAULT_BUFFER_SIZE
+	#endif
+
+	#ifndef UART3_SEGMENT
+		#define UART3_SEGMENT UART_DEFAULT_SEGMENT
+	#endif
+
+	FIFO_BUFFER(UART3_receiveBuffer, UART3_RX_BUFFER_SIZE, UART3_SEGMENT)
+	FIFO_BUFFER(UART3_transmitBuffer, UART3_TX_BUFFER_SIZE, UART3_SEGMENT)
+
+	#ifndef UART4_TX_BUFFER_SIZE
+		#define UART4_TX_BUFFER_SIZE UART_DEFAULT_BUFFER_SIZE
+	#endif
+
+	#ifndef UART4_RX_BUFFER_SIZE
+		#define UART4_RX_BUFFER_SIZE UART_DEFAULT_BUFFER_SIZE
+	#endif
+
+	#ifndef UART4_SEGMENT
+		#define UART4_SEGMENT UART_DEFAULT_SEGMENT
+	#endif
+
+	FIFO_BUFFER(UART4_receiveBuffer, UART4_RX_BUFFER_SIZE, UART4_SEGMENT)
+	FIFO_BUFFER(UART4_transmitBuffer, UART4_TX_BUFFER_SIZE, UART4_SEGMENT)
 #endif // HAL_UARTS >= 3
 
-static FifoBuffer *inputBuffer(Uart uart) {
-	FifoBuffer *result = NULL;
+FifoState *uartReceiveBuffer(Uart uart) REENTRANT {
+	FifoState *result = NULL;
 	
 	switch (uart) {
 	case UART1:
-		result = &UART1_inputBuffer;
+		result = &UART1_receiveBuffer;
 		break;
 	
 #if HAL_UARTS >= 2
 	case UART2:
-		result = &UART2_inputBuffer;
+		result = &UART2_receiveBuffer;
 		break;
 #endif // HAL_UARTS >= 2
 
 #if HAL_UARTS >= 3
 	case UART3:
-		result = &UART3_inputBuffer;
+		result = &UART3_receiveBuffer;
 		break;
 	
 	case UART4:
-		result = &UART4_inputBuffer;
+		result = &UART4_receiveBuffer;
 		break;
 #endif // HAL_UARTS >= 3
 	}
@@ -97,94 +141,32 @@ static FifoBuffer *inputBuffer(Uart uart) {
 	return result;
 }
 
-static FifoBuffer *outputBuffer(Uart uart) {
-	FifoBuffer *result = NULL;
+FifoState *uartTransmitBuffer(Uart uart) REENTRANT {
+	FifoState *result = NULL;
 	
 	switch (uart) {
 	case UART1:
-		result = &UART1_outputBuffer;
+		result = &UART1_transmitBuffer;
 		break;
 	
 #if HAL_UARTS >= 2
 	case UART2:
-		result = &UART2_outputBuffer;
+		result = &UART2_transmitBuffer;
 		break;
 #endif // HAL_UARTS >= 2
 
 #if HAL_UARTS >= 3
 	case UART3:
-		result = &UART3_outputBuffer;
+		result = &UART3_transmitBuffer;
 		break;
 	
 	case UART4:
-		result = &UART4_outputBuffer;
+		result = &UART4_transmitBuffer;
 		break;
 #endif // HAL_UARTS >= 3
 	}
 	
 	return result;
-}
-
-static UartMode uartMode(Uart uart) {
-	UartMode result = UART_8N1;
-	
-	switch (uart) {
-	case UART1:
-		result = UART1_mode;
-		break;
-	
-#if HAL_UARTS >= 2
-	case UART2:
-		result = UART2_mode;
-		break;
-#endif // HAL_UARTS >= 2
-
-#if HAL_UARTS >= 3
-	case UART3:
-		result = UART3_mode;
-		break;
-	
-	case UART4:
-		result = UART4_mode;
-		break;
-#endif // HAL_UARTS >= 3
-	}
-	
-	return result;
-}
-
-uint8_t uartReceiveBufferEmpty(Uart uart) {
-	return fifoLength(inputBuffer(uart)) == 0;
-}
-
-uint8_t uartReceiveBufferFull(Uart uart) {
-	return fifoLength(inputBuffer(uart)) == FIFO_BUFFER_SIZE;
-}
-
-uint8_t uartReceiveBufferBytesUsed(Uart uart) {
-	return fifoLength(inputBuffer(uart));
-}
-
-uint8_t uartReceiveBufferBytesFree(Uart uart) {
-	FifoBuffer *buffer = inputBuffer(uart);
-	return buffer->size - fifoLength(buffer);
-}
-
-uint8_t uartTransmitBufferEmpty(Uart uart) {
-	return fifoLength(outputBuffer(uart)) == 0;
-}
-
-uint8_t uartTransmitBufferFull(Uart uart) {
-	return fifoLength(outputBuffer(uart)) == FIFO_BUFFER_SIZE;
-}
-
-uint8_t uartTransmitBufferBytesUsed(Uart uart) {
-	return fifoLength(outputBuffer(uart));
-}
-
-uint8_t uartTransmitBufferBytesFree(Uart uart) {
-	FifoBuffer *buffer = outputBuffer(uart);
-	return buffer->size - fifoLength(buffer);
 }
 
 #ifndef M_S1_S
@@ -192,8 +174,8 @@ uint8_t uartTransmitBufferBytesFree(Uart uart) {
 // when using STC12 with HAL_UARTS set to 1.
 #pragma disable_warning 85
 #endif // M_S1_S
-Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudRateTimer, UartMode mode, uint8_t pinSwitch) {
-	Timer_Status rc = TIMER_FREQUENCY_OK;
+TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudRateTimer, UartMode mode, uint8_t pinSwitch) {
+	TimerStatus rc = TIMER_FREQUENCY_OK;
 	
 	// UART1 is somewhat peculiar: when mode != UART_8N1, baudRate is
 	// expected to be of type Uart1_9BitMode_Clock and is derived from
@@ -218,16 +200,13 @@ Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baud
 		rc = startTimer(
 			timer, 
 			baudRateToSysclkDivisor(baudRate), 
-			TIMER_OUTPUT_DISABLE, 
-			TIMER_INTERRUPT_DISABLE, 
-			TIMER_FREE_RUNNING
+			DISABLE_OUTPUT, 
+			DISABLE_INTERRUPT, 
+			FREE_RUNNING
 		);
 	}
 	
 	if (rc == TIMER_FREQUENCY_OK) {
-		fifoInitialise(inputBuffer(uart));
-		fifoInitialise(outputBuffer(uart));
-		
 		uint8_t operationMode = 0;
 		
 		switch (mode) {
@@ -287,9 +266,6 @@ Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baud
 			P_SW1 = (P_SW1 & ~M_S1_S) | ((pinSwitch << P_S1_S) & M_S1_S);
 #endif // M_S1_S
 			
-			// Save mode for ISR
-			UART1_mode = mode;
-			
 			// Set UART mode and clear interrupt flag
 			S1CON = scon | ((operationMode & 1) ? M_SM1 : 0);
 			
@@ -302,9 +278,6 @@ Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baud
 			// For UART2, OWM_TIMER == TIMER2, so no need to 
 			// configure UART clock source.
 			
-			// Save mode for ISR
-			UART2_mode = mode;
-
 	#if MCU_FAMILY == 8 || MCU_FAMILY == 15
 			// Set pin configuration
 			P_SW2 = (P_SW2 & ~M_S2_S) | ((pinSwitch << P_S2_S) & M_S2_S);
@@ -334,9 +307,6 @@ Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baud
 				S3CON &= ~M_S3ST3;
 			}
 			
-			// Save mode for ISR
-			UART3_mode = mode;
-			
 			// Set pin configuration
 			P_SW2 = (P_SW2 & ~M_S3_S) | ((pinSwitch << P_S3_S) & M_S3_S);
 			
@@ -355,9 +325,6 @@ Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baud
 				S4CON &= ~M_S4ST4;
 			}
 			
-			// Save mode for ISR
-			UART4_mode = mode;
-			
 			// Set pin configuration
 			P_SW2 = (P_SW2 & ~M_S4_S) | ((pinSwitch << P_S4_S) & M_S4_S);
 			
@@ -375,118 +342,173 @@ Timer_Status uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baud
 }
 
 INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
+	uint8_t c;
+	
 	if (S1CON & M_TI) {
 		S1CON &= ~M_TI;
 		
-		if (fifoLength(&UART1_outputBuffer) > 0) {
-			S1BUF = fifoRead(&UART1_outputBuffer);
+		if (fifoRead(&UART1_transmitBuffer, &c, 1)) {
+			S1BUF = c;
 		} else {
-			UART1_outputBuffer.status = STATUS_CLEAR;
+			UART1_transmitBuffer.status = STATUS_CLEAR;
 		}
 	}
 
 	if (S1CON & M_RI) {
 		S1CON &= ~M_RI;
-		fifoWrite(&UART1_inputBuffer, S1BUF);
+		c = S1BUF;
+		fifoWrite(&UART1_receiveBuffer, &c, 1);
 	}
 }
 
 #if HAL_UARTS >= 2
 	INTERRUPT_USING(__uart2_isr, UART2_INTERRUPT, 1) CRITICAL {
+		uint8_t c;
+		
 		if (S2CON & M_TI) {
 			S2CON &= ~M_TI;
 			
-			if (fifoLength(&UART2_outputBuffer) > 0) {
-				S2BUF = fifoRead(&UART2_outputBuffer);
+			if (fifoRead(&UART2_transmitBuffer, &c, 1)) {
+				S2BUF = c;
 			} else {
-				UART2_outputBuffer.status = STATUS_CLEAR;
+				UART2_transmitBuffer.status = STATUS_CLEAR;
 			}
 		}
 
 		if (S2CON & M_RI) {
 			S2CON &= ~M_RI;
-			fifoWrite(&UART2_inputBuffer, S2BUF);
+			c = S2BUF;
+			fifoWrite(&UART2_receiveBuffer, &c, 1);
 		}
 	}
 #endif // HAL_UARTS >= 2
 
 #if HAL_UARTS >= 3
 	INTERRUPT_USING(__uart3_isr, UART3_INTERRUPT, 1) CRITICAL {
+		uint8_t c;
+		
 		if (S3CON & M_TI) {
 			S3CON &= ~M_TI;
 			
-			if (fifoLength(&UART3_outputBuffer) > 0) {
-				S3BUF = fifoRead(&UART3_outputBuffer);
+			if (fifoRead(&UART3_transmitBuffer, &c, 1)) {
+				S3BUF = c;
 			} else {
-				UART3_outputBuffer.status = STATUS_CLEAR;
+				UART3_transmitBuffer.status = STATUS_CLEAR;
 			}
 		}
 
 		if (S3CON & M_RI) {
 			S3CON &= ~M_RI;
-			fifoWrite(&UART3_inputBuffer, S3BUF);
+			c = S3BUF;
+			fifoWrite(&UART3_receiveBuffer, &c, 1);
 		}
 	}
 
 	INTERRUPT_USING(__uart4_isr, UART4_INTERRUPT, 1) CRITICAL {
+		uint8_t c;
+		
 		if (S4CON & M_TI) {
 			S4CON &= ~M_TI;
 			
-			if (fifoLength(&UART4_outputBuffer) > 0) {
-				S4BUF = fifoRead(&UART4_outputBuffer);
+			if (fifoRead(&UART4_transmitBuffer, &c, 1)) {
+				S4BUF = c;
 			} else {
-				UART4_outputBuffer.status = STATUS_CLEAR;
+				UART4_transmitBuffer.status = STATUS_CLEAR;
 			}
 		}
 
 		if (S4CON & M_RI) {
 			S4CON &= ~M_RI;
-			fifoWrite(&UART4_inputBuffer, S4BUF);
+			c = S4BUF;
+			fifoWrite(&UART4_receiveBuffer, &c, 1);
 		}
 	}
 #endif // HAL_UARTS >= 3
 
-
-uint8_t uartGetCharacter(Uart uart) {
+uint8_t uartGetCharacter(Uart uart, BlockingOperation blocking) {
 	uint8_t result = 0;
-	FifoBuffer *buffer = inputBuffer(uart);
+	FifoState *buffer = uartReceiveBuffer(uart);
 	
-	if (fifoLength(buffer) > 0) {
-		result = fifoRead(buffer);
+	if (blocking == BLOCKING) {
+		while (!fifoRead(buffer, &result, 1));
+	} else {
+		fifoRead(buffer, &result, 1);
 	}
 	
 	return result;
 }
 
-uint8_t uartSendCharacter(Uart uart, uint8_t c) {
-	FifoBuffer *buffer = outputBuffer(uart);
-	uint8_t result = fifoWrite(buffer, c);
+bool uartGetBlock(Uart uart, uint8_t *data, uint8_t size, BlockingOperation blocking) {
+	bool rc = true;
+	FifoState *buffer = uartReceiveBuffer(uart);
 	
-	if (fifoLength(buffer) > 0 && buffer->status == STATUS_CLEAR) {
-		buffer->status = STATUS_SENDING;
-		
-		switch (uart) {
-		case UART1:
-			S1BUF = fifoRead(buffer);
-			break;
-		
-#if HAL_UARTS >= 2
-		case UART2:
-			S2BUF = fifoRead(buffer);
-			break;
-#endif // HAL_UARTS >= 2
-		
-#if HAL_UARTS >= 3
-		case UART3:
-			S3BUF = fifoRead(buffer);
-			break;
-		
-		case UART4:
-			S4BUF = fifoRead(buffer);
-			break;
-#endif // HAL_UARTS >= 3
-		}
+	if (blocking == BLOCKING) {
+		while (!fifoRead(buffer, data, size));
+	} else {
+		fifoRead(buffer, data, size);
 	}
 	
-	return result;
+	return rc;
+}
+
+inline void __uartStartSending(Uart uart, FifoState *buffer) {
+	buffer->status = STATUS_SENDING;
+	uint8_t data;
+	fifoRead(buffer, &data, 1);
+	
+	switch (uart) {
+	case UART1:
+		S1BUF = data;
+		break;
+	
+#if HAL_UARTS >= 2
+	case UART2:
+		S2BUF = data;
+		break;
+#endif // HAL_UARTS >= 2
+	
+#if HAL_UARTS >= 3
+	case UART3:
+		S3BUF = data;
+		break;
+	
+	case UART4:
+		S4BUF = data;
+		break;
+#endif // HAL_UARTS >= 3
+	}
+}
+
+bool uartSendCharacter(Uart uart, uint8_t c, BlockingOperation blocking) {
+	FifoState *buffer = uartTransmitBuffer(uart);
+	bool rc = true;
+	
+	if (blocking == BLOCKING) {
+		while (!fifoWrite(buffer, &c, 1));
+	} else {
+		rc = fifoWrite(buffer, &c, 1);
+	}
+	
+	if (rc && buffer->status == STATUS_CLEAR) {
+		__uartStartSending(uart, buffer);
+	}
+	
+	return rc;
+}
+
+bool uartSendBlock(Uart uart, uint8_t *data, uint8_t size, BlockingOperation blocking) {
+	FifoState *buffer = uartTransmitBuffer(uart);
+	bool rc = true;
+	
+	if (blocking == BLOCKING) {
+		while (!fifoWrite(buffer, data, size));
+	} else {
+		rc = fifoWrite(buffer, data, size);
+	}
+	
+	if (rc && buffer->status == STATUS_CLEAR) {
+		__uartStartSending(uart, buffer);
+	}
+	
+	return rc;
 }

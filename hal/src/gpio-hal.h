@@ -35,9 +35,21 @@
  * 
  * GPIO abstraction layer definitions.
  * 
- * Supported MCU families: STC12, STC15, STC8.
+ * Supported MCU:
  * 
- * Dependencies: none.
+ *     STC12*
+ *     STC15*
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     none
+ * 
+ * Optional macros:
+ * 
+ *     BASIC_GPIO_HAL (default: undefined). When defined, removes
+ *     support for GPIO features not available on the original 8051.
+ *     Greatly helps reduce flash footprint.
  */
 
 #ifdef BASIC_GPIO_HAL
@@ -54,9 +66,29 @@
 #endif
 
 typedef enum {
-	GPIO_DISABLED = 0,
-	GPIO_ENABLED = 1,
-} GpioBoolean;
+	DISABLE_SCHMIDT_TRIGGER = 0,
+	ENABLE_SCHMIDT_TRIGGER = 1,
+} GpioSchmidtTrigger;
+
+typedef enum {
+	DISABLE_INTERNAL_PULL_UP = 0,
+	ENABLE_INTERNAL_PULL_UP = 1,
+} GpioInternalPullUp;
+
+typedef enum {
+	DISABLE_GPIO_DIGITAL_INPUT = 0,
+	ENABLE_GPIO_DIGITAL_INPUT = 1,
+} GpioDigitalInput;
+
+typedef enum {
+	DISABLE_GPIO_PIN_INTERRUPT = 0,
+	ENABLE_GPIO_PIN_INTERRUPT = 1,
+} GpioInterrupt;
+
+typedef enum {
+	DISABLE_GPIO_PIN_WAKE_UP = 0,
+	ENABLE_GPIO_PIN_WAKE_UP = 1,
+} GpioWakeUp;
 
 /**
  * Configuration details of a GPIO pin, or series of consecutive pins.
@@ -69,22 +101,22 @@ typedef struct {
 	GpioPin pin;			/*!< Index of the first pin used on the port. */
 	uint8_t count;	/*!< Number of consecutive pins used on the port, 
 							starting with .pin and counting up. */
-	GpioPortMode portMode;			/*!< GPIO pins mode of operation. */
+	GpioPinMode pinMode;			/*!< GPIO pins mode of operation. */
 #ifdef GPIO_HAS_PU_NCS
-	GpioBoolean schmidtTrigger;	/*!< Enable Schmidt trigger. */
-	GpioBoolean internalPullUp;	/*!< Enable internal 4.1k pull-up resistor. */
+	GpioSchmidtTrigger schmidtTrigger;	/*!< Enable Schmidt trigger. */
+	GpioInternalPullUp internalPullUp;	/*!< Enable internal 4.1k pull-up resistor. */
 #endif // GPIO_HAS_PU_NCS
 
 #ifdef GPIO_HAS_SR_DR_IE
 	GpioCurrentDrive currentDrive;	/*!< Control output drive capacity. */
-	GpioSlewRate slewRate;	/*!< Control output slew rate. */
-	GpioBoolean digitalInput;	/*!< Enable line(s) as digital inputs. */
+	GpioSlewRate slewRate;	/*!< Control output slew rate. A low slew rate reduces RF emissions and power draw. */
+	GpioDigitalInput digitalInput;	/*!< Enable line(s) as digital input(s). Reduces power draw when pin is either not used, or used by another peripheral (e.g. ADC). */
 #endif // GPIO_HAS_SR_DR_IE
 
 #ifdef GPIO_HAS_INT_WK
-	GpioBoolean interrupts;	/*!< Enable interrupts. */
-	GpioInterruptMode interruptMode;	/*!< Type of event triggering an interrupt. */
-	GpioBoolean wakeUp;	/*!< Enable wake-up interrupt. */
+	GpioInterrupt pinInterrupt;	/*!< Enable interrupts when interruptTrigger occurs. */
+	GpioInterruptTrigger interruptTrigger;	/*!< Type of event triggering an interrupt. */
+	GpioWakeUp wakeUpInterrupt;	/*!< Enable wake-up interrupt. */
 #endif // GPIO_HAS_INT_WK
 	
 	uint8_t __setMask;
@@ -96,34 +128,34 @@ typedef struct {
  */
 #ifdef GPIO_HAS_PU_NCS
 	#define DEFAULTS_PU_NCS \
-		.schmidtTrigger = GPIO_DISABLED, \
-		.internalPullUp = GPIO_DISABLED,
+		.schmidtTrigger = DISABLE_SCHMIDT_TRIGGER, \
+		.internalPullUp = DISABLE_INTERNAL_PULL_UP,
 #else
-	#define DEFAULTS_PU_NCS /**/
+	#define DEFAULTS_PU_NCS
 #endif // GPIO_HAS_PU_NCS
 
 #ifdef GPIO_HAS_SR_DR_IE
 	#define DEFAULTS_SR_DR_IE \
 		.currentDrive = GPIO_STANDARD_DRIVE, \
-		.slewRate = GPIO_SLOW_TRANSITIONS, \
-		.digitalInput = GPIO_ENABLED,
+		.slewRate = GPIO_LOW_SLEW_RATE, \
+		.digitalInput = ENABLE_GPIO_DIGITAL_INPUT,
 #else
-	#define DEFAULTS_SR_DR_IE /**/
+	#define DEFAULTS_SR_DR_IE
 #endif // GPIO_HAS_SR_DR_IE
 
 #ifdef GPIO_HAS_INT_WK
 	#define DEFAULTS_INT_WK \
-		.interrupts = GPIO_DISABLED, \
-		.interruptMode = GPIO_FALLING_EDGE, \
-		.wakeUp = GPIO_DISABLED,
+		.pinInterrupt = DISABLE_GPIO_PIN_INTERRUPT, \
+		.interruptTrigger = GPIO_FALLING_EDGE, \
+		.wakeUpInterrupt = DISABLE_GPIO_PIN_WAKE_UP,
 #else
-	#define DEFAULTS_INT_WK /**/
+	#define DEFAULTS_INT_WK
 #endif // GPIO_HAS_INT_WK
 
-#define GPIO_PORT_CONFIG(gpioPort, gpioMode) { .port = gpioPort, .pin = 0, .count = 8, .portMode = gpioMode, \
+#define GPIO_PORT_CONFIG(gpioPort, gpioMode) { .port = gpioPort, .pin = 0, .count = 8, .pinMode = gpioMode, \
 	DEFAULTS_PU_NCS  DEFAULTS_SR_DR_IE  DEFAULTS_INT_WK }
 
-#define GPIO_PIN_CONFIG(gpioPort, gpioPin, gpioMode) { .port = gpioPort, .pin = gpioPin, .count = 1, .portMode = gpioMode, \
+#define GPIO_PIN_CONFIG(gpioPort, gpioPin, gpioMode) { .port = gpioPort, .pin = gpioPin, .count = 1, .pinMode = gpioMode, \
 	DEFAULTS_PU_NCS  DEFAULTS_SR_DR_IE  DEFAULTS_INT_WK }
 
 /**

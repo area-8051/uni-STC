@@ -35,9 +35,15 @@
  * 
  * System reset abstraction definitions.
  * 
- * Supported MCU families: STC12, STC15, STC8.
+ * Supported MCU:
  * 
- * Dependencies: none.
+ *     STC12*
+ *     STC15*
+ *     STC8*
+ * 
+ * Dependencies:
+ * 
+ *     none
  */
 
 // Watchdog ------------------------------------------------------------

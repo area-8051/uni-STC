@@ -48,7 +48,7 @@
 	#undef MCU_HAS_ADVANCED_PWM
 #endif // MCU_HAS_ADVANCED_PWM
 
-static GpioConfig blinkingPin = GPIO_PIN_CONFIG(GPIO_PORT3, BLINKING_PIN, GPIO_BIDIRECTIONAL);
+static GpioConfig blinkingPin = GPIO_PIN_CONFIG(GPIO_PORT3, BLINKING_PIN, GPIO_BIDIRECTIONAL_MODE);
 static uint8_t blinkingState = 0;
 
 #ifdef MCU_HAS_PCA
@@ -144,12 +144,12 @@ void advpwmUpdateGlowingDutyCycle() {
 void echoCharactersReceived() {
 	uint8_t c;
 	
-	while (c = uartGetCharacter(CONSOLE_UART)) {
+	while (c = uartGetCharacter(CONSOLE_UART, NON_BLOCKING)) {
 		if (c == '\n') {
-			uartSendCharacter(CONSOLE_UART, '\r');
+			uartSendCharacter(CONSOLE_UART, '\r', BLOCKING);
 		}
 		
-		uartSendCharacter(CONSOLE_UART, c);
+		uartSendCharacter(CONSOLE_UART, c, BLOCKING);
 	}
 }
 
@@ -187,21 +187,21 @@ void main() {
 	startTimer(
 		TIMER0, 
 		frequencyToSysclkDivisor(PCA_GLOWING_COUNTER_FREQ), 
-		TIMER_OUTPUT_DISABLE, 
-		TIMER_INTERRUPT_DISABLE, 
-		TIMER_FREE_RUNNING
+		DISABLE_OUTPUT, 
+		DISABLE_INTERRUPT, 
+		FREE_RUNNING
 	);
 	
 	pcaInitialise(
 		PCA_TIMER0, 
-		PCA_FREE_RUNNING, 
-		PCA_INTERRUPT_DISABLE, 
+		FREE_RUNNING, 
+		DISABLE_INTERRUPT, 
 		PCA_GLOWING_PIN_CONFIG
 	);
 	
 	pcaStartPwm(
 		PCA_GLOWING_CHANNEL, 
-		GPIO_BIDIRECTIONAL, 
+		GPIO_BIDIRECTIONAL_MODE, 
 		MAKE_PCA_PWM_BITS(PCA_GLOWING_PWM_BITS), 
 		PCA_EDGE_NONE, 
 		PCA_COUNTER_VALUE - PCA_GLOWING_GRADIENT[0]
@@ -211,11 +211,15 @@ void main() {
 // ---------------------------------------------------------------------
 
 #ifdef MCU_HAS_ENHANCED_PWM
-	enhpwmInitialise(ENHPWM_SYSCLK_DIV_7, ENHPWM_COUNTER_VALUE, ENHPWM_INTERRUPT_DISABLE);
+	enhpwmInitialise(
+		ENHPWM_SYSCLK_DIV_7, 
+		ENHPWM_COUNTER_VALUE, 
+		DISABLE_INTERRUPT
+	);
 	enhpwmStartChannel(
 		ENHPWM_GLOWING_CHANNEL, 
 		ENHPWM_GLOWING_PIN_CONFIG, 
-		GPIO_BIDIRECTIONAL, 
+		GPIO_BIDIRECTIONAL_MODE, 
 		ENHPWM_LOW, 
 		ENHPWM_INTERRUPT_EVENT_NONE, 
 		0,

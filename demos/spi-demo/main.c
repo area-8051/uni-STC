@@ -30,12 +30,13 @@
 #include "project-defs.h"
 #include "delay.h"
 
+#include "gpio-hal.h"
 #include "spi-hal.h"
 #include "uart-hal.h"
 #include "serial-console.h"
 #include <stdio.h>
 
-static GpioConfig csPin = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN6, GPIO_BIDIRECTIONAL);
+static GpioConfig csPin = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN6, GPIO_BIDIRECTIONAL_MODE);
 #define MAX6675_MAX_SPEED 4300000UL
 
 uint16_t readTemperature() {
@@ -87,7 +88,7 @@ void main() {
 		SPI_CLK_IDLE_LOW, 
 		spiSelectSpeed(MAX6675_MAX_SPEED), 
 		SPI_PIN_CONFIG, 
-		GPIO_BIDIRECTIONAL
+		GPIO_BIDIRECTIONAL_MODE
 	);
 	
 	// Enable interrupts -----------------------------------------------

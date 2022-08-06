@@ -282,16 +282,6 @@
 	} PCA_CounterMode;
 
 	typedef enum {
-		PCA_INTERRUPT_DISABLE = 0,
-		PCA_INTERRUPT_ENABLE = 1,
-	} PCA_InterruptEnable;
-
-	typedef enum {
-		PCA_OUTPUT_DISABLE = 0,
-		PCA_OUTPUT_ENABLE = 1,
-	} PCA_OutputEnable;
-
-	typedef enum {
 		PCA_8BIT_PWM = 0,
 	#ifdef PCA_HAS_67BIT_PWM
 		PCA_7BIT_PWM = 1,

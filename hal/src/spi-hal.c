@@ -39,7 +39,7 @@
  */
 
 #ifndef SPI_SEGMENT
-	#define SPI_SEGMENT __idata
+	#define SPI_SEGMENT __data
 #endif
 
 #define SPI_PIN_SWITCH 0

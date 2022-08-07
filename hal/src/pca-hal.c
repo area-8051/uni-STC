@@ -136,6 +136,7 @@ typedef struct {
 // so let's leave it in the default memory segment.
 static uint8_t __pca_pinSwitch;
 
+// Each channel uses 7 bytes RAM
 static HAL_PCA_SEGMENT uint8_t __pca_overflowCounter[HAL_PCA_CHANNELS];
 static HAL_PCA_SEGMENT PCA_ChannelData __pca_channelData[HAL_PCA_CHANNELS];
 static HAL_PCA_SEGMENT PCA_ChannelConfig __pca_channelConfig[HAL_PCA_CHANNELS];

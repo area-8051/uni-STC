@@ -67,15 +67,11 @@ typedef struct {
 
 uint8_t __fifoLength(FifoState *fifo) REENTRANT;
 
-bool fifoWrite(FifoState *fifo, const uint8_t *data, uint8_t count) REENTRANT;
+bool fifoWrite(FifoState *fifo, const void *data, uint8_t count) REENTRANT;
 
-bool fifoRead(FifoState *fifo, uint8_t *data, uint8_t count) REENTRANT;
+bool fifoRead(FifoState *fifo, void *data, uint8_t count) REENTRANT;
 
-INLINE void fifoClear(FifoState *fifo) {
-	fifo->first = fifo->size;
-	fifo->last = fifo->size;
-	fifo->status = 0;
-}
+void fifoClear(FifoState *fifo);
 
 INLINE bool fifoIsEmpty(FifoState *fifo) {
 	return __fifoLength(fifo) == 0;

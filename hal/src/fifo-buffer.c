@@ -45,7 +45,7 @@ uint8_t __fifoLength(FifoState *buffer) REENTRANT {
 		: (buffer->size - (buffer->first - buffer->last - 1));
 }
 
-bool fifoWrite(FifoState *buffer, const uint8_t *data, uint8_t count) REENTRANT {
+bool fifoWrite(FifoState *buffer, const void *data, uint8_t count) REENTRANT {
 	bool rc = fifoBytesFree(buffer) >= count;
 	
 	if (rc) {
@@ -62,20 +62,20 @@ bool fifoWrite(FifoState *buffer, const uint8_t *data, uint8_t count) REENTRANT 
 				buffer->first = 0;
 			}
 			
-			buffer->data[buffer->last] = data[n];
+			buffer->data[buffer->last] = ((uint8_t *) data)[n];
 		}
 	}
 	
 	return rc;
 }
 
-bool fifoRead(FifoState *buffer, uint8_t *data, uint8_t count) REENTRANT {
+bool fifoRead(FifoState *buffer, void *data, uint8_t count) REENTRANT {
 	bool rc = fifoBytesUsed(buffer) >= count;
 	
 	if (rc) {
 		for (uint8_t n = 0; n < count; n++) {
 			// Buffer is not empty, read first character.
-			data[n] = buffer->data[buffer->first];
+			((uint8_t *) data)[n] = buffer->data[buffer->first];
 			
 			if (buffer->first == buffer->last) {
 				// We've read the last character, mark buffer as empty.
@@ -92,4 +92,10 @@ bool fifoRead(FifoState *buffer, uint8_t *data, uint8_t count) REENTRANT {
 	}
 	
 	return rc;
+}
+
+void fifoClear(FifoState *fifo) {
+	fifo->first = fifo->size;
+	fifo->last = fifo->size;
+	fifo->status = 0;
 }

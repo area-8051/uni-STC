@@ -7,11 +7,15 @@ a HAL on top of it. It makes the migration of a project from, for
 instance, STC15W408AS to STC8G1K08A ridiculously easy, changes only 
 affecting the Makefile and a project-wide header called project-defs.h.
 
-I make them available under a permissive license in the hope they would 
-be useful to someone else. Their documentation is perfectible, when 
-existent at all, but I would create or improve it little by little if 
-asked, and time permitting. I also welcome help requests, comments and 
-suggestions.
+While I was at it, I also integrated drivers in the project structure 
+in the same way as the HAL so they can be centralised and reused as 
+easily as HAL modules.
+
+I make this work available under a permissive license in the hope they 
+would be useful to someone else. Their documentation is perfectible, 
+when existent at all, but I would create or improve it little by little 
+if asked, and time permitting. I also welcome help requests, comments 
+and suggestions.
 
 I can be reached at vincent dot defert at posteo dot net.
 
@@ -21,6 +25,16 @@ to use it.
 Finally, below are a few notes you might find useful or interesting.
 
 
+TERMINOLOGY
+
+I use the term Hardware Abstraction Layer (HAL) to name pieces of code
+allowing to manipulate an MCU's internal peripherals in a way that is
+independent of the specific part used.
+
+I use the term Driver to name pieces of code providing a high-level 
+programming interface to use devices external to the MCU.
+
+
 DESIGN CHOICES
 
 The necessity of this work arose from the desire to use SDCC to work 
@@ -28,8 +42,9 @@ with STC MCU. This has 2 consequences:
 
 - I'm not interested in supporting Keil's compiler, STC already does it.
 
-- STC16 and STC32 MCS-251 MCU cannot be supported as long as SDCC will 
-only support MCS-51.
+- STC16 and STC32 MCS-251 MCU cannot be supported as long as SDCC only 
+supports MCS-51. I'd be interested to work on this, but lack time for 
+the moment.
 
 Also, I do NOT want to support MCU older than STC12. In fact, I added 
 support for STC12 only to assess the relevance of my design. It also 
@@ -49,7 +64,7 @@ simple and natural as possible.
 	https://en.wikipedia.org/wiki/Principle_of_least_astonishment
 
 The drawbacks of my approach are that my naming differs from STC's
-documentation and it complicates the reuse of STC's examples. The 
+documentation and it can complicate the reuse of STC's examples. The 
 latter isn't really an issue since software is clearly not a strength 
 of STC. All in all, I deemed this a decent price to pay for clarity, 
 consistency, and predictability.

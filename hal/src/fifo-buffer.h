@@ -71,7 +71,7 @@ bool fifoWrite(FifoState *fifo, const void *data, uint8_t count) REENTRANT;
 
 bool fifoRead(FifoState *fifo, void *data, uint8_t count) REENTRANT;
 
-void fifoClear(FifoState *fifo);
+void fifoClear(FifoState *fifo) REENTRANT;
 
 INLINE bool fifoIsEmpty(FifoState *fifo) {
 	return __fifoLength(fifo) == 0;

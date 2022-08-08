@@ -94,7 +94,7 @@ bool fifoRead(FifoState *buffer, void *data, uint8_t count) REENTRANT {
 	return rc;
 }
 
-void fifoClear(FifoState *fifo) {
+void fifoClear(FifoState *fifo) REENTRANT {
 	fifo->first = fifo->size;
 	fifo->last = fifo->size;
 	fifo->status = 0;

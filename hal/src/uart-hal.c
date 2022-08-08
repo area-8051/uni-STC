@@ -35,7 +35,12 @@
 #endif
 
 #ifndef UART_DEFAULT_SEGMENT
-	#define UART_DEFAULT_SEGMENT __pdata
+	// __data and __idata are to small to be used as default values:
+	// default values should "just work", even when using all UART
+	// simultaneously.
+	// __xdata uses more flash but takes 1 cycle less than __pdata,
+	// that seems a good trade off.
+	#define UART_DEFAULT_SEGMENT __xdata
 #endif
 
 /**

@@ -28,12 +28,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "delay.h"
-
-#include "gpio-hal.h"
-#include "spi-hal.h"
-#include "uart-hal.h"
-#include "serial-console.h"
+#include <delay.h>
+#include <gpio-hal.h>
+#include <spi-hal.h>
+#include <uart-hal.h>
+#include <serial-console.h>
 #include <stdio.h>
 
 static GpioConfig csPin = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN6, GPIO_BIDIRECTIONAL_MODE);

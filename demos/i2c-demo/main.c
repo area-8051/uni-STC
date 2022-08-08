@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "delay.h"
+#include <delay.h>
 
 /*
  * -- LCD DISPLAY ------------------------------------------------------
@@ -38,9 +38,9 @@
  * we'll use its parallel interface in 8-bit mode.
  */
 
-#include "lcd-device.h"
-#include "lcd-text.h"
-#include "lcd-link-i2c.h"
+#include <lcd/lcd-device.h>
+#include <lcd/lcd-text.h>
+#include <lcd/links/lcd-link-i2c.h>
 
 /*
  * PIN ASSIGNMENTS:
@@ -48,7 +48,7 @@
  * SCL is connected to P1.5.
  * SDA is connected to P1.4.
  */
-LCD_I2CLinkConfig lcdLinkConfig = {
+LCDI2CLinkConfig lcdLinkConfig = {
 	.slaveAddress  = 0x27,
 	.pinSwitch = 0,
 };
@@ -60,8 +60,8 @@ LCD_TEXT_ONLY_DEVICE(lcdDevice, &lcdLinkConfig, 2, 16)
 
 void main() {
 	// Initialise LCD module -------------------------------------------
-	lcd_initialiseDevice(&lcdDevice);
-	lcd_txtInitialiseDisplayMode(&lcdDevice);
+	lcdInitialiseDevice(&lcdDevice);
+	lcdTxtInitialiseDisplayMode(&lcdDevice);
 		
 	// Enable interrupts -----------------------------------------------
 	EA = 1;
@@ -69,11 +69,11 @@ void main() {
 	// Main loop -------------------------------------------------------
 	
 	while (1) {
-		lcd_txtClear(&lcdDevice);
+		lcdTxtClear(&lcdDevice);
 		delay1ms(1000);
-		lcd_txtPrintAt(&lcdDevice, 0, 0, "Hello,");
+		lcdTxtPrintAt(&lcdDevice, 0, 0, "Hello,");
 		delay1ms(1000);
-		lcd_txtPrintAt(&lcdDevice, 1, 8, "World!");
+		lcdTxtPrintAt(&lcdDevice, 1, 8, "World!");
 		delay1ms(1000);
 	}
 }

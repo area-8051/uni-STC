@@ -34,8 +34,8 @@
 	#error "The selected MCU doesn't have a power-down wake-up timer."
 #endif // MCU_HAS_WAKE_UP_TIMER
 
-#include "gpio-hal.h"
-#include "power-hal.h"
+#include <gpio-hal.h>
+#include <power-hal.h>
 
 // All STC MCU have P5.4
 static GpioConfig ledPin = GPIO_PIN_CONFIG(GPIO_PORT5, GPIO_PIN4, GPIO_BIDIRECTIONAL_MODE);

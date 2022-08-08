@@ -28,12 +28,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "delay.h"
-
-#include "eeprom-hal.h"
-#include "uart-hal.h"
-#include "serial-console.h"
-
+#include <delay.h>
+#include <eeprom-hal.h>
+#include <uart-hal.h>
+#include <serial-console.h>
 #include <stdio.h>
 #include <string.h>
 

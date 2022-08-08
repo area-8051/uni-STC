@@ -72,12 +72,10 @@ MEMORY_MODEL := --model-medium
 
 HAS_DUAL_DPTR := n
 
-# Define UNISTC_DIR, HAL_DIR, and MAKE_DIR -----------------------------
-
-include ../directories.mk
+# Define UNISTC_DIR, HAL_DIR, DRIVER_DIR, and MAKE_DIR -----------------
+include ../../makefiles/0-directories.mk
 
 # Project settings -----------------------------------------------------
-
 PROJECT_NAME := hal-demo
 
 PROJECT_FLAGS = -DBUILD_FOR_STC15W408AS_DIP16
@@ -97,10 +95,7 @@ CONSOLE_PORT := ttyUSB0
 
 ISP_PORT := ttyUSB0
 
-# ----------------------------------------------------------------------
-
-include $(MAKE_DIR)/include1.mk
-
+# Boilerplate rules ----------------------------------------------------
+include $(MAKE_DIR)/1-settings.mk
 -include $(DEP_FILE)
-
-include $(MAKE_DIR)/include2.mk
+include $(MAKE_DIR)/2-rules.mk

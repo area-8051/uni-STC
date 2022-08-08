@@ -72,23 +72,21 @@ MEMORY_MODEL := --model-large
 
 HAS_DUAL_DPTR := y
 
-# Define UNISTC_DIR, HAL_DIR, and MAKE_DIR -----------------------------
-
-include ../directories.mk
+# Define UNISTC_DIR, HAL_DIR, DRIVER_DIR, and MAKE_DIR -----------------
+include ../../makefiles/0-directories.mk
 
 # Project settings -----------------------------------------------------
-
 PROJECT_NAME := i2c-demo
 
 SRCS := \
 	$(HAL_DIR)/delay.c \
 	$(HAL_DIR)/gpio-hal.c \
 	$(HAL_DIR)/i2c-hal.c \
-	lcd-interface.c \
-	lcd-device.c \
-	lcd-link-i2c.c \
-	lcd-text.c \
-	HD44780.c \
+	$(DRIVER_DIR)/lcd/lcd-interface.c \
+	$(DRIVER_DIR)/lcd/lcd-device.c \
+	$(DRIVER_DIR)/lcd/lcd-text.c \
+	$(DRIVER_DIR)/lcd/controllers/HD44780.c \
+	$(DRIVER_DIR)/lcd/links/lcd-link-i2c.c \
 	main.c
 
 CONSOLE_BAUDRATE := 57600
@@ -96,10 +94,7 @@ CONSOLE_PORT := ttyUSB0
 
 ISP_PORT := ttyUSB0
 
-# ----------------------------------------------------------------------
-
-include $(MAKE_DIR)/include1.mk
-
+# Boilerplate rules ----------------------------------------------------
+include $(MAKE_DIR)/1-settings.mk
 -include $(DEP_FILE)
-
-include $(MAKE_DIR)/include2.mk
+include $(MAKE_DIR)/2-rules.mk

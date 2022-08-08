@@ -28,19 +28,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "delay.h"
-#include "gpio-hal.h"
-#include "uart-hal.h"
-#include "serial-console.h"
+#include <delay.h>
+#include <gpio-hal.h>
+#include <uart-hal.h>
+#include <serial-console.h>
 #include <stdio.h>
 
 #ifdef MCU_HAS_PCA
-	#include "timer-hal.h"
-	#include "pca-hal.h"
+	#include <timer-hal.h>
+	#include <pca-hal.h>
 #endif // MCU_HAS_PCA
 
 #ifdef MCU_HAS_ENHANCED_PWM
-	#include "enhpwm-hal.h"
+	#include <enhpwm-hal.h>
 #endif // MCU_HAS_ENHANCED_PWM
 
 #ifdef MCU_HAS_ADVANCED_PWM

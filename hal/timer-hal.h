@@ -46,7 +46,7 @@
  *     none
  */
 
-#include "hal-defs.h"
+#include <hal-defs.h>
 
 typedef enum {
 	// Frequency or Baud rate, of course.

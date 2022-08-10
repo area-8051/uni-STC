@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "gpio-hal.h"
+#include <gpio-hal.h>
 
 /**
  * @file gpio-hal.c

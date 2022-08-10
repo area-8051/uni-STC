@@ -35,8 +35,8 @@
  */
 
 #include "project-defs.h"
-#include "uart-hal.h"
-#include "delay.h"
+#include <uart-hal.h>
+#include <delay.h>
 #include <stdio.h>
 
 #ifndef SERIAL_CONSOLE_SEGMENT

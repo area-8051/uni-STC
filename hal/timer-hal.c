@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "timer-hal.h"
+#include <timer-hal.h>
 
 /**
  * @file timer-hal.c

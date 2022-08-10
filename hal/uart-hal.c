@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "uart-hal.h"
+#include <uart-hal.h>
 
 #ifndef UART_DEFAULT_BUFFER_SIZE
 	#define UART_DEFAULT_BUFFER_SIZE 16

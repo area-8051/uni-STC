@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "reset-hal.h"
+#include <reset-hal.h>
 
 /**
  * @file reset-hal.c

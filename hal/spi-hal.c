@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "spi-hal.h"
-#include "gpio-hal.h"
+#include <spi-hal.h>
+#include <gpio-hal.h>
 #include <string.h>
 
 /**
@@ -49,7 +49,7 @@
 #define SPI_SCLK_PIN 4
 #define SPI_ROW_SIZE 5
 
-static const __code uint8_t __pinConfigurations[][SPI_ROW_SIZE] = {
+static const uint8_t __pinConfigurations[][SPI_ROW_SIZE] = {
 #if MCU_FAMILY == 8
 	#if MCU_PINS == 8
 		{ 0, 0x55, 0x54, 0x33, 0x32 },

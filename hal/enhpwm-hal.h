@@ -78,7 +78,7 @@
  *     INTERRUPT_USING(__enhpwm_isr, PWM0_INTERRUPT, 1);
  */
 
-#include "hal-defs.h"
+#include <hal-defs.h>
 
 typedef enum {
 	ENHPWM_SYSCLK_DIV_1 = 0,
@@ -151,12 +151,24 @@ typedef enum {
 /**
  * Initialises and starts the master counter.
  */
-void enhpwmInitialise(ENHPWM_ClockSource clockSource, uint16_t divisor, InterruptEnable overflowInterrupt);
+void enhpwmInitialise(
+	ENHPWM_ClockSource clockSource, 
+	uint16_t divisor, 
+	InterruptEnable overflowInterrupt
+);
 
 /**
  * Configures a PCA channel in PWM mode.
  */
-void enhpwmStartChannel(ENHPWM_Channel channel, uint8_t pinSwitch, GpioPinMode pinMode, ENHPWM_OutputLevel initialLevel, ENHPWM_InterruptOnEvent interruptOnEvent, uint16_t flipPoint1, uint16_t flipPoint2);
+void enhpwmStartChannel(
+	ENHPWM_Channel channel, 
+	uint8_t pinSwitch, 
+	GpioPinMode pinMode, 
+	ENHPWM_OutputLevel initialLevel, 
+	ENHPWM_InterruptOnEvent interruptOnEvent, 
+	uint16_t flipPoint1, 
+	uint16_t flipPoint2
+);
 
 /**
  * Changes the flip points of a PWM channel.

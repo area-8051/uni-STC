@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "delay.h"
+#include <delay.h>
 
 /**
  * @file delay.c

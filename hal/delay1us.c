@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "delay1us.h"
+#include <delay1us.h>
 
 /*
  * Only valid for an STC8 running at 24 MHz.

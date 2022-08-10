@@ -28,9 +28,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "adc-comp-hal.h"
-#include "gpio-hal.h"
-#include "delay.h"
+#include <adc-comp-hal.h>
+#include <gpio-hal.h>
+#include <delay.h>
 
 /**
  * @file adc-comp-hal.c
@@ -109,7 +109,7 @@ void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts)
 	adcPowerOn();
 }
 
-static const __code uint8_t __adcPins[] = {
+static const uint8_t __adcPins[] = {
 	// 0xff means "do NOT configure GPIO pin".
 	// I didn't use a macro to keep arrays aligned, and because it's only used in adcConfigureChannel().
 	#if MCU_FAMILY == 8 && MCU_SERIES == 'H'

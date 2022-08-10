@@ -61,7 +61,7 @@
  * file where main() is defined.
  */
 
-#include "hal-defs.h"
+#include <hal-defs.h>
 
 typedef enum {
 	PCA_CONTINUOUS = 0,

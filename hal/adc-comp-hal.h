@@ -54,7 +54,7 @@
  *     delay
  */
 
-#include "hal-defs.h"
+#include <hal-defs.h>
 
 typedef enum {
 	ADC_ALIGN_LEFT = 0,

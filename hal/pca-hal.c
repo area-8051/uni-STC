@@ -28,11 +28,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "pca-hal.h"
-#include "gpio-hal.h"
+#include <pca-hal.h>
+#include <gpio-hal.h>
 
 #ifndef HAL_PCA_SEGMENT
 	#define HAL_PCA_SEGMENT __idata
+#endif
+
+/*
+ * By default, all available UARTs are exposed through the HAL
+ * However, should you need to reduce your application's RAM or
+ * flash usage, you can define the HAL_UARTS macro to expose less
+ * UARTs, e.g. setting HAL_UARTS to 2 on an MCU with 4 UARTs would
+ * only expose UART1 and UART2.
+ */
+#ifdef HAL_PCA_CHANNELS
+	#if HAL_PCA_CHANNELS < 1 || HAL_PCA_CHANNELS > PCA_CHANNELS
+		#error "Macro HAL_PCA_CHANNELS out of range"
+	#endif // HAL_PCA_CHANNELS < 1 || HAL_PCA_CHANNELS > NB_UARTS
+#else
+	#define HAL_PCA_CHANNELS PCA_CHANNELS
 #endif
 
 /**
@@ -41,7 +56,7 @@
  * PCA abstraction implementation.
  */
 
-static const __code uint8_t __pca_pinConfigurations[][PCA_CHANNELS + 1] = {
+static const uint8_t __pca_pinConfigurations[][PCA_CHANNELS + 1] = {
 #if MCU_FAMILY == 8 && MCU_SERIES == 'G' && MCU_PINS > 8
 	// PCA pin configurations for STC8G *except* STC8G1K08A
 	{ 0x11, 0x10, 0x37, 0x12, }, 
@@ -78,21 +93,6 @@ static const __code uint8_t __pca_pinConfigurations[][PCA_CHANNELS + 1] = {
 	{ 0x42, 0x43, 0x41, }, 
 #endif // MCU_FAMILY == 12
 };
-
-/*
- * By default, all available UARTs are exposed through the HAL
- * However, should you need to reduce your application's RAM or
- * flash usage, you can define the HAL_UARTS macro to expose less
- * UARTs, e.g. setting HAL_UARTS to 2 on an MCU with 4 UARTs would
- * only expose UART1 and UART2.
- */
-#ifdef HAL_PCA_CHANNELS
-	#if HAL_PCA_CHANNELS < 1 || HAL_PCA_CHANNELS > PCA_CHANNELS
-		#error "Macro HAL_PCA_CHANNELS out of range"
-	#endif // HAL_PCA_CHANNELS < 1 || HAL_PCA_CHANNELS > NB_UARTS
-#else
-	#define HAL_PCA_CHANNELS PCA_CHANNELS
-#endif
 
 typedef enum {
 	PCA_UNUSED = 0x00,

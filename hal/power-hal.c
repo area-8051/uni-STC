@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "power-hal.h"
+#include <power-hal.h>
 
 /**
  * @file power-hal.c

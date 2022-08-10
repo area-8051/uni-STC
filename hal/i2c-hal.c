@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "i2c-hal.h"
-#include "gpio-hal.h"
+#include <i2c-hal.h>
+#include <gpio-hal.h>
 
 /**
  * @file i2c-hal.c
@@ -60,7 +60,7 @@
  *    3   | P3.2 | P3.3 | 
  */
 
-static const __code uint8_t __pinConfigurations[][I2C_ROW_SIZE] = {
+static const uint8_t __pinConfigurations[][I2C_ROW_SIZE] = {
 #if MCU_PINS == 8
 	{ 0, 0x32, 0x33 },
 	{ 1, 0x54, 0x55 },

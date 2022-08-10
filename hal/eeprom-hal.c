@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "eeprom-hal.h"
+#include <eeprom-hal.h>
 
 /**
  * @file eeprom-hal.c

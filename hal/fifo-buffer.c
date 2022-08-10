@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "fifo-buffer.h"
+#include <fifo-buffer.h>
 
 /**
  * @file fifo-buffer.c

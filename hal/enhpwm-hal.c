@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include "enhpwm-hal.h"
-#include "gpio-hal.h"
+#include <enhpwm-hal.h>
+#include <gpio-hal.h>
 
 /**
  * @file enhpwm-hal.c
@@ -37,7 +37,7 @@
  * 15-bit enhanced PWM abstraction implementation.
  */
 
-static const __code uint8_t __pinConfigurations[][PWM_CHANNELS] = {
+static const uint8_t __pinConfigurations[][PWM_CHANNELS] = {
 #if MCU_HAS_ENHANCED_PWM == '5'
 	// STC15W4K
 	{ 0x37, 0x22, 0x21, 0x23, 0x16, 0x17 }, 

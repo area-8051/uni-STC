@@ -90,8 +90,8 @@
 	#define HAL_UARTS NB_UARTS
 #endif
 
-#include "hal-defs.h"
-#include "timer-hal.h"
+#include <hal-defs.h>
+#include <timer-hal.h>
 
 typedef enum {
 	UART_USE_TIMER2 = 0,
@@ -169,7 +169,7 @@ typedef enum {
  *   1   | P5.2 | P5.3
  * 
  */
-#include "fifo-buffer.h"
+#include <fifo-buffer.h>
 
 FifoState *uartReceiveBuffer(Uart uart) REENTRANT;
 FifoState *uartTransmitBuffer(Uart uart) REENTRANT;

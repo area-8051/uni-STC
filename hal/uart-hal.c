@@ -505,7 +505,7 @@ bool uartSendCharacter(Uart uart, uint8_t c, BlockingOperation blocking) {
 	return rc;
 }
 
-bool uartSendBlock(Uart uart, uint8_t *data, uint8_t size, BlockingOperation blocking) {
+bool uartSendBlock(Uart uart, const uint8_t *data, uint8_t size, BlockingOperation blocking) {
 	FifoState *buffer = uartTransmitBuffer(uart);
 	bool rc = true;
 	

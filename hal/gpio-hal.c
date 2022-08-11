@@ -417,7 +417,7 @@ uint8_t gpioRead(GpioConfig *gpioConfig) {
 	return (value & gpioConfig->__setMask) >> gpioConfig->pin;
 }
 
-void gpioWrite(GpioConfig *gpioConfig, uint8_t value) {
+void gpioWrite(GpioConfig *gpioConfig, uint8_t GPIO_SEGMENT value) {
 	if (gpioConfig->count == 1) {
 		// In case the caller wants to set a single bit and expects
 		// any non-zero value will be treated as a logical one (which

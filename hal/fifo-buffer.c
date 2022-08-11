@@ -61,7 +61,7 @@ bool fifoWrite(FifoState *buffer, const void *data, uint8_t count) {
 	return rc;
 }
 
-bool fifoWrite_using1(FifoState *buffer, const void *data, uint8_t count) USING(1) {
+bool fifoWrite_using1(FifoState *buffer, const void * FIFO_SEGMENT data, uint8_t FIFO_SEGMENT count) USING(1) {
 	bool rc = fifoBytesFree(buffer) >= count;
 	
 	if (rc) {
@@ -110,7 +110,7 @@ bool fifoRead(FifoState *buffer, void *data, uint8_t count) {
 	return rc;
 }
 
-bool fifoRead_using1(FifoState *buffer, void *data, uint8_t count) USING(1) {
+bool fifoRead_using1(FifoState *buffer, void * FIFO_SEGMENT data, uint8_t FIFO_SEGMENT count) USING(1) {
 	bool rc = fifoBytesUsed(buffer) >= count;
 	
 	if (rc) {

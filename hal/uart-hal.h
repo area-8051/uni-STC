@@ -181,7 +181,7 @@ bool uartGetBlock(Uart uart, uint8_t *data, uint8_t size, BlockingOperation bloc
 
 bool uartSendCharacter(Uart uart, uint8_t c, BlockingOperation blocking);
 
-bool uartSendBlock(Uart uart, uint8_t *data, uint8_t size, BlockingOperation blocking);
+bool uartSendBlock(Uart uart, const uint8_t *data, uint8_t size, BlockingOperation blocking);
 
 INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1);
 

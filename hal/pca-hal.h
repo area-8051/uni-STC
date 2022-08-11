@@ -49,12 +49,12 @@
  * 
  * Optional macros:
  * 
- *     HAL_PCA_SEGMENT (default: __idata) defines where the HAL's 
- *     state information will be stored. Impacts ISR execution time.
- * 
  *     HAL_PCA_CHANNELS (default: PCA_CHANNELS) defines how many PCA
  *     channels will be supported by the HAL. Useful to reduce both
  *     flash and RAM footprint.
+ * 
+ *     HAL_PCA_SEGMENT (default: __idata) defines where the HAL's 
+ *     state information will be stored. Impacts ISR execution time.
  * 
  * **IMPORTANT:** In order to satisfy SDCC's requirements for ISR 
  * handling, this header file **MUST** be included in the C source 
@@ -62,6 +62,10 @@
  */
 
 #include <hal-defs.h>
+
+#ifndef HAL_PCA_SEGMENT
+	#define HAL_PCA_SEGMENT __idata
+#endif
 
 typedef enum {
 	PCA_CONTINUOUS = 0,
@@ -161,6 +165,6 @@ void pcaStartTimer(PCA_Channel channel, GpioPinMode pinMode, OutputEnable pulseO
  * **IMPORTANT** We're inside an ISR, so just keep track of the values 
  * but DON'T do any processing there!
  */
-void pcaOnInterrupt(PCA_Channel channel, uint16_t pulseLength) USING(1);
+void pcaOnInterrupt(PCA_Channel channel, uint16_t HAL_PCA_SEGMENT pulseLength) USING(1);
 
 #endif // _PCA_HAL_H

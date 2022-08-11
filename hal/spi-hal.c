@@ -38,10 +38,6 @@
  * SPI abstraction implementation.
  */
 
-#ifndef SPI_SEGMENT
-	#define SPI_SEGMENT __data
-#endif
-
 #define SPI_PIN_SWITCH 0
 #define SPI_SS_PIN 1
 #define SPI_MOSI_PIN 2

@@ -55,6 +55,10 @@
  * file where main() is defined.
  */
 
+#ifndef I2C_SEGMENT
+	#define I2C_SEGMENT __idata
+#endif
+
 /*
  * I2C pin configurations (STC8 only)
  * 

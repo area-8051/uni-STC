@@ -31,10 +31,6 @@
 #include <pca-hal.h>
 #include <gpio-hal.h>
 
-#ifndef HAL_PCA_SEGMENT
-	#define HAL_PCA_SEGMENT __idata
-#endif
-
 /*
  * By default, all available UARTs are exposed through the HAL
  * However, should you need to reduce your application's RAM or

@@ -47,13 +47,17 @@
  * 
  * Optional macros:
  * 
- *     SPI_SEGMENT (default: __data) defines where the HAL's state
+ *     SPI_SEGMENT (default: __idata) defines where the HAL's state
  *     information will be stored. Impacts ISR execution time.
  * 
  * **IMPORTANT:** In order to satisfy SDCC's requirements for ISR 
  * handling, this header file **MUST** be included in the C source 
  * file where main() is defined.
  */
+
+#ifndef SPI_SEGMENT
+	#define SPI_SEGMENT __idata
+#endif
 
 /*
  * SPI pin configurations for STC8H

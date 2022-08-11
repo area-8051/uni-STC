@@ -44,7 +44,18 @@
  * Dependencies:
  * 
  *     none
+ * 
+ * Optional macros:
+ * 
+ *     FIFO_SEGMENT (default: __idata) defines where the arguments
+ *     of the *_using1 functions will be stored. These functions are
+ *     intended to be called in ISR, hence the interest of using a
+ *     memory segment with the fastest access.
  */
+
+#ifndef FIFO_SEGMENT
+	#define FIFO_SEGMENT __idata
+#endif
 
 typedef struct {
 	uint8_t size;
@@ -56,8 +67,8 @@ typedef struct {
 
 // Declares a FifoState variable and its buffer.
 #define FIFO_BUFFER(variableName, bufferSize, segment) \
-	static segment uint8_t variableName ## Data[bufferSize]; \
-	segment FifoState variableName = { \
+	static uint8_t segment variableName ## Data[bufferSize]; \
+	FifoState segment variableName = { \
 		.size = bufferSize, \
 		.first = bufferSize, \
 		.last = bufferSize, \
@@ -68,8 +79,8 @@ typedef struct {
 bool fifoWrite(FifoState *fifo, const void *data, uint8_t count);
 bool fifoRead(FifoState *fifo, void *data, uint8_t count);
 
-bool fifoWrite_using1(FifoState *fifo, const void *data, uint8_t count) USING(1);
-bool fifoRead_using1(FifoState *fifo, void *data, uint8_t count) USING(1);
+bool fifoWrite_using1(FifoState *fifo, const void * FIFO_SEGMENT data, uint8_t FIFO_SEGMENT count) USING(1);
+bool fifoRead_using1(FifoState *fifo, void * FIFO_SEGMENT data, uint8_t FIFO_SEGMENT count) USING(1);
 
 INLINE void fifoClear(FifoState *fifo) {
 	fifo->first = fifo->size;

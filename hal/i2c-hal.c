@@ -37,10 +37,6 @@
  * I2C abstraction implementation.
  */
 
-#ifndef I2C_SEGMENT
-	#define I2C_SEGMENT __idata
-#endif
-
 #define I2C_PIN_SWITCH 0
 #define I2C_SCL_PIN 1
 #define I2C_SDA_PIN 2

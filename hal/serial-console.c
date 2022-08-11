@@ -35,16 +35,12 @@
  */
 
 #include "project-defs.h"
+#include "serial-console.h"
 #include <uart-hal.h>
 #include <delay.h>
 #include <stdio.h>
 
-#ifndef SERIAL_CONSOLE_SEGMENT
-	// Default to the memory model's segment.
-	#define SERIAL_CONSOLE_SEGMENT
-#endif
-
-static SERIAL_CONSOLE_SEGMENT Uart __serialConsoleUart;
+static Uart SERIAL_CONSOLE_SEGMENT __serialConsoleUart;
 
 #ifdef TIMER_HAS_T1
 	#define CONSOLE_TIMER UART_USE_OWN_TIMER

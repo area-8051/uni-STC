@@ -61,6 +61,11 @@
  * - uart-hal.h must be included in the source file containing main()
  */
 
+#ifndef SERIAL_CONSOLE_SEGMENT
+	// Default to the memory model's segment.
+	#define SERIAL_CONSOLE_SEGMENT
+#endif
+
 void serialConsoleInitialise(Uart uart, uint32_t baudRate, uint8_t pinConfiguration);
 
 #endif // _SERIAL_CONSOLE_H

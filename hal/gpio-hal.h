@@ -50,7 +50,15 @@
  *     BASIC_GPIO_HAL (default: undefined). When defined, removes
  *     support for GPIO features not available on the original 8051.
  *     Greatly helps reduce flash footprint.
+ * 
+ *     GPIO_SEGMENT (default: __idata) defines where the arguments
+ *     of the critical functions (expected to be called inside an ISR)
+ *     will be stored. Allows using a memory segment with faster access.
  */
+
+#ifndef GPIO_SEGMENT
+	#define GPIO_SEGMENT __idata
+#endif
 
 #ifdef BASIC_GPIO_HAL
 	// Useful to save on flash space when advanced features aren't used.
@@ -179,6 +187,6 @@ uint8_t gpioRead(GpioConfig *config);
  * bit 0 corresponds to .pin in GpioConfig.
  * Bits outside of the scope defined by GpioConfig are masked off.
  */
-void gpioWrite(GpioConfig *config, uint8_t value);
+void gpioWrite(GpioConfig *config, uint8_t GPIO_SEGMENT value);
 
 #endif // _GPIO_HAL_H

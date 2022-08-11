@@ -32,6 +32,9 @@ ifeq ($(PROJECT_NAME),)
 	$(error The PROJECT_NAME variable must be defined.)
 endif
 
+# You may also define PROJECT_FLAGS if you need specific build flags 
+# for your application, but this is not required, so not tested.
+
 ifeq ($(MCU_FREQ),)
 	$(error The MCU_FREQ variable must be defined.)
 endif
@@ -100,7 +103,7 @@ BUILD_ROOT := build
 OBJDIR := $(BUILD_ROOT)
 
 FW_FILE := $(OBJDIR)/$(PROJECT_NAME).ihx
-DEP_FILE := $(OBJDIR)/dependencies
+DEP_FILE := $(OBJDIR)/dependencies.mk
 
 DRIVER_SRCS := $(filter $(DRIVER_DIR)/%, $(SRCS))
 HAL_SRCS := $(filter $(HAL_DIR)/%, $(SRCS))
@@ -124,7 +127,7 @@ all: $(DEP_FILE) $(FW_FILE)
 
 
 clean:
-	rm -rf $(BUILD_ROOT)
+	@rm -rf $(BUILD_ROOT)
 
 doc:
 	doxygen doxygen.conf
@@ -133,4 +136,5 @@ upload:
 	stcgal -a -p /dev/$(ISP_PORT) -t `echo "$(MCU_FREQ)" | rev | cut -c 4- | rev` $(FW_FILE)
 
 console:
+	# TODO: Replace with your favorite terminal emulator
 	mate-terminal -t "$(PROJECT_NAME) console" -e "minicom -b $(CONSOLE_BAUDRATE) -D /dev/$(CONSOLE_PORT)"

@@ -61,11 +61,13 @@
 # having an internal RC oscillator.
 MCU_FREQ := 23961600
 
+STACK_SIZE := 112
+
 # Tested on STC15W408AS-35I-DIP16
 MEMORY_SIZES := \
 	--xram-loc 0 \
 	--xram-size 256 \
-	--stack-size 128 \
+	--stack-size $(STACK_SIZE) \
 	--code-size 8192
 
 MEMORY_MODEL := --model-medium

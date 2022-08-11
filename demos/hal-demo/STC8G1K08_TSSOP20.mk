@@ -61,12 +61,14 @@
 # having an internal RC oscillator.
 MCU_FREQ := 23961600
 
+STACK_SIZE := 112
+
 # Tested on STC8G1K08-38I-TSSOP20
 
 MEMORY_SIZES := \
 	--xram-loc 0 \
 	--xram-size 1024 \
-	--stack-size 128 \
+	--stack-size $(STACK_SIZE) \
 	--code-size 8192
 
 MEMORY_MODEL := --model-medium

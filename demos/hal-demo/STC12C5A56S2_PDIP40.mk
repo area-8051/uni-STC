@@ -60,11 +60,13 @@
 # The STC12 doesn't have an internal RC oscillator.
 MCU_FREQ := 11059200
 
+STACK_SIZE := 112
+
 # Tested on STC12C5A56S2-35I-PDIP40 @ 11.0952 MHz
 MEMORY_SIZES := \
 	--xram-loc 0 \
 	--xram-size 1024 \
-	--stack-size 128 \
+	--stack-size $(STACK_SIZE) \
 	--code-size 57344
 
 MEMORY_MODEL := --model-large

@@ -26,14 +26,14 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
 
+# SDCC's dependencies generation is buggy and doesn't match GCC's
+# documentation (which the SDCC manual says should apply), so we 
+# need to compensate for this. We also need to create subdirectories
+# under $(OBJDIR) as needed because SDCC can't do it.
 $(DEP_FILE):
 	@mkdir -p $(OBJDIR)
-	# SDCC's dependencies generation is buggy and doesn't match GCC's
-	# documentation (which the SDCC manual says should apply), so we 
-	# need to compensate for this.
 	@for srcFile in $(LOCAL_SRCS); do $(CC) $(CPPFLAGS) -MM $${srcFile} >> $(DEP_FILE); done
 	@sed -i "s/^\(.*\.rel:.*\)/build\/\1/g" $(DEP_FILE)
-	# Create subdirectories as needed because SDCC can't do it.
 	@for objFile in $(DRIVER_OBJS); do objPath="$${objFile%/*}"; if [ ! -d "$${objPath}" ]; then mkdir -p "$${objPath}"; fi; done
 	@for objFile in $(HAL_OBJS); do objPath="$${objFile%/*}"; if [ ! -d "$${objPath}" ]; then mkdir -p "$${objPath}"; fi; done
 	@for objFile in $(LOCAL_OBJS); do objPath="$${objFile%/*}"; if [ ! -d "$${objPath}" ]; then mkdir -p "$${objPath}"; fi; done

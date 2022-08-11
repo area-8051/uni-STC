@@ -36,16 +36,8 @@
  * FIFO circular buffer implementation.
  */
 
-uint8_t __fifoLength(FifoState *buffer) REENTRANT {
-	return (buffer->last >= buffer->first)
-		? (buffer->last == buffer->size
-			? 0
-			: (buffer->last - buffer->first + 1)
-		)
-		: (buffer->size - (buffer->first - buffer->last - 1));
-}
 
-bool fifoWrite(FifoState *buffer, const void *data, uint8_t count) REENTRANT {
+bool fifoWrite(FifoState *buffer, const void *data, uint8_t count) {
 	bool rc = fifoBytesFree(buffer) >= count;
 	
 	if (rc) {
@@ -69,7 +61,31 @@ bool fifoWrite(FifoState *buffer, const void *data, uint8_t count) REENTRANT {
 	return rc;
 }
 
-bool fifoRead(FifoState *buffer, void *data, uint8_t count) REENTRANT {
+bool fifoWrite_using1(FifoState *buffer, const void *data, uint8_t count) USING(1) {
+	bool rc = fifoBytesFree(buffer) >= count;
+	
+	if (rc) {
+		for (uint8_t n = 0; n < count; n++) {
+			buffer->last++;
+			
+			if (buffer->last >= buffer->size) {
+				// Handles both buffer empty and wrap around cases.
+				buffer->last = 0;
+			}
+			
+			if (buffer->first == buffer->size) {
+				// Buffer was empty, initialise .first too.
+				buffer->first = 0;
+			}
+			
+			buffer->data[buffer->last] = ((uint8_t *) data)[n];
+		}
+	}
+	
+	return rc;
+}
+
+bool fifoRead(FifoState *buffer, void *data, uint8_t count) {
 	bool rc = fifoBytesUsed(buffer) >= count;
 	
 	if (rc) {
@@ -94,8 +110,27 @@ bool fifoRead(FifoState *buffer, void *data, uint8_t count) REENTRANT {
 	return rc;
 }
 
-void fifoClear(FifoState *fifo) REENTRANT {
-	fifo->first = fifo->size;
-	fifo->last = fifo->size;
-	fifo->status = 0;
+bool fifoRead_using1(FifoState *buffer, void *data, uint8_t count) USING(1) {
+	bool rc = fifoBytesUsed(buffer) >= count;
+	
+	if (rc) {
+		for (uint8_t n = 0; n < count; n++) {
+			// Buffer is not empty, read first character.
+			((uint8_t *) data)[n] = buffer->data[buffer->first];
+			
+			if (buffer->first == buffer->last) {
+				// We've read the last character, mark buffer as empty.
+				buffer->first = buffer->size;
+				buffer->last = buffer->size;
+			} else {
+				buffer->first++;
+				
+				if (buffer->first == buffer->size) {
+					buffer->first = 0;
+				}
+			}
+		}
+	}
+	
+	return rc;
 }

@@ -171,8 +171,7 @@ typedef enum {
  */
 #include <fifo-buffer.h>
 
-FifoState *uartReceiveBuffer(Uart uart) REENTRANT;
-FifoState *uartTransmitBuffer(Uart uart) REENTRANT;
+bool uartTransmitBufferHasBytesFree(Uart uart, uint8_t bytes);
 
 TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudRateTimer, UartMode mode, uint8_t pinSwitch);
 

@@ -70,7 +70,7 @@ static int8_t pcaGlowingIncrement = 1;
  */
 // Suppress warning "unreferenced function argument"
 #pragma disable_warning 85
-void pcaOnInterrupt(PCA_Channel channel, uint16_t pulseLength) USE_BANK(1) {
+void pcaOnInterrupt(PCA_Channel channel, uint16_t pulseLength) USING(1) {
 }
 
 void pcaUpdateGlowingDutyCycle() {

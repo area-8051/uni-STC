@@ -161,6 +161,6 @@ void pcaStartTimer(PCA_Channel channel, GpioPinMode pinMode, OutputEnable pulseO
  * **IMPORTANT** We're inside an ISR, so just keep track of the values 
  * but DON'T do any processing there!
  */
-void pcaOnInterrupt(PCA_Channel channel, uint16_t pulseLength) USE_BANK(1);
+void pcaOnInterrupt(PCA_Channel channel, uint16_t pulseLength) USING(1);
 
 #endif // _PCA_HAL_H

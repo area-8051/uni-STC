@@ -118,7 +118,7 @@ FIFO_BUFFER(UART1_transmitBuffer, UART1_TX_BUFFER_SIZE, UART1_SEGMENT)
 	FIFO_BUFFER(UART4_transmitBuffer, UART4_TX_BUFFER_SIZE, UART4_SEGMENT)
 #endif // HAL_UARTS >= 3
 
-FifoState *uartReceiveBuffer(Uart uart) REENTRANT {
+static FifoState *uartReceiveBuffer(Uart uart) {
 	FifoState *result = NULL;
 	
 	switch (uart) {
@@ -146,7 +146,7 @@ FifoState *uartReceiveBuffer(Uart uart) REENTRANT {
 	return result;
 }
 
-FifoState *uartTransmitBuffer(Uart uart) REENTRANT {
+static FifoState *uartTransmitBuffer(Uart uart) {
 	FifoState *result = NULL;
 	
 	switch (uart) {
@@ -172,6 +172,10 @@ FifoState *uartTransmitBuffer(Uart uart) REENTRANT {
 	}
 	
 	return result;
+}
+
+bool uartTransmitBufferHasBytesFree(Uart uart, uint8_t bytes) {
+	return fifoBytesFree(uartTransmitBuffer(UART_PORT)) >= bytes;
 }
 
 #ifndef M_S1_S
@@ -352,7 +356,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 	if (S1CON & M_TI) {
 		S1CON &= ~M_TI;
 		
-		if (fifoRead(&UART1_transmitBuffer, &c, 1)) {
+		if (fifoRead_using1(&UART1_transmitBuffer, &c, 1)) {
 			S1BUF = c;
 		} else {
 			UART1_transmitBuffer.status = STATUS_CLEAR;
@@ -362,7 +366,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 	if (S1CON & M_RI) {
 		S1CON &= ~M_RI;
 		c = S1BUF;
-		fifoWrite(&UART1_receiveBuffer, &c, 1);
+		fifoWrite_using1(&UART1_receiveBuffer, &c, 1);
 	}
 }
 
@@ -373,7 +377,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 		if (S2CON & M_TI) {
 			S2CON &= ~M_TI;
 			
-			if (fifoRead(&UART2_transmitBuffer, &c, 1)) {
+			if (fifoRead_using1(&UART2_transmitBuffer, &c, 1)) {
 				S2BUF = c;
 			} else {
 				UART2_transmitBuffer.status = STATUS_CLEAR;
@@ -383,7 +387,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 		if (S2CON & M_RI) {
 			S2CON &= ~M_RI;
 			c = S2BUF;
-			fifoWrite(&UART2_receiveBuffer, &c, 1);
+			fifoWrite_using1(&UART2_receiveBuffer, &c, 1);
 		}
 	}
 #endif // HAL_UARTS >= 2
@@ -395,7 +399,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 		if (S3CON & M_TI) {
 			S3CON &= ~M_TI;
 			
-			if (fifoRead(&UART3_transmitBuffer, &c, 1)) {
+			if (fifoRead_using1(&UART3_transmitBuffer, &c, 1)) {
 				S3BUF = c;
 			} else {
 				UART3_transmitBuffer.status = STATUS_CLEAR;
@@ -405,7 +409,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 		if (S3CON & M_RI) {
 			S3CON &= ~M_RI;
 			c = S3BUF;
-			fifoWrite(&UART3_receiveBuffer, &c, 1);
+			fifoWrite_using1(&UART3_receiveBuffer, &c, 1);
 		}
 	}
 
@@ -415,7 +419,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 		if (S4CON & M_TI) {
 			S4CON &= ~M_TI;
 			
-			if (fifoRead(&UART4_transmitBuffer, &c, 1)) {
+			if (fifoRead_using1(&UART4_transmitBuffer, &c, 1)) {
 				S4BUF = c;
 			} else {
 				UART4_transmitBuffer.status = STATUS_CLEAR;
@@ -425,7 +429,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 		if (S4CON & M_RI) {
 			S4CON &= ~M_RI;
 			c = S4BUF;
-			fifoWrite(&UART4_receiveBuffer, &c, 1);
+			fifoWrite_using1(&UART4_receiveBuffer, &c, 1);
 		}
 	}
 #endif // HAL_UARTS >= 3

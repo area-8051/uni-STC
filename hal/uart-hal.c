@@ -175,7 +175,7 @@ static FifoState *uartTransmitBuffer(Uart uart) {
 }
 
 bool uartTransmitBufferHasBytesFree(Uart uart, uint8_t bytes) {
-	return fifoBytesFree(uartTransmitBuffer(UART_PORT)) >= bytes;
+	return fifoBytesFree(uartTransmitBuffer(uart)) >= bytes;
 }
 
 #ifndef M_S1_S

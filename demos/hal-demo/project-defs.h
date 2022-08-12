@@ -47,8 +47,6 @@
 	
 	#ifdef BUILD_FOR_STC8G1K17_DIP16
 		#include <STC/8G1Kxx/DIP16.h>
-		// Uncomment to build using the medium memory model.
-		//#define SMALL_RAM
 	#endif
 	
 	#ifdef BUILD_FOR_STC8G2K64S4
@@ -68,12 +66,24 @@
 		#define SMALL_FLASH
 	#endif
 	
+	#ifdef BUILD_FOR_STC8H1K28_LQFP32
+		#include <STC/8H1Kxx/LQFP32.h>
+	#endif
+	
 	#ifdef BUILD_FOR_STC8H3K64S2_TSSOP20
 		#include <STC/8H3KxxS2/TSSOP20.h>
 	#endif
 	
 	#ifdef BUILD_FOR_STC8H3K64S4_LQFP32
 		#include <STC/8H3KxxS4/LQFP32.h>
+	#endif
+	
+	#ifdef BUILD_FOR_STC8H4K64TL_TSSOP20
+		#include <STC/8H4KxxTL/TSSOP20.h>
+	#endif
+	
+	#ifdef BUILD_FOR_STC8H4K64TL_LQFP32
+		#include <STC/8H4KxxTL/LQFP32.h>
 	#endif
 	
 	#ifdef BUILD_FOR_STC8H8K64U_PDIP40

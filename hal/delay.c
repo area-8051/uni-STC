@@ -170,3 +170,34 @@ void delay10us(uint8_t us) {
 		}
 	}
 }
+
+#if MCU_FAMILY == 8 && MCU_FREQ >= 19000000UL
+	#define DELAY_1us ((uint8_t) ((((MCU_FREQ / 10000UL) + 41UL) / 100UL) - 13UL) / 4UL)
+	/*
+	 * total_cycles = us (4 n + 15) + 9
+	 * total_cycles = delay (= 1e-4 s) * oscillator_frequency (e.g. 4.5e7 Hz)
+	 * In order to round the result of the division to the closest integer,
+	 * we add 100/2 = 50 to the numerator, giving + 41UL instead of - 9UL,
+	 * and similarly 4/2 = 2, giving - 13UL instead of - 15UL.
+	 */
+#elif (MCU_FAMILY == 12 || MCU_FAMILY == 15) && MCU_FREQ >= 32000000UL
+	#define DELAY_1us ((uint8_t) ((((MCU_FREQ / 10000UL) + 44UL) / 100UL) - 17UL) / 10UL)
+	/*
+	 * total_cycles = us (10 n + 22) + 6
+	 * total_cycles = delay (= 1e-4 s) * oscillator_frequency (e.g. 4.5e7 Hz)
+	 * In order to round the result of the division to the closest integer,
+	 * we add 100/2 = 50 to the numerator, giving + 44UL instead of - 6UL,
+	 * and similarly 10/2 = 5, giving - 17UL instead of - 22UL.
+	 */
+#endif // MCU_FAMILY
+
+#ifdef DELAY_1us
+	void delay1us(uint16_t us) {
+		for (uint16_t i = us; i; i--) {
+			for (uint8_t n = DELAY_1us; n; n--) {
+			}
+			
+			NOP();
+		}
+	}
+#endif

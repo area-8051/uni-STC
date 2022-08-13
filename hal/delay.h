@@ -45,18 +45,17 @@
  * 
  *     none
  * 
- * Achieving microsecond delays on an MCS-51 is only possible with code 
- * specifically hand-crafted for a given MCU at a given frequency.
- * 
- * Delays in the 10s of microseconds and above can be achieved with 
- * fixed nested-loop structures, making it possible to calculate inner 
- * loop counts according to the operating frequency of the MCU.
- * 
  * See the clock-cycles.ods spreadsheet for execution time calculations.
  */
 
 void delay1ms(uint16_t n);
 
 void delay10us(uint8_t n);
+
+#if (MCU_FAMILY == 8 && MCU_FREQ >= 19000000UL) || ((MCU_FAMILY == 12 || MCU_FAMILY == 15) && MCU_FREQ >= 32000000UL)
+	void delay1us(uint16_t n);
+#else
+	#warning "delay1us() is not available in this MCU family + frequency configuration."
+#endif
 
 #endif // _DELAY_H

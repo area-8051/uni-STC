@@ -58,17 +58,17 @@ OneWire_StatusCode onewireInitialise(GpioConfig *gpioConfig) {
 uint8_t onewireReset(GpioConfig *gpioConfig) {
 	gpioWrite(gpioConfig, 0);
 	// datasheet says "at least 480us" to reset slaves
-	delay10us(48);
+	delay1us(480);
 	gpioWrite(gpioConfig, 1);
 	// datasheet says "15 to 60us" before slave pulls line low for 60-240us,
 	// so sampling after a bit more than 70us should be ok il all cases,
 	// that is both within 15+60 (fastest slave) and 60+240 (slowest slave).
-	delay10us(7);
+	delay1us(70);
 	// Bus should now be low if a slave is present and working
 	uint8_t result = gpioRead(gpioConfig);
 	// datasheet says "at least 480us" from the moment master goes high
 	// and we have already waited for 70us.
-	delay10us(41);
+	delay1us(410);
 	
 	return result;
 }
@@ -81,7 +81,7 @@ static void __onewireWriteBit(GpioConfig *gpioConfig, uint8_t bit) {
 	// Now send the data bit to the slave
 	gpioWrite(gpioConfig, bit);
 	// End write slot, which datasheet says should last "at least 60us"
-	delay10us(6);
+	delay1us(60);
 	gpioWrite(gpioConfig, 1);
 }
 
@@ -93,11 +93,11 @@ static uint8_t __onewireReadBit(GpioConfig *gpioConfig) {
 	// Now, let the slave talk
 	gpioWrite(gpioConfig, 1);
 	// Master should sample input within 15us
-	delay10us(1);
+	delay1us(10);
 	uint8_t result = gpioRead(gpioConfig);
 	// End read slot, which datasheet says should last "at least 60us",
 	// taking into account we've already waited 10us.
-	delay10us(5);
+	delay1us(50);
 	
 	return result;
 }

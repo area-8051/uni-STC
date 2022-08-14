@@ -102,25 +102,25 @@
 #include <lcd/lcd-controller.h>
 #include <delay.h>
 
-#define WRITE_DELAY 7
+#define WRITE_DELAY 72
 
 static void __waitWhileBusy(LCDInterface *interface) {
-	while (lcdReadStatus(interface) & 0x80) delay10us(1);
+	while (lcdReadStatus(interface) & 0x80) delay1us(10);
 }
 
 static void __sendCommand(LCDDevice *device, uint8_t command) {
 	__waitWhileBusy(device->interface);
 	lcdSendCommand(device->interface, command);
 	device->__status.setAddressInvoked = 0;
-	// All instructions except Clear Display take 72us
-	delay10us(WRITE_DELAY);
+	// All instructions take 72us except Clear Display
+	delay1us(WRITE_DELAY);
 }
 
 static void __sendData(LCDInterface *interface, uint8_t data) {
 	__waitWhileBusy(interface);
 	lcdSendData(interface, data);
 	// All data write operations take 72us
-	delay10us(WRITE_DELAY);
+	delay1us(WRITE_DELAY);
 }
 
 static uint8_t __readData(LCDInterface *interface) {
@@ -143,7 +143,7 @@ static void __displayControl(LCDDevice *device, uint8_t displayOn, uint8_t curso
 static void __clearTextDisplay(LCDDevice *device) {
 	__sendCommand(device, 0x01);
 	// Clear Display takes 1.6ms but we already waited for WRITE_DELAY in sendCommand()
-	delay10us((uint8_t) (160 - WRITE_DELAY));
+	delay1us((uint8_t) (1600 - WRITE_DELAY));
 }
 
 static void __setEntryMode(LCDDevice *device, uint8_t textDirection, uint8_t shiftDisplay) {
@@ -168,16 +168,16 @@ void lcdInitialiseController(LCDDevice *device) {
 			// 8-bit mode
 			__sendCommand(device, 0x30);
 			// Data sheet says > 100us and we already waited for WRITE_DELAY
-			delay10us(10 - WRITE_DELAY);
+			delay1us(100 - WRITE_DELAY);
 			__sendCommand(device, 0x30);
 		} else {
 			// 4-bit mode
 			__sendCommand(device, 0x20);
 			// Data sheet says > 100us and we already waited for WRITE_DELAY
-			delay10us(10 - WRITE_DELAY);
+			delay1us(100 - WRITE_DELAY);
 			__sendCommand(device, 0x20);
 			// Data sheet says > 100us and we already waited for WRITE_DELAY
-			delay10us(10 - WRITE_DELAY);
+			delay1us(100 - WRITE_DELAY);
 		}
 	}
     

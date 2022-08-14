@@ -82,6 +82,8 @@
 #include <lcd/lcd-controller.h>
 #include <delay.h>
 
+#define WRITE_DELAY 50
+
 static void __waitWhileBusy(LCDInterface *interface) {
 	while (lcdReadStatus(interface) & 0x80);
 }
@@ -90,15 +92,15 @@ static void __sendCommand(LCDDevice *device, uint8_t command) {
 	__waitWhileBusy(device->interface);
 	lcdSendCommand(device->interface, command);
 	device->__status.setAddressInvoked = 0;
-	// All instructions except Clear Display and Return Home take 50us
-	delay10us(5);
+	// All instructions take 50us except Clear Display and Return Home
+	delay1us(WRITE_DELAY);
 }
 
 static void __sendData(LCDInterface *interface, uint8_t data) {
 	__waitWhileBusy(interface);
 	lcdSendData(interface, data);
 	// All data write operations take 50us
-	delay10us(5);
+	delay1us(WRITE_DELAY);
 }
 
 static uint8_t __readData(LCDInterface *interface) {
@@ -119,8 +121,8 @@ static void __displayControl(LCDDevice *device, uint8_t displayOn, uint8_t curso
 
 static void __clearTextDisplay(LCDDevice *device) {
 	__sendCommand(device, 0x01);
-	// Clear Display takes 1.6ms but we already waited for 50us in sendCommand()
-	delay10us(155);
+	// Clear Display takes 1.6ms but we already waited for WRITE_DELAY in sendCommand()
+	delay1us(1600 - WRITE_DELAY);
 }
 
 static void __setEntryMode(LCDDevice *device, uint8_t textDirection, uint8_t shiftDisplay) {
@@ -145,12 +147,11 @@ void lcdInitialiseController(LCDDevice *device)  {
 		// In case of a warm reset, we must make sure to be in 8-bit mode
 		// so the context is the same as after a power-on reset.
 		__sendCommand(device, 0x30);
-		// Wait for 4.1ms, but we've already waited for 50us in sendCommnand()
-		delay1ms(4);
-		delay10us(5);
+		// Wait for 4.1ms, but we've already waited for WRITE_DELAY in sendCommnand()
+		delay1us(4100 - WRITE_DELAY);
 		__sendCommand(device, 0x30);
-		// Wait for 100us, but we've already waited for 50us in sendCommnand()
-		delay10us(5);
+		// Wait for 100us, but we've already waited for WRITE_DELAY in sendCommnand()
+		delay1us(100 - WRITE_DELAY);
 		__sendCommand(device, 0x30);
 		
 		if (lcdGetLinkWidth(device->interface) != 8) {
@@ -199,8 +200,8 @@ void lcdClearTextDisplay(LCDDevice *device)  {
 
 void lcdReturnHome(LCDDevice *device)  {
 	__sendCommand(device, 0x02);
-	// Return Home takes 1.6ms but we already waited for 50us in sendCommand()
-	delay10us(155);
+	// Return Home takes 1.6ms but we already waited for WRITE_DELAY in sendCommand()
+	delay1us(1600 - WRITE_DELAY);
 }
 
 void lcdSetEntryMode(LCDDevice *device, uint8_t textDirection, uint8_t shiftDisplay)  {

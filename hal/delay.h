@@ -55,7 +55,12 @@ void delay10us(uint8_t n);
 #if (MCU_FAMILY == 8 && MCU_FREQ >= 19000000UL) || ((MCU_FAMILY == 12 || MCU_FAMILY == 15) && MCU_FREQ >= 32000000UL)
 	void delay1us(uint16_t n);
 #else
-	#warning "delay1us() is not available in this MCU family + frequency configuration."
+	#ifndef SUPPRESS_delay1us_WARNING
+		#warning "CAUTION! delay1us() is *NOT* available in this MCU family + frequency"
+		#warning "configuration, using delay10us() to emulate it, but with less accuracy."
+	#endif
+	
+	#define delay1us(d) delay10us(d / 10)
 #endif
 
 #endif // _DELAY_H

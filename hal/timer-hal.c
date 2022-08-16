@@ -286,3 +286,31 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 	
 	return rc;
 }
+
+void stopTimer(Timer timer) {
+	switch (timer) {
+	case TIMER0:
+		TCON &= ~M_T0R;
+		break;
+	
+#ifdef TIMER_HAS_T1
+	case TIMER1:
+		TCON &= ~M_T1R;
+		break;
+#endif // TIMER_HAS_T1
+
+	case TIMER2:
+		AUXR &= ~M_T2R;
+		break;
+
+#ifdef TIMER_HAS_T3_T4
+	case TIMER3:
+		T4T3M &= ~M_T3R;
+		break;
+	
+	case TIMER4:
+		T4T3M &= ~M_T4R;
+		break;
+#endif // TIMER_HAS_T3_T4
+	}
+}

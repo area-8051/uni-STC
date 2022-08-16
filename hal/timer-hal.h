@@ -62,6 +62,8 @@ uint32_t frequencyToSysclkDivisor(uint32_t frequency);
 // timerControl affects Timers 0 & 1 only (ignored for the others).
 TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableOutput, InterruptEnable enableInterrupt, CounterControl timerControl);
 
+void stopTimer(Timer timer);
+
 /*
  * The prototype of timer <n>'s ISR is:
  * 

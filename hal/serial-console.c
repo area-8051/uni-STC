@@ -55,6 +55,12 @@ void serialConsoleInitialise(Uart uart, uint32_t baudRate, uint8_t pinConfigurat
 }
 
 int putchar(int c) {
+	if (c == '\n') {
+		// Using Unix line terminations reduces flash usage and makes
+		// strings in the source code a little big more legible.
+		uartSendCharacter(__serialConsoleUart, '\r', BLOCKING);
+	}
+	
 	uartSendCharacter(__serialConsoleUart, c, BLOCKING);
 	
 	return c;

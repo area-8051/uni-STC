@@ -66,4 +66,10 @@ typedef enum {
 	EXTERNALY_ENABLED = 1,
 } CounterControl;
 
+typedef union {
+	uint8_t u8values[4];
+	uint16_t u16values[2];
+	uint32_t u32value;
+} UnsignedIntSlicer;
+
 #endif // _HAL_DEFS_H

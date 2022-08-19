@@ -116,3 +116,22 @@ Bit ranges instead of individual bit constants
 
 	OC1M2,OC1M1,OC1M0 (0x40, 0x20, 0x10) => M_OC1M (0x70)
 	                        and, of course, P_OC1M (4)
+
+OTHER NOTES
+
+I have implemented a HAL for the Multiply/Divide Unit and compared it
+against SDCC's software multiplication, division and modulo.
+
+For the comparison to be fair, I implemented using the MDU the 
+_muluchar, _mulint, _mullong, _divuint, _divulong, _moduint, and 
+_modulong functions from SDCC's standard C library implementation
+and compared the execution times of both implementations on the
+same set of values.
+
+It appears that SDCC provides very efficient implementations of these
+operations, with a constant execution time.
+
+Using the MDU is an order of magnitude LESS EFFICIENT, and execution 
+time is variable.
+
+This is why you won't see an MDU HAL in uni-STC.

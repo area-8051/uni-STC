@@ -62,7 +62,17 @@ uint32_t frequencyToSysclkDivisor(uint32_t frequency);
 // timerControl affects Timers 0 & 1 only (ignored for the others).
 TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableOutput, InterruptEnable enableInterrupt, CounterControl timerControl);
 
-void stopTimer(Timer timer);
+// Returns the value of the counter once stopped (useful to measure elapsed time).
+uint16_t stopTimer(Timer timer);
+
+#ifdef TIMER_HAS_PRESCALERS
+	/**
+	 * System clock will be pre-divided by (divisor + 1) before
+	 * being sent to the timer's internal circuitry.
+	 * Only applicable to T2, T3 and T4.
+	 */
+	void setTimerPrescaler(Timer timer, uint8_t divisor);
+#endif
 
 /*
  * The prototype of timer <n>'s ISR is:

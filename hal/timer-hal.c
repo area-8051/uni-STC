@@ -287,30 +287,78 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 	return rc;
 }
 
-void stopTimer(Timer timer) {
+
+uint16_t stopTimer(Timer timer) {
+	uint16_t counterValue = 0;
+	
 	switch (timer) {
 	case TIMER0:
 		TCON &= ~M_T0R;
+#if MCU_FAMILY == 12
+		counterValue = T0L;
+#else
+		counterValue = T0;
+#endif
 		break;
 	
 #ifdef TIMER_HAS_T1
 	case TIMER1:
 		TCON &= ~M_T1R;
+#if MCU_FAMILY == 12
+		counterValue = T1L;
+#else
+		counterValue = T1;
+#endif
 		break;
 #endif // TIMER_HAS_T1
 
 	case TIMER2:
 		AUXR &= ~M_T2R;
+#ifdef TIMER_HAS_T2
+		counterValue = T2;
+#endif
+#ifdef TIMER_HAS_BRT
+		counterValue = BRT;
+#endif
 		break;
 
 #ifdef TIMER_HAS_T3_T4
 	case TIMER3:
 		T4T3M &= ~M_T3R;
+		counterValue = T3;
 		break;
 	
 	case TIMER4:
 		T4T3M &= ~M_T4R;
+		counterValue = T4;
 		break;
 #endif // TIMER_HAS_T3_T4
 	}
+	
+	return counterValue;
 }
+
+
+#ifdef TIMER_HAS_PRESCALERS
+
+	void setTimerPrescaler(Timer timer, uint8_t divisor) {
+		switch (timer) {
+	#ifdef TIMER_HAS_T2
+		case TIMER2:
+			TM2PS = divisor;
+			break;
+	#endif
+
+	#ifdef TIMER_HAS_T3_T4
+		case TIMER3:
+			TM3PS = divisor;
+			break;
+		
+		case TIMER4:
+			TM4PS = divisor;
+			break;
+	#endif // TIMER_HAS_T3_T4
+		}
+	}
+
+#endif // TIMER_HAS_PRESCALERS

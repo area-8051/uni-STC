@@ -46,7 +46,7 @@
 	
 	#if MCU_SERIES == 'H' || (MCU_SERIES == 'A' && defined(MCU_HAS_DMA))
 		#define TIMER_HAS_PRESCALERS
-		#define TIMER_HAS_T3_T4_PIN
+		#define TIMER_HAS_T3_T4_PIN_SWITCH
 	#endif // MCU_SERIES == 'H'
 #endif // MCU_FAMILY == 8
 
@@ -314,7 +314,7 @@ SFR(WDT_CONTR, 0xC1);
 		SFRX(TM2PS, 0xFEA2);
 	#endif // TIMER_HAS_T2
 
-	#ifdef TIMERS_HAS_T3_T4
+	#ifdef TIMER_HAS_T3_T4
 		// SFR TM3PS: Timer 3 clock prescaler register
 		SFRX(TM3PS, 0xFEA3);
 		// SFR TM4PS: Timer 4 clock prescaler register
@@ -322,8 +322,8 @@ SFR(WDT_CONTR, 0xC1);
 	#endif // TIMER_HAS_T3_T4
 #endif // TIMER_HAS_PRESCALERS
 
-#ifdef TIMER_HAS_T3_T4_PIN
-	// SFR T3T4PIN: T3/T4 selection register
+#ifdef TIMER_HAS_T3_T4_PIN_SWITCH
+	// SFR T3T4PIN: T3/T4 pin configuration switch
 	SFRX(T3T4PIN, 0xFEAC);
 	
 	#define M_T3T4SEL 0x1

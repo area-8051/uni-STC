@@ -68,13 +68,15 @@ ifeq ($(ISP_PORT),)
 endif
 
 ifeq ($(CONSOLE_PORT),)
-	$(warning The CONSOLE_PORT variable is undefined, defaulting to $(ISP_PORT).)
 	CONSOLE_PORT := $(ISP_PORT)
 endif
 
 ifeq ($(CONSOLE_BAUDRATE),)
-	$(warning The CONSOLE_BAUDRATE variable is undefined, defaulting to 115200.)
 	CONSOLE_BAUDRATE := 115200
+endif
+
+ifeq ($(STCGAL_OPTIONS),)
+	STCGAL_OPTIONS := -a
 endif
 
 # Toolchain settings ---------------------------------------------------
@@ -133,7 +135,7 @@ doc:
 	doxygen doxygen.conf
 
 upload:
-	stcgal -a -p /dev/$(ISP_PORT) -t `echo "$(MCU_FREQ)" | rev | cut -c 4- | rev` $(FW_FILE)
+	stcgal $(STCGAL_OPTIONS) -p /dev/$(ISP_PORT) -t `echo "$(MCU_FREQ)" | rev | cut -c 4- | rev` $(FW_FILE)
 
 console:
 	# TODO: Replace with your favorite terminal emulator

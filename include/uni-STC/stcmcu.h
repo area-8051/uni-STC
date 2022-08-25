@@ -23,6 +23,11 @@
 	#error "The MCU_PINS macro must be defined (e.g. 8, 20, 48)"
 #endif
 
+// Convenience macro, improves legibility.
+#if MCU_FAMILY == 8 && MCU_SERIES == 'A' && defined(MCU_HAS_DMA)
+	#define STC8A8KxxD4
+#endif
+
 #include <compiler.h>
 
 #include <uni-STC/uni-STC.h>
@@ -48,9 +53,5 @@
 #include <uni-STC/touchkey.h>
 #include <uni-STC/uart.h>
 #include <uni-STC/usb.h>
-
-#ifndef MCU_FREQ
-	#error "The MCU_FREQ macro must be defined (e.g. 24000000UL)"
-#endif
 
 #endif // _UNISTC_STCMCU_H

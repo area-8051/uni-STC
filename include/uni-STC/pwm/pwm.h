@@ -8,11 +8,6 @@
 #ifndef _UNISTC_PWM_PWM_H
 #define _UNISTC_PWM_PWM_H
 
-/**
- * When using an STC8A8K64D4:
- *     The MCU_HAS_DMA macro must be defined.
- */
-
 #if defined(PWM_GROUPS) && defined(PWM_CHANNELS) && PWM_GROUPS > 0 && PWM_CHANNELS > 0
 	#if MCU_FAMILY == 15
 		#include <uni-STC/pwm/pwm15.h>
@@ -36,7 +31,7 @@
 			// PWM B interrupt
 			#define PWMB_INTERRUPT 27
 			#define PWMB_VECTOR_ADDR 0x00DB
-		#elif MCU_SERIES == 'G' || (MCU_SERIES == 'A' && defined(MCU_HAS_DMA))
+		#elif MCU_SERIES == 'G' || defined(STC8A8KxxD4)
 			#include <uni-STC/pwm/pwm8g.h>
 			#define MCU_HAS_ENHANCED_PWM 'G'
 		#elif MCU_SERIES == 'A'

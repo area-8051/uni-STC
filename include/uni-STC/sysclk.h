@@ -57,15 +57,14 @@
 			#define IRCO_MAX_FREQ 39000000UL
 			#define IRCO_REC_FREQ 35000000UL
 		#endif // MCU_HAS_USB
-	#elif MCU_SERIES == 'A' && defined(MCU_HAS_DMA)
-		// STC8A8K64D4
+	#elif defined(STC8A8KxxD4)
 		#define MCU_HAS_IRC_TRIM
 		#define MCU_HAS_MCLKOCR
 		// Theoretical max. is 55 MHz, but practical and
 		// recommended are 45 MHz
 		#define IRCO_MAX_FREQ 45000000UL
 	#else
-		// STC8A and STC8F but not STC8A8K64D4
+		// STC8A and STC8F but not STC8A8KxxD4
 		#define IRCO_MAX_FREQ 24000000UL
 	#endif
 #endif // MCU_FAMILY == 8

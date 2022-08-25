@@ -12,8 +12,7 @@
 		#define MCU_HAS_IAP_TPS
 	#elif MCU_SERIES == 'H'
 		#define MCU_HAS_IAP_TPS
-	#elif MCU_SERIES == 'A' && defined(MCU_HAS_DMA)
-		// STC8A8K64D4
+	#elif defined(STC8A8KxxD4)
 		#define MCU_HAS_IAP_TPS
 	#endif
 #endif // MCU_FAMILY == 8

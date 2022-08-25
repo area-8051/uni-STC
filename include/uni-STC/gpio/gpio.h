@@ -10,9 +10,6 @@
 /**
  * When using most, but not all, STC8H
  *     The GPIO_HAS_INT_WK macro must be defined.
- * 
- * When using an STC8A8K64D4:
- *     The MCU_HAS_DMA macro must be defined.
  */
 
 // All MCU have P3 and P5. Other ports might be available depending 
@@ -43,14 +40,14 @@
 	#if MCU_SERIES == 'A' || MCU_SERIES == 'F'
 		// Internal pull-up resistors & Schmidt-trigger
 		#define GPIO_HAS_PU_NCS
-	#endif // MCU_SERIES == 'A'
 
-	#if MCU_SERIES == 'A' && defined(MCU_HAS_DMA)
-		// Slew rate control, drive current control, input enable
-		#define GPIO_HAS_SR_DR_IE
-		// Interrupts & wake-up
-		#define GPIO_HAS_INT_WK
-	#endif // MCU_SERIES == 'A' && defined(MCU_HAS_DMA)
+		#ifdef STC8A8KxxD4
+			// Slew rate control, drive current control, input enable
+			#define GPIO_HAS_SR_DR_IE
+			// Interrupts & wake-up
+			#define GPIO_HAS_INT_WK
+		#endif // STC8A8KxxD4
+	#endif // MCU_SERIES == 'A'
 
 	#if MCU_SERIES == 'G'
 		// Internal pull-up resistors & Schmidt-trigger

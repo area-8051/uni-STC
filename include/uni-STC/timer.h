@@ -11,9 +11,6 @@
 /**
  * When using an STC15W4K32S4:
  *     The TIMERS_HAS_T3_T4 macro must be defined.
- * 
- * When using an STC8A8K64D4:
- *     The MCU_HAS_DMA macro must be defined.
  */
 
 // All MCU have T0, T2 and WDT. Other timers might be available 
@@ -44,10 +41,10 @@
 		#define TIMER_HAS_PRESCALERS
 	#endif // MCU_SERIES == 'G'
 	
-	#if MCU_SERIES == 'H' || (MCU_SERIES == 'A' && defined(MCU_HAS_DMA))
+	#if MCU_SERIES == 'H' || defined(STC8A8KxxD4)
 		#define TIMER_HAS_PRESCALERS
 		#define TIMER_HAS_T3_T4_PIN_SWITCH
-	#endif // MCU_SERIES == 'H'
+	#endif // MCU_SERIES == 'H' || defined(STC8A8KxxD4)
 #endif // MCU_FAMILY == 8
 
 // SFR TCON: Timer control

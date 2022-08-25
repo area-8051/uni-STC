@@ -77,10 +77,10 @@
 		#define M_ADC_CHS 0x0f
 		#define P_ADC_CHS 0
 		
-		#if MCU_SERIES == 'G' || MCU_SERIES == 'H' || (MCU_SERIES == 'A' && defined(MCU_HAS_DMA))
+		#if MCU_SERIES == 'G' || MCU_SERIES == 'H' || defined(STC8A8KxxD4)
 			#define M_ADC_EPWMT 0x10
 			#define P_ADC_EPWMT 4
-		#endif // MCU_SERIES == 'G' || MCU_SERIES == 'H' || (MCU_SERIES == 'A' && defined(MCU_HAS_DMA))
+		#endif // MCU_SERIES == 'G' || MCU_SERIES == 'H' || defined(STC8A8KxxD4)
 		
 		#define M_ADC_FLAG 0x20
 		#define P_ADC_FLAG 5
@@ -107,19 +107,14 @@
 		#define M_RESFMT 0x20
 		#define P_RESFMT 5
 		
-		#if MCU_SERIES == 'A' && defined(MCU_HAS_DMA)
-			#define MCU_HAS_ADCTIM
-			#define MCU_HAS_ADCEXCFG
-		#endif // MCU_SERIES == 'A' && defined(MCU_HAS_DMA
-
 		#if MCU_SERIES == 'G'
 			#define MCU_HAS_ADCTIM
 		#endif // MCU_SERIES == 'G'
 
-		#if MCU_SERIES == 'H'
+		#if MCU_SERIES == 'H' || defined(STC8A8KxxD4)
 			#define MCU_HAS_ADCTIM
 			#define MCU_HAS_ADCEXCFG
-		#endif // MCU_SERIES == 'H'
+		#endif // MCU_SERIES == 'H' || defined(STC8A8KxxD4)
 
 		#ifdef MCU_HAS_ADCTIM
 			// SFR ADCTIM: ADC timing control register

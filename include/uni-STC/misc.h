@@ -11,9 +11,6 @@
 /**
  * When using an STC15W4K32S4:
  *     The MCU_HAS_EAXSFR macro must be defined.
- * 
- * When relevant:
- *     The MCU_HAS_DMA macro must be defined.
  */
 
 // SFR SP: Stack pointer
@@ -76,11 +73,10 @@ SFR(PCON, 0x87);
 		#define MCU_HAS_3BIT_BUS_SPEED
 	#elif MCU_SERIES == 'H'
 		#define MCU_HAS_3BIT_BUS_SPEED
-	#elif MCU_SERIES == 'A' && defined(MCU_HAS_DMA)
-		// STC8A8K64D4
+	#elif defined(STC8A8KxxD4)
 		#define MCU_HAS_3BIT_BUS_SPEED
 	#else
-		// STC8A and STC8F but not STC8A8K64D4
+		// STC8A and STC8F but not STC8A8KxxD4
 		
 		// SFR AUXR2: Auxiliary register 2
 		SFR(AUXR2, 0x97);

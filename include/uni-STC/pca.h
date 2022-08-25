@@ -13,9 +13,6 @@
  * 
  * When using an STC8G1K08A:
  *     The MCU_HAS_PCA macro must be defined.
- * 
- * When using an STC8A8K64D4:
- *     The MCU_HAS_DMA macro must be defined.
  */
 
 #if MCU_FAMILY == 12
@@ -43,9 +40,9 @@
 	#if MCU_SERIES == 'A'
 		#define PCA_CHANNELS 4
 
-		#ifdef MCU_HAS_DMA
+		#ifdef STC8A8KxxD4
 			#define PCA_CHANNEL3_XSFR
-		#endif // MCU_HAS_DMA
+		#endif // STC8A8KxxD4
 	#endif // MCU_SERIES == 'A'
 
 	#if MCU_SERIES == 'G'

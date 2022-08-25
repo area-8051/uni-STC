@@ -50,7 +50,7 @@ void adcPowerOff() {
 	ADC_CONTR &= ~M_ADC_POWER;
 }
 
-void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts) {
+void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts, bool pwmTriggered) {
 	#if MCU_FAMILY == 12
 		P_SW1 = resultAlignment ? (P_SW1 | M_RESFMT) : (P_SW1 & ~M_RESFMT);
 	#elif MCU_FAMILY == 15
@@ -99,6 +99,12 @@ void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts)
 		
 		ADCCFG = (ADCCFG & ~M_ADC_SPEED) | ((ADJ_SPEED << P_ADC_SPEED) & M_ADC_SPEED);
 	#endif // MCU_FAMILY == 8
+	
+	#ifdef M_ADC_EPWMT
+		if (pwmTriggered) {
+			ADC_CONTR |= M_ADC_EPWMT;
+		}
+	#endif
 	
 	ADC_CONTR &= ~M_ADC_FLAG;
 	

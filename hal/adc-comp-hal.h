@@ -106,8 +106,11 @@ typedef enum {
 
 /**
  * ADC initialisation.
+ * 
+ * Note: pwmTriggered if only applicable to STC8G, STC8H and STC8A8K64D4.
+ * It has no effect for other MCU.
  */
-void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts);
+void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts, bool pwmTriggered);
 
 /**
  * ADC input pin configuration.

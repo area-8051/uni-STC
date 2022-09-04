@@ -158,6 +158,9 @@ typedef struct {
 #define GPIO_PIN_CONFIG(gpioPort, gpioPin, gpioMode) { .port = gpioPort, .pin = gpioPin, .count = 1, .pinMode = gpioMode, \
 	DEFAULTS_PU_NCS  DEFAULTS_SR_DR_IE  DEFAULTS_INT_WK }
 
+#define GPIO_PINS_CONFIG(gpioPort, gpioFirstPin, gpioPinCount, gpioMode) { .port = gpioPort, .pin = gpioFirstPin, .count = gpioPinCount, .pinMode = gpioMode, \
+	DEFAULTS_PU_NCS  DEFAULTS_SR_DR_IE  DEFAULTS_INT_WK }
+
 /**
  * Configures a GPIO pin, or series of consecutive pins.
  */

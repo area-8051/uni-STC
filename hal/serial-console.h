@@ -45,6 +45,7 @@
  * 
  *     uart-hal
  *     timer-hal
+ *     fifo-buffer
  * 
  * Optional macros:
  * 

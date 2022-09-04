@@ -38,51 +38,75 @@
  * ADC and comparator abstraction layer implementation.
  */
 
+inline void adcPowerOnDelay() {
+#if MCU_FAMILY == 8 && (MCU_SERIES == 'G' || MCU_SERIES == 'H')
+	// The STC8A TRM doesn't specify a power on delay and none is used in code examples.
+	delay1ms(1);
+#elif MCU_FAMILY == 12 || MCU_FAMILY == 15
+	// The STC12 and STC15 TRM doesn't specify a power on delay BUT one is used in code examples.
+	delay1ms(2);
+#endif // MCU_FAMILY == 8 && (MCU_SERIES == 'G' || MCU_SERIES == 'H')
+}
+
 void adcPowerOn() {
 	ADC_CONTR |= M_ADC_POWER;
-	
-#if MCU_FAMILY == 8 && (MCU_SERIES == 'G' || MCU_SERIES == 'H')
-	delay1ms(1);
-#endif // MCU_FAMILY == 8 && (MCU_SERIES == 'G' || MCU_SERIES == 'H')
+	adcPowerOnDelay();
 }
 
 void adcPowerOff() {
 	ADC_CONTR &= ~M_ADC_POWER;
 }
 
-void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts, bool pwmTriggered) {
+static __bit rightAligned;
+
+#pragma save
+// Suppress warning "unreferenced function argument"
+#pragma disable_warning 85
+void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts, ADC_Trigger triggerMode) {
+	rightAligned = (resultAlignment == ADC_ALIGN_RIGHT);
+
 	#if MCU_FAMILY == 12
-		P_SW1 = resultAlignment ? (P_SW1 | M_RESFMT) : (P_SW1 & ~M_RESFMT);
+		P_SW1 = rightAligned ? (P_SW1 | M_RESFMT) : (P_SW1 & ~M_RESFMT);
 	#elif MCU_FAMILY == 15
-		CLKDIV = resultAlignment ? (CLKDIV | M_RESFMT) : (CLKDIV & ~M_RESFMT);
+		CLKDIV = rightAligned ? (CLKDIV | M_RESFMT) : (CLKDIV & ~M_RESFMT);
 	#elif MCU_FAMILY == 8
-		ADCCFG = resultAlignment ? (ADCCFG | M_RESFMT) : (ADCCFG & ~M_RESFMT);
+		ADCCFG = rightAligned ? (ADCCFG | M_RESFMT) : (ADCCFG & ~M_RESFMT);
 	#endif // MCU_FAMILY == 12
+	
+	uint8_t adcContr = M_ADC_POWER;
 	
 	#ifdef MCU_HAS_ADCTIM
 		// Use recommended settings from Technical Reference Manual
 		#define cssetup 0
 		#define cshold 1
 		#define smpduty 15
+		ENABLE_EXTENDED_SFR();
 		ADCTIM = (cssetup << P_CSSETUP) | (cshold << P_CSHOLD) | (smpduty << P_SMPDUTY);
+		DISABLE_EXTENDED_SFR();
 		
 		#define CYCLES_PER_CONV ((cssetup + 1) + (cshold + 1) + (smpduty + 1) + ADC_BITS)
 	#elif MCU_FAMILY == 8
 		#define CYCLES_PER_CONV 16
 	#else // STC12 & STC15
-		#define CYCLES (MCU_FREQ / ADC_MAX_SAMPLE_RATE)
+		// On the STC12 and STC15, the number of clock cycles allowed
+		// for the conversion seems to be a design choice. The TRM 
+		// doesn't give any explanation as to how to choose the speed
+		// and the code example uses the slowest speed.
+		#ifndef ADC_CYCLES
+			#define ADC_CYCLES 540
+		#endif
 		
-		#if CYCLES <= 90
+		#if ADC_CYCLES <= 90
 			#define SPEED 3
-		#elif CYCLES <= 180
+		#elif ADC_CYCLES <= 180
 			#define SPEED 2
-		#elif CYCLES <= 360
+		#elif ADC_CYCLES <= 360
 			#define SPEED 1
-		#else
+		#else // 540 cycles
 			#define SPEED 0
 		#endif
 		
-		ADC_CONTR = (ADC_CONTR & ~M_ADC_SPEED) | ((SPEED << P_ADC_SPEED) & M_ADC_SPEED);
+		adcContr |= SPEED << P_ADC_SPEED;
 	#endif // MCU_HAS_ADCTIM
 	
 	#if MCU_FAMILY == 8
@@ -100,20 +124,18 @@ void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts,
 		ADCCFG = (ADCCFG & ~M_ADC_SPEED) | ((ADJ_SPEED << P_ADC_SPEED) & M_ADC_SPEED);
 	#endif // MCU_FAMILY == 8
 	
-	#ifdef M_ADC_EPWMT
-		if (pwmTriggered) {
-			ADC_CONTR |= M_ADC_EPWMT;
-		}
+	#ifdef P_ADC_EPWMT
+		adcContr |= triggerMode << P_ADC_EPWMT;
 	#endif
-	
-	ADC_CONTR &= ~M_ADC_FLAG;
 	
 	if (useInterrupts == ENABLE_INTERRUPT) {
 		IE1 |= M_EADC;
 	}
 	
-	adcPowerOn();
+	ADC_CONTR = adcContr;
+	adcPowerOnDelay();
 }
+#pragma restore
 
 static const uint8_t __adcPins[] = {
 	// 0xff means "do NOT configure GPIO pin".
@@ -157,12 +179,18 @@ void adcConfigureChannel(ADC_Channel channel) {
 		gpioConfigure(&pinConfig);
 		
 #if MCU_FAMILY == 12 || MCU_FAMILY == 15
-		P1ASF |= 1 << channel;
+		P1ASF |= (1 << channel);
 #endif // MCU_FAMILY == 12 || MCU_FAMILY == 15
 	}
 }
 
 uint16_t adcBlockingRead(ADC_Channel channel) {
+#if MCU_FAMILY == 12 || MCU_FAMILY == 15
+	// Clear previous result. This is not mentioned in the TRM, but
+	// code examples for the STC12 and STC15 do it.
+	ADC_RES = 0;
+#endif // MCU_FAMILY == 12 || MCU_FAMILY == 15
+
 	ADC_CONTR = (ADC_CONTR & ~M_ADC_CHS) | channel | M_ADC_START;
 	NOP();
 	NOP();
@@ -170,16 +198,29 @@ uint16_t adcBlockingRead(ADC_Channel channel) {
 	NOP();
 	NOP();
 #endif // MCU_FAMILY == 12 || MCU_FAMILY == 15
+
 	while (!(ADC_CONTR & M_ADC_FLAG));
+	
 	ADC_CONTR &= ~M_ADC_FLAG;
 	
-	return (ADC_RESH << 8) | ADC_RESL;
+	// Left alignment means we only want the 8 most significant bits of the result.
+	// Right alignment means we want the full result.
+	return rightAligned ? ADC_RES : ((uint16_t) ADC_RESH);
 }
 
-void adcStartConversion(ADC_Channel channel) {
+void adcStartConversion(ADC_Channel channel) REENTRANT {
+#if MCU_FAMILY == 12 || MCU_FAMILY == 15
+	// Clear previous result. This is not mentioned in the TRM, but
+	// code examples for the STC12 and STC15 do it.
+	ADC_RES = 0;
+#endif // MCU_FAMILY == 12 || MCU_FAMILY == 15
+
 	ADC_CONTR = (ADC_CONTR & ~M_ADC_CHS) | channel | M_ADC_START;
 }
 
+#pragma save
+// Suppress warning "unreferenced function argument"
+#pragma disable_warning 85
 void compInitialise(
 	COMP_PositiveInput positiveInput,
 	// Ignored when positiveInput != POSITIVE_INPUT_ADC_IN.
@@ -226,6 +267,7 @@ void compInitialise(
 	
 	CMPCR1 = cmpcr1;
 }
+#pragma restore
 
 COMP_Result compRead() {
 	CMPCR1 &= ~M_CMPIF;

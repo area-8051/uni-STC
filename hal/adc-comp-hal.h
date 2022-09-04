@@ -57,7 +57,14 @@
 #include <hal-defs.h>
 
 typedef enum {
+	ADC_STANDALONE = 0,
+	ADC_PWM_TRIGGERED = 1,
+} ADC_Trigger;
+
+typedef enum {
+	// Left alignment means we only want the 8 most significant bits of the result.
 	ADC_ALIGN_LEFT = 0,
+	// Right alignment means we want the full result.
 	ADC_ALIGN_RIGHT = 1,
 } ADC_Alignment;
 
@@ -110,7 +117,7 @@ typedef enum {
  * Note: pwmTriggered if only applicable to STC8G, STC8H and STC8A8K64D4.
  * It has no effect for other MCU.
  */
-void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts, bool pwmTriggered);
+void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts, ADC_Trigger triggerMode);
 
 /**
  * ADC input pin configuration.
@@ -149,7 +156,7 @@ uint16_t adcBlockingRead(ADC_Channel channel);
  * 
  * INTERRUPT_USING(__adc_isr, ADC_INTERRUPT, 1);
  */
-void adcStartConversion(ADC_Channel channel);
+void adcStartConversion(ADC_Channel channel) REENTRANT;
 
 typedef enum {
 	COMP_EDGE_RISING = 2,

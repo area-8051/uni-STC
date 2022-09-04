@@ -66,6 +66,11 @@ typedef enum {
 	EXTERNALY_ENABLED = 1,
 } CounterControl;
 
+typedef enum {
+	OUTPUT_LOW = 0,
+	OUTPUT_HIGH = 1,
+} OutputLevel;
+
 typedef union {
 	uint8_t u8values[4];
 	uint16_t u16values[2];

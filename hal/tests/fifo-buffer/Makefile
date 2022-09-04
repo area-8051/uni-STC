@@ -34,7 +34,7 @@ SRCS = \
 
 CC = gcc
 # The -O2 option is REQUIRED for the 'inline' keyword to work as expected.
-CFLAGS = -I. -I../.. -I../../../../include -O2
+CFLAGS = -I. -I../.. -I../../../include -O2
 
 test: $(PROJECT_NAME)
 	./$(PROJECT_NAME)

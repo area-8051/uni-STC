@@ -36,100 +36,87 @@
  * FIFO circular buffer implementation.
  */
 
-
 bool fifoWrite(FifoState *buffer, const void *data, uint8_t count) {
-	bool rc = fifoBytesFree(buffer) >= count;
+	bool rc = (buffer->size - fifoLength(buffer)) >= count;
 	
 	if (rc) {
+		uint8_t wIndex = buffer->wIndex;
+		
 		for (uint8_t n = 0; n < count; n++) {
-			buffer->last++;
+			buffer->data[wIndex] = ((uint8_t *) data)[n];
+			wIndex++;
 			
-			if (buffer->last >= buffer->size) {
-				// Handles both buffer empty and wrap around cases.
-				buffer->last = 0;
+			if (wIndex > buffer->size) {
+				wIndex = 0;
 			}
-			
-			if (buffer->first == buffer->size) {
-				// Buffer was empty, initialise .first too.
-				buffer->first = 0;
-			}
-			
-			buffer->data[buffer->last] = ((uint8_t *) data)[n];
 		}
+		
+		buffer->wIndex = wIndex;
 	}
 	
 	return rc;
 }
 
 bool fifoWrite_using1(FifoState *buffer, const void * FIFO_SEGMENT data, uint8_t FIFO_SEGMENT count) USING(1) {
-	bool rc = fifoBytesFree(buffer) >= count;
+	bool rc = (buffer->size - fifoLength(buffer)) >= count;
 	
 	if (rc) {
+		uint8_t wIndex = buffer->wIndex;
+		
 		for (uint8_t n = 0; n < count; n++) {
-			buffer->last++;
+			buffer->data[wIndex] = ((uint8_t *) data)[n];
+			wIndex++;
 			
-			if (buffer->last >= buffer->size) {
-				// Handles both buffer empty and wrap around cases.
-				buffer->last = 0;
+			if (wIndex > buffer->size) {
+				wIndex = 0;
 			}
-			
-			if (buffer->first == buffer->size) {
-				// Buffer was empty, initialise .first too.
-				buffer->first = 0;
-			}
-			
-			buffer->data[buffer->last] = ((uint8_t *) data)[n];
 		}
+		
+		buffer->wIndex = wIndex;
 	}
 	
 	return rc;
 }
 
 bool fifoRead(FifoState *buffer, void *data, uint8_t count) {
-	bool rc = fifoBytesUsed(buffer) >= count;
+	bool rc = fifoLength(buffer) >= count;
 	
 	if (rc) {
+		uint8_t rIndex = buffer->rIndex;
+		
 		for (uint8_t n = 0; n < count; n++) {
-			// Buffer is not empty, read first character.
-			((uint8_t *) data)[n] = buffer->data[buffer->first];
+			// Buffer is not empty, read rIndex character.
+			((uint8_t *) data)[n] = buffer->data[rIndex];
+			rIndex++;
 			
-			if (buffer->first == buffer->last) {
-				// We've read the last character, mark buffer as empty.
-				buffer->first = buffer->size;
-				buffer->last = buffer->size;
-			} else {
-				buffer->first++;
-				
-				if (buffer->first == buffer->size) {
-					buffer->first = 0;
-				}
+			if (rIndex > buffer->size) {
+				rIndex = 0;
 			}
 		}
+		
+		buffer->rIndex = rIndex;
 	}
 	
 	return rc;
 }
 
 bool fifoRead_using1(FifoState *buffer, void * FIFO_SEGMENT data, uint8_t FIFO_SEGMENT count) USING(1) {
-	bool rc = fifoBytesUsed(buffer) >= count;
+	bool rc = fifoLength(buffer) >= count;
 	
 	if (rc) {
+		uint8_t rIndex = buffer->rIndex;
+		
 		for (uint8_t n = 0; n < count; n++) {
-			// Buffer is not empty, read first character.
-			((uint8_t *) data)[n] = buffer->data[buffer->first];
+			// Buffer is not empty, read rIndex character.
+			((uint8_t *) data)[n] = buffer->data[rIndex];
+			rIndex++;
 			
-			if (buffer->first == buffer->last) {
-				// We've read the last character, mark buffer as empty.
-				buffer->first = buffer->size;
-				buffer->last = buffer->size;
-			} else {
-				buffer->first++;
-				
-				if (buffer->first == buffer->size) {
-					buffer->first = 0;
-				}
+			if (rIndex > buffer->size) {
+				rIndex = 0;
 			}
 		}
+		
+		buffer->rIndex = rIndex;
 	}
 	
 	return rc;

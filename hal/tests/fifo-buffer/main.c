@@ -103,7 +103,7 @@ int main() {
 		}
 		
 		uint8_t size = fifoBytesUsed(&buffer);
-		printf("After item %2d: .test = %s  .first = %hhd  .last = %hhd  size = %hhd\n", item, test2str(item), buffer.first, buffer.last, size);
+		printf("After item %2d: .test = %s  .rIndex = %hhd  .wIndex = %hhd  size = %hhd\n", item, test2str(item), buffer.rIndex, buffer.wIndex, size);
 		
 		switch (items[item].test) {
 		case READ:

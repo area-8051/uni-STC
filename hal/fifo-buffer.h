@@ -50,7 +50,7 @@
  *     FIFO_SEGMENT (default: __idata) defines where the arguments
  *     of the *_using1 functions will be stored. These functions are
  *     intended to be called in ISR, hence the interest of using a
- *     memory segment with the fastest access.
+ *     memory segment with the fastest access possible.
  */
 
 #ifndef FIFO_SEGMENT
@@ -58,23 +58,51 @@
 #endif
 
 typedef struct {
-	uint8_t size;
-	uint8_t first;
-	uint8_t last;
-	uint8_t status;
-	uint8_t *data;
+	uint8_t size; /*!< Usable size of the buffer. */
+	uint8_t rIndex; /*!< Index of the next read. */
+	uint8_t wIndex; /*!< Index of the next write. */
+	uint8_t status; /*!< Application-defined status byte. */
+	uint8_t *data; /*!< Buffer address (must be statically allocated). */
 } FifoState;
 
-// Declares a FifoState variable and its buffer.
+/**
+ * Declares a FifoState variable and its buffer.
+ * Buffer is empty when rIndex == wIndex.
+ * bufferSize is the usable size of the buffer and MUST be in [1; 255].
+ * Effective buffer size is bufferSize + 1.
+ * 
+ * IMPORTANT: This extra unused byte is the price to pay for an 
+ * interrupt-safe FIFO implementation. This is true as long as the
+ * ISR only writes to (respectively reads from) the FIFO, while the
+ * main loop only reads from (respectively writes to) it.
+ */
 #define FIFO_BUFFER(variableName, bufferSize, segment) \
-	static uint8_t segment variableName ## Data[bufferSize]; \
+	static uint8_t segment variableName ## Data[bufferSize + 1]; \
 	FifoState segment variableName = { \
 		.size = bufferSize, \
-		.first = bufferSize, \
-		.last = bufferSize, \
+		.rIndex = 0, \
+		.wIndex = 0, \
 		.status = 0, \
 		.data = variableName ## Data, \
 	};
+
+/**
+ * Returns the number of bytes in use.
+ */
+INLINE uint8_t fifoLength(FifoState *buffer) {
+	return (buffer->wIndex >= buffer->rIndex)
+		? (buffer->wIndex - buffer->rIndex)
+		: (buffer->size - buffer->rIndex + buffer->wIndex + 1);
+}
+
+/**
+ * Empties the fifo.
+ */
+INLINE void fifoClear(FifoState *buffer) {
+	buffer->rIndex = 0;
+	buffer->wIndex = 0;
+	buffer->status = 0;
+}
 
 bool fifoWrite(FifoState *fifo, const void *data, uint8_t count);
 bool fifoRead(FifoState *fifo, void *data, uint8_t count);
@@ -82,35 +110,20 @@ bool fifoRead(FifoState *fifo, void *data, uint8_t count);
 bool fifoWrite_using1(FifoState *fifo, const void * FIFO_SEGMENT data, uint8_t FIFO_SEGMENT count) USING(1);
 bool fifoRead_using1(FifoState *fifo, void * FIFO_SEGMENT data, uint8_t FIFO_SEGMENT count) USING(1);
 
-INLINE void fifoClear(FifoState *fifo) {
-	fifo->first = fifo->size;
-	fifo->last = fifo->size;
-	fifo->status = 0;
-}
-
-INLINE uint8_t __fifoLength(FifoState *buffer) {
-	return (buffer->last == buffer->first)
-		? 0
-		: (buffer->last > buffer->first
-			? (buffer->last - buffer->first + 1)
-			: (buffer->size - (buffer->first - buffer->last - 1))
-		);
-}
-
 INLINE bool fifoIsEmpty(FifoState *fifo) {
-	return __fifoLength(fifo) == 0;
+	return fifoLength(fifo) == 0;
 }
 
 INLINE bool fifoIsFull(FifoState *fifo) {
-	return __fifoLength(fifo) == fifo->size;
+	return fifoLength(fifo) == fifo->size;
 }
 
 INLINE uint8_t fifoBytesUsed(FifoState *fifo) {
-	return __fifoLength(fifo);
+	return fifoLength(fifo);
 }
 
 INLINE uint8_t fifoBytesFree(FifoState *fifo) {
-	return fifo->size - __fifoLength(fifo);
+	return fifo->size - fifoLength(fifo);
 }
 
 #endif // _FIFO_BUFFER_H

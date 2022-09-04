@@ -48,13 +48,12 @@
  * 
  * Optional global macros:
  * 
- *     UART_DEFAULT_SEGMENT (default: __pdata) defines where the HAL's 
+ *     UART_DEFAULT_SEGMENT (default: __xdata) defines where the HAL's 
  *     state information will be stored, unless overridden per-UART.
  *     Impacts ISR execution time.
  * 
- *     HAL_UARTS (default: NB_UARTS) defines how many UART will be 
- *     supported by the HAL. Useful to reduce both flash and RAM 
- *     footprint.
+ *     HAL_UARTS (default: 1, max. NB_UARTS) defines how many UART will 
+ *     be supported by the HAL. Impacts both flash and RAM footprints.
  * 
  *     UART_DEFAULT_BUFFER_SIZE (default: 16) defines the default size
  *     for UART RX and TX buffers. Impacts RAM footprint.
@@ -87,7 +86,7 @@
 		#error "Macro HAL_UARTS out of range"
 	#endif // HAL_UARTS < 1 || HAL_UARTS > NB_UARTS
 #else
-	#define HAL_UARTS NB_UARTS
+	#define HAL_UARTS 1
 #endif
 
 #include <hal-defs.h>

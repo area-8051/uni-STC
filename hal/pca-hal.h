@@ -150,7 +150,7 @@ void pcaStartPwm(PCA_Channel channel, GpioPinMode pinMode, PCA_PWM_Bits bits, PC
  * 
  * All other configuration parameters remain unchanged.
  */
-void pcaSetPwmDutyCycle(PCA_Channel channel, uint16_t clocksHigh);
+void pcaSetDutyCycle(PCA_Channel channel, uint16_t clocksHigh);
 
 /**
  * Configures a PCA channel in 16-bit software timer / pulse output mode.

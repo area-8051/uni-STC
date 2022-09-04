@@ -57,7 +57,9 @@ static const uint8_t __pca_pinConfigurations[][PCA_CHANNELS + 1] = {
 	// PCA pin configurations for STC8G *except* STC8G1K08A
 	{ 0x11, 0x10, 0x37, 0x12, }, 
 	{ 0x35, 0x36, 0x37, 0x34, }, 
-	{ 0x25, 0x26, 0x27, 0x24, }, 
+	#ifdef GPIO_HAS_P2
+		{ 0x25, 0x26, 0x27, 0x24, }, 
+	#endif // GPIO_HAS_P2
 #endif // MCU_FAMILY == 8 && MCU_SERIES == 'G' && MCU_PINS > 8
 
 #if MCU_FAMILY == 8 && MCU_SERIES == 'G' && MCU_PINS == 8
@@ -76,11 +78,19 @@ static const uint8_t __pca_pinConfigurations[][PCA_CHANNELS + 1] = {
 #endif // MCU_FAMILY == 8 && MCU_SERIES == 'A'
 
 #if MCU_FAMILY == 15
-	// PCA pin configurations for STC8A
-	{ 0x11, 0x10, 0x37, 0x12, }, 
-	{ 0x35, 0x36, 0x37, 0x34, }, 
-	// nNot available on STC15W4xxAS
-	{ 0x25, 0x26, 0x27, 0x24, }, 
+	#if PCA_CHANNELS == 2
+		// PCA pin configurations for STC15W4KxxS4
+		{ 0x11, 0x10, 0x12, }, 
+		{ 0x35, 0x36, 0x34, }, 
+		{ 0x25, 0x26, 0x24, }, 
+	#else
+		// PCA pin configurations for STC15W4xxAS
+		{ 0x11, 0x10, 0x37, 0x12, }, 
+		{ 0x35, 0x36, 0x37, 0x34, }, 
+		#ifdef GPIO_HAS_P2
+			{ 0x25, 0x26, 0x27, 0x24, }, 
+		#endif // GPIO_HAS_P2
+	#endif
 #endif // MCU_FAMILY == 15
 
 #if MCU_FAMILY == 12
@@ -340,7 +350,7 @@ void pcaStartPwm(PCA_Channel channel, GpioPinMode pinMode, PCA_PWM_Bits bits, PC
 	);
 }
 
-void pcaSetPwmDutyCycle(PCA_Channel channel, uint16_t clocksHigh) {
+void pcaSetDutyCycle(PCA_Channel channel, uint16_t clocksHigh) {
 	__pcaConfigurePWM(
 		false,
 		channel, 

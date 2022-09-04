@@ -92,10 +92,11 @@
 	#define M_ADC_POWER 0x80
 	#define P_ADC_POWER 7
 
-	// SFR ADC_RES: ADC result
+	// SFR ADC_RES: ADC result high
 	SFR(ADC_RESH, 0xBD);
 	// SFR ADC_RESL: ADC result low
 	SFR(ADC_RESL, 0xBE);
+	SFR16E(ADC_RES, 0xBDBE);
 
 	#if MCU_FAMILY == 8
 		// SFR ADCCFG: ADC configuration register

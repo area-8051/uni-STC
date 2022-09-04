@@ -140,8 +140,18 @@ SFR(P_SW1, 0xA2);
 	#define M_CMPO_S 0x8
 	#define P_CMPO_S 3
 	
-	#define M_I2C_S 0x30
-	#define P_I2C_S 4
+	#if MCU_FAMILY == 15
+		#define M_PWM2345_S 0x10
+		#define P_PWM2345_S 4
+		
+		#define M_PWM67_S 0x20
+		#define P_PWM67_S 5
+	#endif
+	
+	#if MCU_FAMILY == 8
+		#define M_I2C_S 0x30
+		#define P_I2C_S 4
+	#endif
 	
 	#ifdef MCU_HAS_EAXSFR
 		#define M_EAXSFR 0x80

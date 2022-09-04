@@ -131,50 +131,56 @@
 // Delay in milliseconds.
 #define BLINKING_HALF_PERIOD 250
 
-// 3. The MCU will glow an LED connected to a PCA CCP pin.
-// Exercises: PCA (when available)
+#ifdef MCU_HAS_PCA
+	// 3. The MCU will glow an LED connected to a PCA CCP pin.
+	// Exercises: PCA (when available)
 
-// Target MCU   | Glowing LED pin
-// -------------+-----------------
-// All STC8A    | P1.7
-// STC8G1K08A   | P3.2
-// Other STC8G  | P1.1
-// All STC15    | P1.1
-// STC12C5AxxS2 | P1.3
+	// Target MCU   | Glowing LED pin
+	// -------------+-----------------
+	// All STC8A    | P1.7
+	// STC8G1K08A   | P3.2
+	// Other STC8G  | P1.1
+	// All STC15    | P1.1
+	// STC12C5AxxS2 | P1.3
 
-// Let's use 8-bit PWM mode, all MCU have it
-#define PCA_GLOWING_PWM_BITS 8
+	// Let's use 8-bit PWM mode, all MCU have it
+	#define PCA_GLOWING_PWM_BITS 8
 
-// All MCU have this pin configuration
-#define PCA_GLOWING_PIN_CONFIG 0
+	// All MCU have this pin configuration
+	#define PCA_GLOWING_PIN_CONFIG 0
 
-// All MCU have CCP0
-#define PCA_GLOWING_CHANNEL PCA_CHANNEL0
-#define PCA_GLOWING_PWM_FREQ 100UL
-#define PCA_GLOWING_COUNTER_FREQ ((1 << PCA_GLOWING_PWM_BITS) * PCA_GLOWING_PWM_FREQ)
+	// All MCU have CCP0
+	#define PCA_GLOWING_CHANNEL PCA_CHANNEL0
+	#define PCA_GLOWING_PWM_FREQ 100UL
+	#define PCA_GLOWING_COUNTER_FREQ ((1 << PCA_GLOWING_PWM_BITS) * PCA_GLOWING_PWM_FREQ)
+#endif // MCU_HAS_PCA
 
-// 4. The MCU will glow an LED connected to an enhanced PWM pin.
-// Exercises: 15-bit Enhanced PWM (when available)
+#ifdef MCU_HAS_ENHANCED_PWM
+	// 4. The MCU will glow an LED connected to an enhanced PWM pin.
+	// Exercises: 15-bit Enhanced PWM (when available)
 
-// Target MCU   | Glowing LED pin
-// -------------+-----------------
-// All STC8A    | P2.0
-// STC8G2KxxSx  | P2.0
-// STC15W4KxxS4 | P3.7
+	// Target MCU   | Glowing LED pin
+	// -------------+-----------------
+	// All STC8A    | P2.0
+	// STC8G2KxxSx  | P2.0
+	// STC15W4KxxS4 | P3.7
 
-#define ENHPWM_GLOWING_CHANNEL ENHPWM_Channel0
-// All MCU have this pin configuration
-#define ENHPWM_GLOWING_PIN_CONFIG 0
+	#define PWM_GLOWING_CHANNEL PWM_Channel0
+	// All MCU have this pin configuration
+	#define PWM_GLOWING_PIN_CONFIG 0
+#endif // MCU_HAS_ENHANCED_PWM
 
-// 5. The MCU will glow an LED connected to an advanced PWM pin.
-// Exercises: 16-bit Advanced PWM (when available)
+#ifdef MCU_HAS_ADVANCED_PWM
+	// 5. The MCU will glow an LED connected to an advanced PWM pin.
+	// Exercises: 16-bit Advanced PWM (when available)
 
-// Target MCU   | Glowing LED pin
-// -------------+-----------------
-// All STC8H    | P1.0
+	// Target MCU   | Glowing LED pin
+	// -------------+-----------------
+	// All STC8H    | P1.0
 
-#define ADVPWM_GLOWING_GROUP   PWMA
-#define ADVPWM_GLOWING_CHANNEL PWM1P
+	#define PWM_GLOWING_GROUP   PWMA
+	#define PWM_GLOWING_CHANNEL PWM1P
+#endif // MCU_HAS_ADVANCED_PWM
 
 #ifdef SMALL_FLASH
 	// Manage to fit in 8 KB flash...
@@ -185,6 +191,8 @@
 #ifdef SMALL_RAM
 	// Manage to fit in 512 bytes RAM...
 	#define UART_BUFFER_SIZE 16
-#endif // SMALL_FLASH
+#endif // SMALL_RAM
+
+#define SUPPRESS_delay1us_WARNING
 
 #endif // _PROJECT_DEFS_H

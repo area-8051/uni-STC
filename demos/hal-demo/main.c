@@ -74,7 +74,7 @@ void pcaOnInterrupt(PCA_Channel channel, uint16_t HAL_PCA_SEGMENT pulseLength) U
 }
 
 void pcaUpdateGlowingDutyCycle() {
-	pcaSetPwmDutyCycle(PCA_GLOWING_CHANNEL, PCA_COUNTER_VALUE - PCA_GLOWING_GRADIENT[pcaGlowingStep]);
+	pcaSetDutyCycle(PCA_GLOWING_CHANNEL, PCA_COUNTER_VALUE - PCA_GLOWING_GRADIENT[pcaGlowingStep]);
 	int8_t newStep = pcaGlowingStep + pcaGlowingIncrement;
 	
 	if (newStep < 0 || newStep >= PCA_GLOWING_STEPS) {
@@ -88,54 +88,54 @@ void pcaUpdateGlowingDutyCycle() {
 // ---------------------------------------------------------------------
 
 #ifdef MCU_HAS_ENHANCED_PWM
-#define ENHPWM_COUNTER_VALUE 32767U
+#define PWM_COUNTER_VALUE 32767U
 
-static const uint16_t ENHPWM_GLOWING_GRADIENT[] = {
+static const uint16_t PWM_GLOWING_GRADIENT[] = {
 	181, 342, 579, 907, 1340, 1893, 2579, 3415, 4414, 5590, 6960, 
 	8536, 10334, 12368, 14653, 17204, 20034, 23159, 26594, 30352, 
 };
 
-#define ENHPWM_GLOWING_STEPS (sizeof(ENHPWM_GLOWING_GRADIENT) / sizeof(ENHPWM_GLOWING_GRADIENT[0]))
+#define PWM_GLOWING_STEPS (sizeof(PWM_GLOWING_GRADIENT) / sizeof(PWM_GLOWING_GRADIENT[0]))
 
-static int8_t enhpwmGlowingStep = 0;
-static int8_t enhpwmGlowingIncrement = 1;
+static int8_t pwmGlowingStep = 0;
+static int8_t pwmGlowingIncrement = 1;
 
-void enhpwmUpdateGlowingDutyCycle() {
-	enhpwmSetFlipPoints(ENHPWM_GLOWING_CHANNEL, 0, ENHPWM_COUNTER_VALUE - ENHPWM_GLOWING_GRADIENT[enhpwmGlowingStep]);
-	int8_t newStep = enhpwmGlowingStep + enhpwmGlowingIncrement;
+void pwmUpdateGlowingDutyCycle() {
+	pwmSetFlipPoints(PWM_GLOWING_CHANNEL, 0, PWM_COUNTER_VALUE - PWM_GLOWING_GRADIENT[pwmGlowingStep]);
+	int8_t newStep = pwmGlowingStep + pwmGlowingIncrement;
 	
-	if (newStep < 0 || newStep >= ENHPWM_GLOWING_STEPS) {
-		enhpwmGlowingIncrement = -enhpwmGlowingIncrement;
+	if (newStep < 0 || newStep >= PWM_GLOWING_STEPS) {
+		pwmGlowingIncrement = -pwmGlowingIncrement;
 	}
 	
-	enhpwmGlowingStep += enhpwmGlowingIncrement;
+	pwmGlowingStep += pwmGlowingIncrement;
 }
 #endif // MCU_HAS_ENHANCED_PWM
 
 // ---------------------------------------------------------------------
 
 #ifdef MCU_HAS_ADVANCED_PWM
-#define ADVPWM_COUNTER_VALUE 65535U
+#define PWM_COUNTER_VALUE 65535U
 
-static const uint16_t ADVPWM_GLOWING_GRADIENT[] = {
+static const uint16_t PWM_GLOWING_GRADIENT[] = {
 	363, 684, 1159, 1814, 2680, 3785, 5159, 6830, 8827, 11181, 13919, 
 	17072, 20668, 24736, 29306, 34407, 40069, 46319, 53187, 60703, 
 };
 
-#define ADVPWM_GLOWING_STEPS (sizeof(ADVPWM_GLOWING_GRADIENT) / sizeof(ADVPWM_GLOWING_GRADIENT[0]))
+#define PWM_GLOWING_STEPS (sizeof(PWM_GLOWING_GRADIENT) / sizeof(PWM_GLOWING_GRADIENT[0]))
 
-static int8_t advpwmGlowingStep = 0;
-static int8_t advpwmGlowingIncrement = 1;
+static int8_t pwmGlowingStep = 0;
+static int8_t pwmGlowingIncrement = 1;
 
-void advpwmUpdateGlowingDutyCycle() {
-//	enhpwmSetFlipPoints(ADVPWM_GLOWING_GROUP, ADVPWM_GLOWING_CHANNEL, 0, ADVPWM_COUNTER_VALUE - ADVPWM_GLOWING_GRADIENT[advpwmGlowingStep]);
-	int8_t newStep = advpwmGlowingStep + advpwmGlowingIncrement;
+void pwmUpdateGlowingDutyCycle() {
+//	pwmSetFlipPoints(PWM_GLOWING_GROUP, PWM_GLOWING_CHANNEL, 0, PWM_COUNTER_VALUE - PWM_GLOWING_GRADIENT[pwmGlowingStep]);
+	int8_t newStep = pwmGlowingStep + pwmGlowingIncrement;
 	
-	if (newStep < 0 || newStep >= ADVPWM_GLOWING_STEPS) {
-		advpwmGlowingIncrement = -advpwmGlowingIncrement;
+	if (newStep < 0 || newStep >= PWM_GLOWING_STEPS) {
+		pwmGlowingIncrement = -pwmGlowingIncrement;
 	}
 	
-	advpwmGlowingStep += advpwmGlowingIncrement;
+	pwmGlowingStep += pwmGlowingIncrement;
 }
 #endif // MCU_HAS_ADVANCED_PWM
 
@@ -160,11 +160,11 @@ void stuffToDoWhileTheLedBlinks(uint16_t delay) {
 #endif // MCU_HAS_PCA
 
 #ifdef MCU_HAS_ENHANCED_PWM
-	enhpwmUpdateGlowingDutyCycle();
+	pwmUpdateGlowingDutyCycle();
 #endif // MCU_HAS_ENHANCED_PWM
 
 #ifdef MCU_HAS_ADVANCED_PWM
-	advpwmUpdateGlowingDutyCycle();
+	pwmUpdateGlowingDutyCycle();
 #endif // MCU_HAS_ADVANCED_PWM
 	
 	// Echo characters typed on the host
@@ -211,19 +211,19 @@ void main() {
 // ---------------------------------------------------------------------
 
 #ifdef MCU_HAS_ENHANCED_PWM
-	enhpwmInitialise(
-		ENHPWM_SYSCLK_DIV_7, 
-		ENHPWM_COUNTER_VALUE, 
+	pwmInitialise(
+		PWM_SYSCLK_DIV_7, 
+		PWM_COUNTER_VALUE, 
 		DISABLE_INTERRUPT
 	);
-	enhpwmStartChannel(
-		ENHPWM_GLOWING_CHANNEL, 
-		ENHPWM_GLOWING_PIN_CONFIG, 
+	pwmStartChannel(
+		PWM_GLOWING_CHANNEL, 
+		PWM_GLOWING_PIN_CONFIG, 
 		GPIO_BIDIRECTIONAL_MODE, 
-		ENHPWM_LOW, 
-		ENHPWM_INTERRUPT_EVENT_NONE, 
+		OUTPUT_LOW, 
+		PWM_INTERRUPT_EVENT_NONE, 
 		0,
-		ENHPWM_COUNTER_VALUE - ENHPWM_GLOWING_GRADIENT[0]
+		PWM_COUNTER_VALUE - PWM_GLOWING_GRADIENT[0]
 	);
 #endif // MCU_HAS_ENHANCED_PWM
 

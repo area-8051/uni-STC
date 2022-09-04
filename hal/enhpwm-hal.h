@@ -47,7 +47,7 @@
  *     gpio-hal
  * 
  * IMPORTANT1: on the STC8G2K*, only PWM20..27 are supported, and 
- * correspond to ENHPWM_Channel0..7 respectively.
+ * correspond to PWM_Channel0..7 respectively.
  * 
  * Rationale: the STC8G2K* seems to be an exception as STC never
  * manufactured another MCU with as many PWM channels. Instead, the
@@ -81,49 +81,44 @@
 #include <hal-defs.h>
 
 typedef enum {
-	ENHPWM_SYSCLK_DIV_1 = 0,
-	ENHPWM_SYSCLK_DIV_2 = 1,
-	ENHPWM_SYSCLK_DIV_3 = 2,
-	ENHPWM_SYSCLK_DIV_4 = 3,
-	ENHPWM_SYSCLK_DIV_5 = 4,
-	ENHPWM_SYSCLK_DIV_6 = 5,
-	ENHPWM_SYSCLK_DIV_7 = 6,
-	ENHPWM_SYSCLK_DIV_8 = 7,
-	ENHPWM_SYSCLK_DIV_9 = 8,
-	ENHPWM_SYSCLK_DIV_10 = 9,
-	ENHPWM_SYSCLK_DIV_11 = 10,
-	ENHPWM_SYSCLK_DIV_12 = 11,
-	ENHPWM_SYSCLK_DIV_13 = 12,
-	ENHPWM_SYSCLK_DIV_14 = 13,
-	ENHPWM_SYSCLK_DIV_15 = 14,
-	ENHPWM_SYSCLK_DIV_16 = 15,
-	ENHPWM_TIMER2 = 16,
-} ENHPWM_ClockSource;
+	PWM_SYSCLK_DIV_1 = 0,
+	PWM_SYSCLK_DIV_2 = 1,
+	PWM_SYSCLK_DIV_3 = 2,
+	PWM_SYSCLK_DIV_4 = 3,
+	PWM_SYSCLK_DIV_5 = 4,
+	PWM_SYSCLK_DIV_6 = 5,
+	PWM_SYSCLK_DIV_7 = 6,
+	PWM_SYSCLK_DIV_8 = 7,
+	PWM_SYSCLK_DIV_9 = 8,
+	PWM_SYSCLK_DIV_10 = 9,
+	PWM_SYSCLK_DIV_11 = 10,
+	PWM_SYSCLK_DIV_12 = 11,
+	PWM_SYSCLK_DIV_13 = 12,
+	PWM_SYSCLK_DIV_14 = 13,
+	PWM_SYSCLK_DIV_15 = 14,
+	PWM_SYSCLK_DIV_16 = 15,
+	PWM_TIMER2 = 16,
+} PWM_ClockSource;
 
 typedef enum {
-	ENHPWM_Channel0 = 0,
-	ENHPWM_Channel1,
-	ENHPWM_Channel2,
-	ENHPWM_Channel3,
-	ENHPWM_Channel4,
-	ENHPWM_Channel5,
+	PWM_Channel0 = 0,
+	PWM_Channel1,
+	PWM_Channel2,
+	PWM_Channel3,
+	PWM_Channel4,
+	PWM_Channel5,
 #if PWM_CHANNELS > 6
-	ENHPWM_Channel6,
-	ENHPWM_Channel7,
+	PWM_Channel6,
+	PWM_Channel7,
 #endif // PWM_CHANNELS > 6
-} ENHPWM_Channel;
+} PWM_Channel;
 
 typedef enum {
-	ENHPWM_INTERRUPT_EVENT_NONE = 0,
-	ENHPWM_INTERRUPT_EVENT_T1_ONLY = 5,
-	ENHPWM_INTERRUPT_EVENT_T2_ONLY = 6,
-	ENHPWM_INTERRUPT_EVENT_T1_AND_T2 = 7,
-} ENHPWM_InterruptOnEvent;
-
-typedef enum {
-	ENHPWM_LOW = 0,
-	ENHPWM_HIGH = 1,
-} ENHPWM_OutputLevel;
+	PWM_INTERRUPT_EVENT_NONE = 0,
+	PWM_INTERRUPT_EVENT_T1_ONLY = 5,
+	PWM_INTERRUPT_EVENT_T2_ONLY = 6,
+	PWM_INTERRUPT_EVENT_T1_AND_T2 = 7,
+} PWM_InterruptOnEvent;
 
 /**
  * Pin configurations for STC8G2K*
@@ -151,21 +146,48 @@ typedef enum {
 /**
  * Initialises and starts the master counter.
  */
-void enhpwmInitialise(
-	ENHPWM_ClockSource clockSource, 
+void pwmInitialise(
+	PWM_ClockSource clockSource, 
 	uint16_t divisor, 
 	InterruptEnable overflowInterrupt
 );
 
 /**
+ * Configures PWM fault detection, aka. "brake".
+ */
+
+typedef enum {
+	TRIGGER_ON_PWMFLT_RISING_EDGE = 0x22,
+#ifdef M_INVIO
+	TRIGGER_ON_PWMFLT_FALLING_EDGE = 0x62,
+#endif // M_INVIO
+
+	TRIGGER_ON_COMPARATOR_RISING_EDGE = 0x24,
+#ifdef M_INVCMP
+	TRIGGER_ON_COMPARATOR_FALLING_EDGE = 0xa4,
+#endif // M_INVCMP
+} PWM_FaultTrigger;
+
+typedef enum {
+	PWM_OUTPUT_STAY_UNCHANGED = 0,
+	PWM_OUTPUT_GO_HIGH_IMPEDANCE = 0x10,
+} PWM_FaultResponse;
+
+void pwmConfigureFaultDetection(
+	PWM_FaultTrigger faultTrigger, 
+	PWM_FaultResponse faultResponse, 
+	InterruptEnable faultInterrupt
+);
+
+/**
  * Configures a PCA channel in PWM mode.
  */
-void enhpwmStartChannel(
-	ENHPWM_Channel channel, 
+void pwmStartChannel(
+	PWM_Channel channel, 
 	uint8_t pinSwitch, 
 	GpioPinMode pinMode, 
-	ENHPWM_OutputLevel initialLevel, 
-	ENHPWM_InterruptOnEvent interruptOnEvent, 
+	OutputLevel initialLevel, 
+	PWM_InterruptOnEvent interruptOnEvent, 
 	uint16_t flipPoint1, 
 	uint16_t flipPoint2
 );
@@ -175,14 +197,14 @@ void enhpwmStartChannel(
  * 
  * All other configuration parameters remain unchanged.
  */
-void enhpwmSetFlipPoints(ENHPWM_Channel channel, uint16_t flipPoint1, uint16_t flipPoint2);
+void pwmSetFlipPoints(PWM_Channel channel, uint16_t flipPoint1, uint16_t flipPoint2);
 
 #if MCU_HAS_ENHANCED_PWM != '5'
 	// The STC15W4K doesn't have PWMxxHLD SFR
 	
-	void enhpwmLockChannel(ENHPWM_Channel channel, ENHPWM_OutputLevel outputLevel);
+	void pwmLockChannel(PWM_Channel channel, OutputLevel outputLevel);
 
-	void enhpwmUnlockChannel(ENHPWM_Channel channel);
+	void pwmUnlockChannel(PWM_Channel channel);
 #endif // MCU_HAS_ENHANCED_PWM != '5'
 
-#endif // _ENHPWM_HAL_H
+#endif // _PWM_HAL_H

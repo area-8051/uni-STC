@@ -92,8 +92,11 @@ void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts,
 		// for the conversion seems to be a design choice. The TRM 
 		// doesn't give any explanation as to how to choose the speed
 		// and the code example uses the slowest speed.
+		// However, a developer's natural expectation will likely be
+		// that the ADC runs at its maximum speed, so let's use it as
+		// default value.
 		#ifndef ADC_CYCLES
-			#define ADC_CYCLES 540
+			#define ADC_CYCLES 90
 		#endif
 		
 		#if ADC_CYCLES <= 90

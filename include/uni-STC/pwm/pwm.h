@@ -16,6 +16,7 @@
 		#if MCU_SERIES == 'H'
 			#include <uni-STC/pwm/pwm8h.h>
 			#define MCU_HAS_ADVANCED_PWM
+			#define PWM_COUNTER_MAX 65535u
 
 			// Bit mask for use with IP2L and IP2H
 			#define M_PPWMA 0x04
@@ -38,7 +39,11 @@
 			#include <uni-STC/pwm/pwm8a.h>
 			#define MCU_HAS_ENHANCED_PWM 'A'
 		#endif // MCU_SERIES == 'H'
+	#endif // MCU_FAMILY == 15
 
+	#ifdef MCU_HAS_ENHANCED_PWM
+		#define PWM_COUNTER_MAX 32767u
+		
 		// Bit mask for use with IP2L and IP2H
 		#define M_PPWM0 0x04
 		#define P_PPWM0 2
@@ -108,7 +113,7 @@
 			#define PWM4FD_INTERRUPT 34
 			#define PWM4FD_VECTOR_ADDR 0x113
 		#endif // PWM_GROUPS == 6
-	#endif // MCU_FAMILY == 15
+	#endif // MCU_HAS_ENHANCED_PWM
 #endif // defined(PWM_GROUPS) && defined(PWM_CHANNELS) && PWM_GROUPS > 0 && PWM_CHANNELS > 0
 
 #endif // _UNISTC_PWM_PWM_H

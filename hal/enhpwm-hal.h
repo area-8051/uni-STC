@@ -180,6 +180,12 @@ void pwmConfigureFaultDetection(
 );
 
 /**
+ * Deconfigures the PWM group.
+ * pwmInitialise() must be called again to restart the PWM group.
+ */
+void pwmDeconfigure();
+
+/**
  * Configures a PCA channel in PWM mode.
  */
 void pwmStartChannel(
@@ -191,6 +197,12 @@ void pwmStartChannel(
 	uint16_t flipPoint1, 
 	uint16_t flipPoint2
 );
+
+/**
+ * Deconfigures a PWM channel.
+ * pwmStartChannel() must be called again to restart the channel.
+ */
+void pwmDeconfigureChannel(PWM_Channel channel) REENTRANT;
 
 /**
  * Changes the flip points of a PWM channel.
@@ -206,5 +218,83 @@ void pwmSetFlipPoints(PWM_Channel channel, uint16_t flipPoint1, uint16_t flipPoi
 
 	void pwmUnlockChannel(PWM_Channel channel);
 #endif // MCU_HAS_ENHANCED_PWM != '5'
+
+/**
+ * Helper macros to write generic ISR.
+ * 
+ * Examples:
+ * 
+
+INTERRUPT_USING(pwm_isr, PWM_INTERRUPT, 1) {
+	if (PWM_COUNTER_IF_SFR & PWM_COUNTER_IF_MASK) {
+		PWM_COUNTER_IF_SFR &= ~PWM_COUNTER_IF_MASK;
+		// do something
+	}
+	
+	PWM_CHANNEL_IF_SFR_ENABLE
+	
+	if (PWM_CHANNEL_IF_SFR & M_C0IF) {
+		PWM_COUNTER_IF_SFR &= ~M_C0IF;
+		// do something (possibly after PWM_CHANNEL_IF_SFR_DISABLE
+		// if you need to manipulate SFR).
+	}
+	
+	PWM_CHANNEL_IF_SFR_DISABLE
+}
+
+INTERRUPT_USING(pwmfd_isr, PWMFD_INTERRUPT, 1) {
+	PWMFD_SFR_ENABLE
+	
+	if (PWMFD_SFR & M_FDIF) {
+		PWMFD_SFR &= ~M_FDIF;
+		// do something (possibly after PWMFD_SFR_DISABLE
+		// if you need to manipulate SFR).
+	}
+	
+	PWMFD_SFR_DISABLE
+}
+ */
+#if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
+	#if MCU_SERIES == 'A' // STC8A8KxxD4
+		#define PWM_INTERRUPT PWM0_INTERRUPT
+		#define PWM_COUNTER_IF_SFR PWMCFG01
+		#define PWM_COUNTER_IF_MASK M_PWM0CBIF
+		#define PWM_CHANNEL_IF_SFR PWM0IF
+		
+		#define PWMFD_INTERRUPT PWM0FD_INTERRUPT
+		#define PWMFD_SFR PWM0FDCR
+	#else
+		#define PWM_INTERRUPT PWM2_INTERRUPT
+		#define PWM_COUNTER_IF_SFR PWMCFG23
+		#define PWM_COUNTER_IF_MASK M_PWM2CBIF
+		#define PWM_CHANNEL_IF_SFR PWM2IF
+		
+		#define PWMFD_INTERRUPT PWM2FD_INTERRUPT
+		#define PWMFD_SFR PWM2FDCR
+	#endif
+	
+	#define PWM_CHANNEL_IF_SFR_ENABLE ENABLE_EXTENDED_SFR();
+	#define PWM_CHANNEL_IF_SFR_DISABLE DISABLE_EXTENDED_SFR();
+	
+	#define PWMFD_SFR_ENABLE ENABLE_EXTENDED_SFR();
+	#define PWMFD_SFR_DISABLE DISABLE_EXTENDED_SFR();
+#else
+	#if MCU_HAS_ENHANCED_PWM == 'A'
+		#define PWM_COUNTER_IF_SFR PWMCFG
+	#elif MCU_HAS_ENHANCED_PWM == '5'
+		#define PWM_COUNTER_IF_SFR PWM0IF
+	#endif
+	
+	#define PWM_INTERRUPT PWM0_INTERRUPT
+	#define PWM_COUNTER_IF_MASK M_CBIF
+	#define PWM_CHANNEL_IF_SFR PWM0IF
+	#define PWM_CHANNEL_IF_SFR_ENABLE 
+	#define PWM_CHANNEL_IF_SFR_DISABLE 
+	
+	#define PWMFD_INTERRUPT PWM0FR_INTERRUPT
+	#define PWMFD_SFR PWM0FDCR
+	#define PWMFD_SFR_ENABLE 
+	#define PWMFD_SFR_DISABLE 
+#endif
 
 #endif // _PWM_HAL_H

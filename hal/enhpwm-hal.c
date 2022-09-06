@@ -40,7 +40,7 @@
 static const uint8_t __pinConfigurations[][PWM_CHANNELS] = {
 #if MCU_HAS_ENHANCED_PWM == '5'
 	// STC15W4K
-	{ 0x37, 0x22, 0x21, 0x23, 0x16, 0x17 }, 
+	{ 0x37, 0x21, 0x22, 0x23, 0x16, 0x17 }, 
 	{ 0x27, 0x45, 0x44, 0x42, 0x07, 0x06 }, 
 #endif // MCU_HAS_ENHANCED_PWM == '5'
 
@@ -118,21 +118,27 @@ void pwmInitialise(PWM_ClockSource clockSource, uint16_t divisor, InterruptEnabl
 #endif // MCU_HAS_ENHANCED_PWM == 'G'
 }
 
-void pwmConfigureFaultDetection(
-	PWM_FaultTrigger faultTrigger, 
-	PWM_FaultResponse faultResponse, 
-	InterruptEnable faultInterrupt) {
-	
-	uint8_t fdcr = faultTrigger | faultResponse | ((faultInterrupt == ENABLE_INTERRUPT) ? 0x08 : 0);
-	ENABLE_EXTENDED_SFR();
-	
-#if MCU_FAMILY == 8 && MCU_SERIES == 'G'
-	PWM2FDCR = fdcr;
-#else
-	PWM0FDCR = fdcr;
-#endif
+void pwmConfigureFaultDetection(PWM_FaultTrigger faultTrigger, PWM_FaultResponse faultResponse, InterruptEnable faultInterrupt) {
+	PWMFD_SFR_ENABLE
+	PWMFD_SFR = faultTrigger | faultResponse | ((faultInterrupt == ENABLE_INTERRUPT) ? 0x08 : 0);
+	PWMFD_SFR_DISABLE
+}
 
-	DISABLE_EXTENDED_SFR();
+void pwmDeconfigure() {
+#if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
+	#if MCU_SERIES == 'A' // STC8A8KxxD4
+		PWMCFG01 &= ~(M_EPWM0CBI | M_PWM0CEN);
+		PWMSET &= ~M_ENPWM0;
+	#else // STC8G2K
+		PWMCFG23 &= ~(M_EPWM2CBI | M_PWM2CEN);
+		PWMSET &= ~M_ENPWM2;
+	#endif // MCU_SERIES == 'A'
+#else // STC8A8KxxS4A12 and STC15W4K
+	PWMCR = 0;
+#endif // MCU_HAS_ENHANCED_PWM == 'G'
+	PWMFD_SFR_ENABLE
+	PWMFD_SFR = 0;
+	PWMFD_SFR_DISABLE
 }
 
 static void __pwmSetFlipPoints(PWM_Channel channel, uint16_t flipPoint1, uint16_t flipPoint2) {
@@ -406,6 +412,107 @@ void pwmStartChannel(PWM_Channel channel, uint8_t pinSwitch, GpioPinMode pinMode
 	#if MCU_HAS_ENHANCED_PWM == '5' // STC15W4K
 		PWMCFG |= initialLevel << channel;
 		PWMCR |= 1 << channel;
+	#endif // MCU_HAS_ENHANCED_PWM == '5'
+#endif // MCU_HAS_ENHANCED_PWM == 'G'
+}
+
+void pwmDeconfigureChannel(PWM_Channel channel) REENTRANT {
+	uint8_t channelCR = 0;
+	
+	ENABLE_EXTENDED_SFR();
+	
+#if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
+	#if MCU_SERIES == 'A' // STC8A8KxxD4
+		switch (channel) {
+		case PWM_Channel0:
+			PWM00CR = channelCR;
+			break;
+		case PWM_Channel1:
+			PWM01CR = channelCR;
+			break;
+		case PWM_Channel2:
+			PWM02CR = channelCR;
+			break;
+		case PWM_Channel3:
+			PWM03CR = channelCR;
+			break;
+		case PWM_Channel4:
+			PWM04CR = channelCR;
+			break;
+		case PWM_Channel5:
+			PWM05CR = channelCR;
+			break;
+		case PWM_Channel6:
+			PWM06CR = channelCR;
+			break;
+		case PWM_Channel7:
+			PWM07CR = channelCR;
+			break;
+		}
+	#else // STC8G2K
+		switch (channel) {
+		case PWM_Channel0:
+			PWM20CR = channelCR;
+			break;
+		case PWM_Channel1:
+			PWM21CR = channelCR;
+			break;
+		case PWM_Channel2:
+			PWM22CR = channelCR;
+			break;
+		case PWM_Channel3:
+			PWM23CR = channelCR;
+			break;
+		case PWM_Channel4:
+			PWM24CR = channelCR;
+			break;
+		case PWM_Channel5:
+			PWM25CR = channelCR;
+			break;
+		case PWM_Channel6:
+			PWM26CR = channelCR;
+			break;
+		case PWM_Channel7:
+			PWM27CR = channelCR;
+			break;
+		}
+	#endif // MCU_SERIES == 'A'
+	
+	DISABLE_EXTENDED_SFR();
+#else // STC8A8KxxS4A12 and STC15W4K
+	switch (channel) {
+	case PWM_Channel0:
+		PWM00CR = channelCR;
+		break;
+	case PWM_Channel1:
+		PWM01CR = channelCR;
+		break;
+	case PWM_Channel2:
+		PWM02CR = channelCR;
+		break;
+	case PWM_Channel3:
+		PWM03CR = channelCR;
+		break;
+	case PWM_Channel4:
+		PWM04CR = channelCR;
+		break;
+	case PWM_Channel5:
+		PWM05CR = channelCR;
+		break;
+	#if PWM_CHANNELS > 6
+		case PWM_Channel6:
+			PWM06CR = channelCR;
+			break;
+		case PWM_Channel7:
+			PWM07CR = channelCR;
+			break;
+	#endif // PWM_CHANNELS > 6
+	}
+	
+	DISABLE_EXTENDED_SFR();
+	
+	#if MCU_HAS_ENHANCED_PWM == '5' // STC15W4K
+		PWMCR &= ~(1 << channel);
 	#endif // MCU_HAS_ENHANCED_PWM == '5'
 #endif // MCU_HAS_ENHANCED_PWM == 'G'
 }

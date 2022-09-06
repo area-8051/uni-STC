@@ -35,12 +35,18 @@
 #endif
 
 #ifndef UART_DEFAULT_SEGMENT
-	// __data and __idata are to small to be used as default values:
-	// default values should "just work", even when using all UART
-	// simultaneously.
-	// __xdata uses more flash but takes 1 cycle less than __pdata,
-	// that seems a good trade off.
-	#define UART_DEFAULT_SEGMENT __xdata
+	#if HAL_UARTS > 1
+		// __data and __idata are to small to be used as default values:
+		// default values should "just work", even when using all UART
+		// simultaneously.
+		// __xdata uses more flash but takes 1 cycle less than __pdata,
+		// that seems a good trade off.
+		#define UART_DEFAULT_SEGMENT __xdata
+	#else
+		// With just one UART, __idata is a sound default, especially
+		// when using small buffers and/or a small stack.
+		#define UART_DEFAULT_SEGMENT __idata
+	#endif // HAL_UARTS > 1
 #endif
 
 /**

@@ -192,16 +192,18 @@ void main() {
 		FREE_RUNNING
 	);
 	
-	pcaInitialise(
+	pcaStartCounter(
 		PCA_TIMER0, 
 		FREE_RUNNING, 
 		DISABLE_INTERRUPT, 
 		PCA_GLOWING_PIN_CONFIG
 	);
-	
+	pcaConfigureChannel(
+		PCA_GLOWING_CHANNEL, 
+		GPIO_BIDIRECTIONAL_MODE
+	);
 	pcaStartPwm(
 		PCA_GLOWING_CHANNEL, 
-		GPIO_BIDIRECTIONAL_MODE, 
 		MAKE_PCA_PWM_BITS(PCA_GLOWING_PWM_BITS), 
 		PCA_EDGE_NONE, 
 		PCA_COUNTER_VALUE - PCA_GLOWING_GRADIENT[0]
@@ -211,15 +213,18 @@ void main() {
 // ---------------------------------------------------------------------
 
 #ifdef MCU_HAS_ENHANCED_PWM
-	pwmInitialise(
+	pwmStartCounter(
 		PWM_SYSCLK_DIV_7, 
 		PWM_COUNTER_VALUE, 
 		DISABLE_INTERRUPT
 	);
-	pwmStartChannel(
+	pwmConfigureChannel(
 		PWM_GLOWING_CHANNEL, 
 		PWM_GLOWING_PIN_CONFIG, 
-		GPIO_BIDIRECTIONAL_MODE, 
+		GPIO_BIDIRECTIONAL_MODE
+	);
+	pwmStartChannel(
+		PWM_GLOWING_CHANNEL, 
 		OUTPUT_LOW, 
 		PWM_INTERRUPT_EVENT_NONE, 
 		0,

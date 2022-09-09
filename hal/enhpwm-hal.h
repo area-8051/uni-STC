@@ -144,9 +144,9 @@ typedef enum {
  */
 
 /**
- * Initialises and starts the master counter.
+ * Configures and starts the master counter.
  */
-void pwmInitialise(
+void pwmStartCounter(
 	PWM_ClockSource clockSource, 
 	uint16_t divisor, 
 	InterruptEnable overflowInterrupt
@@ -180,18 +180,26 @@ void pwmConfigureFaultDetection(
 );
 
 /**
- * Deconfigures the PWM group.
- * pwmInitialise() must be called again to restart the PWM group.
+ * Resets the configuration of the master counter.
+ * pwmStartCounter() must be called again to restart the PWM counter.
  */
-void pwmDeconfigure();
+void pwmStopCounter();
 
 /**
- * Configures a PCA channel in PWM mode.
+ * Configures the output pin of a PWM channel.
+ * Must be called (once is enough) before using pwmStartCounter().
+ */
+void pwmConfigureChannel(
+	PWM_Channel channel, 
+	uint8_t pinSwitch, 
+	GpioPinMode pinMode
+);
+
+/**
+ * Configures and starts a PWM channel.
  */
 void pwmStartChannel(
 	PWM_Channel channel, 
-	uint8_t pinSwitch, 
-	GpioPinMode pinMode, 
 	OutputLevel initialLevel, 
 	PWM_InterruptOnEvent interruptOnEvent, 
 	uint16_t flipPoint1, 
@@ -199,10 +207,10 @@ void pwmStartChannel(
 );
 
 /**
- * Deconfigures a PWM channel.
+ * Resets the configuration of a PWM channel.
  * pwmStartChannel() must be called again to restart the channel.
  */
-void pwmDeconfigureChannel(PWM_Channel channel) REENTRANT;
+void pwmStopChannel(PWM_Channel channel) REENTRANT;
 
 /**
  * Changes the flip points of a PWM channel.
@@ -211,13 +219,14 @@ void pwmDeconfigureChannel(PWM_Channel channel) REENTRANT;
  */
 void pwmSetFlipPoints(PWM_Channel channel, uint16_t flipPoint1, uint16_t flipPoint2);
 
-#if MCU_HAS_ENHANCED_PWM != '5'
-	// The STC15W4K doesn't have PWMxxHLD SFR
-	
-	void pwmLockChannel(PWM_Channel channel, OutputLevel outputLevel);
+/**
+ * The STC15W4K doesn't have the PWMxxHLD SFR. We can emulate
+ * pwmLockChannel(), but not pwmUnlockChannel(), you will need
+ * to call pwmStartChannel() again to unlock it.
+ */
+void pwmLockChannel(PWM_Channel channel, OutputLevel outputLevel);
 
-	void pwmUnlockChannel(PWM_Channel channel);
-#endif // MCU_HAS_ENHANCED_PWM != '5'
+void pwmUnlockChannel(PWM_Channel channel);
 
 /**
  * Helper macros to write generic ISR.

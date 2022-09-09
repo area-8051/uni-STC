@@ -117,7 +117,7 @@ typedef enum {
 INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1);
 
 /**
- * Initialises the master counter of the counter array.
+ * Configures and starts the master counter of the PCA.
  * 
  * For source code clarity, should be called before any other PCA_* function.
  * 
@@ -125,7 +125,13 @@ INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1);
  * 
  * CCP = Compare / Capture / PWM
  */
-void pcaInitialise(PCA_ClockSource clockSource, CounterControl counterMode, InterruptEnable overflowInterrupt, uint8_t pinSwitch);
+void pcaStartCounter(PCA_ClockSource clockSource, CounterControl counterMode, InterruptEnable overflowInterrupt, uint8_t pinSwitch);
+
+/**
+ * Configures the I/O pin used by the channel.
+ * MUST be called (once is enough) before any pcaStartXxx() function.
+ */
+void pcaConfigureChannel(PCA_Channel channel, GpioPinMode pinMode);
 
 /**
  * Configures a PCA channel to measure the width of a pulse.
@@ -135,7 +141,7 @@ void pcaInitialise(PCA_ClockSource clockSource, CounterControl counterMode, Inte
  * 
  * shiftBits > 23 makes no sense, but be aware no check is made.
  */
-void pcaStartCapture(PCA_Channel channel, GpioPinMode pinMode, PCA_EdgeTrigger trigger, PCA_CaptureMode captureMode, uint8_t shiftBits);
+void pcaStartCapture(PCA_Channel channel, PCA_EdgeTrigger trigger, PCA_CaptureMode captureMode, uint8_t shiftBits);
 
 /**
  * Configures a PCA channel in PWM mode.
@@ -143,7 +149,7 @@ void pcaStartCapture(PCA_Channel channel, GpioPinMode pinMode, PCA_EdgeTrigger t
  * The duty cycle is defined by the number of clockSource pulses during 
  * which the PWM output must be high.
  */
-void pcaStartPwm(PCA_Channel channel, GpioPinMode pinMode, PCA_PWM_Bits bits, PCA_EdgeTrigger interruptTrigger, uint16_t clocksHigh);
+void pcaStartPwm(PCA_Channel channel, PCA_PWM_Bits bits, PCA_EdgeTrigger interruptTrigger, uint16_t clocksHigh);
 
 /**
  * Changes the duty cycle of a PWM channel.
@@ -157,7 +163,13 @@ void pcaSetDutyCycle(PCA_Channel channel, uint16_t clocksHigh);
  * 
  * timerPeriod is expressed as a number of clockSource pulses.
  */
-void pcaStartTimer(PCA_Channel channel, GpioPinMode pinMode, OutputEnable pulseOutput, uint16_t timerPeriod);
+void pcaStartTimer(PCA_Channel channel, OutputEnable pulseOutput, uint16_t timerPeriod);
+
+/**
+ * Resets the configuration of a PCA channel.
+ * pcaStartXxxx() must be called again to restart the channel.
+ */
+void pcaStopChannel(PCA_Channel channel);
 
 /**
  * MUST be implemented by the application, even when not used.

@@ -150,7 +150,7 @@ static HAL_PCA_SEGMENT PCA_ChannelConfig __pca_channelConfig[HAL_PCA_CHANNELS];
 // On all STC8G, STC8H and the STC8A8K64D4, GPIO ports are configured
 // in high-impedance mode by default, so configuring the channel output
 // pin mode is *REQUIRED*.
-static void __pca_configureChannelOutput(PCA_Channel channel, GpioPinMode pinMode) {
+void pcaConfigureChannel(PCA_Channel channel, GpioPinMode pinMode) {
 	uint8_t channelPin = __pca_pinConfigurations[__pca_pinSwitch][channel];
 	GpioPort port = (GpioPort) (channelPin >> 4);
 	GpioPin pin = (GpioPin) (channelPin & 0x0f);
@@ -172,7 +172,7 @@ inline uint8_t __pca_ccapMode(PCA_ChannelMode channelMode, PCA_EdgeTrigger inter
 			: DISABLE_INTERRUPT) << P_EECF);
 }
 
-void pcaInitialise(PCA_ClockSource clockSource, CounterControl counterMode, InterruptEnable overflowInterrupt, uint8_t pinSwitch) {
+void pcaStartCounter(PCA_ClockSource clockSource, CounterControl counterMode, InterruptEnable overflowInterrupt, uint8_t pinSwitch) {
 	__pca_pinSwitch = pinSwitch;
 	P_SW1 = (P_SW1 & ~M_CCP_S) | ((pinSwitch << P_CCP_S) & M_CCP_S);
 	
@@ -186,9 +186,8 @@ void pcaInitialise(PCA_ClockSource clockSource, CounterControl counterMode, Inte
 	CR = 1;
 }
 
-void pcaStartCapture(PCA_Channel channel, GpioPinMode pinMode, PCA_EdgeTrigger trigger, PCA_CaptureMode captureMode, uint8_t shiftBits) {
+void pcaStartCapture(PCA_Channel channel, PCA_EdgeTrigger trigger, PCA_CaptureMode captureMode, uint8_t shiftBits) {
 	CR = 0;
-	__pca_configureChannelOutput(channel, pinMode);
 	
 	__pca_overflowCounter[channel] = 0;
 	__pca_channelData[channel].value = 0;
@@ -236,6 +235,38 @@ void pcaStartCapture(PCA_Channel channel, GpioPinMode pinMode, PCA_EdgeTrigger t
 	
 	PCA_CTR = 0;
 	CR = 1;
+}
+
+void pcaStopChannel(PCA_Channel channel) {
+	switch (channel) {
+	case PCA_CHANNEL0:
+		CCAPM0 = 0;
+		break;
+		
+#if HAL_PCA_CHANNELS > 1
+	case PCA_CHANNEL1:
+		CCAPM1 = 0;
+		break;
+#endif // HAL_PCA_CHANNELS > 1
+		
+#if HAL_PCA_CHANNELS > 2
+	case PCA_CHANNEL2:
+		CCAPM2 = 0;
+		break;
+#endif // HAL_PCA_CHANNELS > 2
+		
+#if HAL_PCA_CHANNELS > 3
+	case PCA_CHANNEL3:
+	#ifdef PCA_CHANNEL3_XSFR
+		ENABLE_EXTENDED_SFR();
+	#endif
+		CCAPM3 = 0;
+	#ifdef PCA_CHANNEL3_XSFR
+		DISABLE_EXTENDED_SFR();
+	#endif
+		break;
+#endif // HAL_PCA_CHANNELS > 3
+	}
 }
 
 #if MCU_FAMILY == 12
@@ -337,8 +368,7 @@ static void __pcaConfigurePWM(bool initialise, PCA_Channel channel, PCA_PWM_Bits
 	}
 }
 
-void pcaStartPwm(PCA_Channel channel, GpioPinMode pinMode, PCA_PWM_Bits bits, PCA_EdgeTrigger interruptTrigger, uint16_t clocksHigh) {
-	__pca_configureChannelOutput(channel, pinMode);
+void pcaStartPwm(PCA_Channel channel, PCA_PWM_Bits bits, PCA_EdgeTrigger interruptTrigger, uint16_t clocksHigh) {
 	__pca_channelConfig[channel].mode = PCA_PWM;
 	__pca_channelConfig[channel].settings.pwm.bits = bits;
 	__pcaConfigurePWM(
@@ -360,9 +390,7 @@ void pcaSetDutyCycle(PCA_Channel channel, uint16_t clocksHigh) {
 	);
 }
 
-void pcaStartTimer(PCA_Channel channel, GpioPinMode pinMode, OutputEnable pulseOutput, uint16_t timerPeriod) {
-	__pca_configureChannelOutput(channel, pinMode);
-	
+void pcaStartTimer(PCA_Channel channel, OutputEnable pulseOutput, uint16_t timerPeriod) {
 	__pca_channelData[channel].timer.period = timerPeriod;
 	__pca_channelData[channel].timer.value = timerPeriod;
 	uint8_t ccapMode = (pulseOutput == ENABLE_OUTPUT) ? PCA_PULSE : PCA_TIMER;

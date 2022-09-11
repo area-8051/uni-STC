@@ -8,7 +8,7 @@
 #ifndef _UNISTC_PWM_PWM8H_H
 #define _UNISTC_PWM_PWM8H_H
 
-// SFR PWMA_ETRPS: PWMA ETR select register
+// SFR PWMA_ETRPS: PWMA external trigger and PWM fault pin switch
 SFRX(PWMA_ETRPS, 0xFEB0);
 
 #define M_ETR_PS 0x03

@@ -57,12 +57,20 @@ void adcPowerOff() {
 	ADC_CONTR &= ~M_ADC_POWER;
 }
 
+inline void adcClearResult() {
+#if MCU_FAMILY == 12 || MCU_FAMILY == 15
+	// Clear previous result. This is not mentioned in the TRM, but
+	// code examples for the STC12 and STC15 do it.
+	ADC_RES = 0;
+#endif // MCU_FAMILY == 12 || MCU_FAMILY == 15
+}
+
 static __bit rightAligned;
 
 #pragma save
 // Suppress warning "unreferenced function argument"
 #pragma disable_warning 85
-void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts, ADC_Trigger triggerMode) {
+void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts) {
 	rightAligned = (resultAlignment == ADC_ALIGN_RIGHT);
 
 	#if MCU_FAMILY == 12
@@ -127,10 +135,6 @@ void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts,
 		ADCCFG = (ADCCFG & ~M_ADC_SPEED) | ((ADJ_SPEED << P_ADC_SPEED) & M_ADC_SPEED);
 	#endif // MCU_FAMILY == 8
 	
-	#ifdef P_ADC_EPWMT
-		adcContr |= triggerMode << P_ADC_EPWMT;
-	#endif
-	
 	if (useInterrupts == ENABLE_INTERRUPT) {
 		IE1 |= M_EADC;
 	}
@@ -188,12 +192,7 @@ void adcConfigureChannel(ADC_Channel channel) {
 }
 
 uint16_t adcBlockingRead(ADC_Channel channel) {
-#if MCU_FAMILY == 12 || MCU_FAMILY == 15
-	// Clear previous result. This is not mentioned in the TRM, but
-	// code examples for the STC12 and STC15 do it.
-	ADC_RES = 0;
-#endif // MCU_FAMILY == 12 || MCU_FAMILY == 15
-
+	adcClearResult();
 	ADC_CONTR = (ADC_CONTR & ~M_ADC_CHS) | channel | M_ADC_START;
 	NOP();
 	NOP();
@@ -212,14 +211,15 @@ uint16_t adcBlockingRead(ADC_Channel channel) {
 }
 
 void adcStartConversion(ADC_Channel channel) REENTRANT {
-#if MCU_FAMILY == 12 || MCU_FAMILY == 15
-	// Clear previous result. This is not mentioned in the TRM, but
-	// code examples for the STC12 and STC15 do it.
-	ADC_RES = 0;
-#endif // MCU_FAMILY == 12 || MCU_FAMILY == 15
-
+	adcClearResult();
 	ADC_CONTR = (ADC_CONTR & ~M_ADC_CHS) | channel | M_ADC_START;
 }
+
+#ifdef M_ADC_EPWMT
+	void adcPwmTriggered(ADC_Channel channel) {
+		ADC_CONTR = (ADC_CONTR & ~M_ADC_CHS) | channel | M_ADC_EPWMT;
+	}
+#endif // M_ADC_EPWMT
 
 #pragma save
 // Suppress warning "unreferenced function argument"

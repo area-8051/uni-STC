@@ -1,26 +1,33 @@
 This Hardware Abstraction Layer (HAL) builds upon uni-STC to expose 
 peripherals and features in an MCU-independent way.
 
-In order to use it, copy the files you need in your project directory 
-and create a project-defs.h file which includes the selected MCU's 
-header file from include/STC/, and defines pin assignments and other 
-application configuration choices.
+In order to use it, create a project-defs.h file in your project's
+directory, where you will include the selected MCU's header file from 
+include/STC/, and of course add application-wide definitions you need,
+such as pin assignments and other configuration choices.
 
-In addition to project-defs.h, applications using uni-STC are REQUIRED 
-to define the MCU_FREQ macro, specifying the MCU's operating frequency 
-in Herz as an unsigned long, e.g.: -DMCU_FREQ=24000000UL
+Note applications using uni-STC are REQUIRED to define the MCU_FREQ 
+macro to specify the MCU's desired operating frequency in Herz as an 
+unsigned long. This should be done in the Makefile because stcgal also
+needs this information.
+
+Refer to the projects under the demos/ directory for examples of how 
+to write your Makefile.
 
 To port your application to another STC MCU (provided it has the 
-required features, of course), you just need to change project-defs.h 
+features you need, of course), you just need to change project-defs.h 
 and rebuild your project.
 
 Internal dependencies between HAL modules are described in their 
-respective header files.
+respective header files. Headers may also describe optional macros
+allowing to tweak memory footprint.
 
-See the projects under the demos/ directory for examples.
+Note that the benefits of the HAL come at a price in terms of memory
+footprint (both flash and RAM). From personal experience, 8KB flash
+and 256 bytes RAM seems a bare minimum to write any decent application.
 
 Some peripheral support is incomplete (e.g. uart-hal doesn't support 
-9-bit mode) because I haven't had the need for all their features yet.
+9-bit mode), because I haven't had the need for all their features yet.
 
 All STC periperals aren't supported yet (e.g. advanced PWM) for the 
 same reason.

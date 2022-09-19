@@ -48,8 +48,9 @@
  * Optional macros:
  * 
  *     BASIC_GPIO_HAL (default: undefined). When defined, removes
- *     support for GPIO features not available on the original 8051.
- *     Greatly helps reduce flash footprint.
+ *     support for enhanced GPIO features available on STC8 MCU series.
+ *     Greatly helps reduce flash footprint on STC8, but has no effect
+ *     on other MCU series.
  */
 
 #ifdef BASIC_GPIO_HAL

@@ -24,7 +24,9 @@ allowing to tweak memory footprint.
 
 Note that the benefits of the HAL come at a price in terms of memory
 footprint (both flash and RAM). From personal experience, 8KB flash
-and 256 bytes RAM seems a bare minimum to write any decent application.
+and 256 bytes RAM seems a minimum to write any decent application.
+However, the less capable the MCU, the smaller the HAL too, so your
+mileage may vary.
 
 Some peripheral support is incomplete (e.g. uart-hal doesn't support 
 9-bit mode), because I haven't had the need for all their features yet.

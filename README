@@ -46,9 +46,11 @@ with STC MCU. This has 2 consequences:
 supports MCS-51. I'd be interested to work on this, but lack time for 
 the moment.
 
-Also, I do NOT want to support MCU older than STC12. In fact, I added 
-support for STC12 only to assess the relevance of my design. It also 
-gave me a better understanding of the evolution of STC's MCU.
+Also, I do NOT want to support MCU older than STC12C5AxxS2. For clarity,
+the STC12C520x, STC12C54xx, and STC12C56xx series are NOT and will NOT 
+be supported. In fact, I added support for the STC12C5AxxS2 only to 
+assess the relevance of my design. It also gave me a better understanding 
+of the evolution of STC's MCU.
 
 This is why every time I had to make a choice, I made it with the most 
 capable MCU and/or most recent in mind.
@@ -100,8 +102,8 @@ Confusing naming
 	No prefix: SFR or bit accessor, e.g. P_SW1 or EA
 	
 	Whenever I defined an M_ constant, I also defined the corresponding 
-	P_ constant, so bit manipulations are a no-brainer (or with M_*, 
-	and with ~M_*, shift with P_*).
+	P_ constant, so bit manipulations are a no-brainer (OR with M_*, 
+	AND with ~M_*, shift with P_*).
 	
 Unhelpful complication or redundancy, cryptic naming
 

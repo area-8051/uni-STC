@@ -41,6 +41,8 @@ static GpioConfig ledPin = GPIO_PIN_CONFIG(GPIO_PORT5, GPIO_PIN4, GPIO_BIDIRECTI
 #define NB_FLASHES 4
 
 void main() {
+	INIT_EXTENDED_SFR()
+	
 	gpioConfigure(&ledPin);
 	gpioWrite(&ledPin, 1);
 	

@@ -72,6 +72,8 @@ uint16_t readTemperature() {
 }
 
 void main() {
+	INIT_EXTENDED_SFR()
+	
 	serialConsoleInitialise(
 		CONSOLE_UART, 
 		CONSOLE_SPEED, 

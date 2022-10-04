@@ -30,10 +30,6 @@
 #ifndef _PROJECT_DEFS_H
 #define _PROJECT_DEFS_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
 #ifdef __SDCC
 	//#include <STC/8A8KxxS4A12/LQFP48.h>
 	//#include <STC/8A8KxxD4/LQFP48.h>

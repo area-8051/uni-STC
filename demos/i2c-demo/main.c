@@ -59,6 +59,8 @@ LCDI2CLinkConfig lcdLinkConfig = {
 LCD_TEXT_ONLY_DEVICE(lcdDevice, &lcdLinkConfig, 2, 16)
 
 void main() {
+	INIT_EXTENDED_SFR()
+	
 	// Initialise LCD module -------------------------------------------
 	lcdInitialiseDevice(&lcdDevice);
 	lcdTxtInitialiseDisplayMode(&lcdDevice);

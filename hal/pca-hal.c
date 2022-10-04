@@ -167,7 +167,7 @@ void pcaConfigureChannel(PCA_Channel channel, GpioPinMode pinMode) {
 inline uint8_t __pca_ccapMode(PCA_ChannelMode channelMode, PCA_EdgeTrigger interruptTrigger) {
 	return channelMode
 		| (interruptTrigger << P_CAPN)
-		| (((interruptTrigger != PCA_EDGE_NONE)
+		| ((interruptTrigger != PCA_EDGE_NONE
 			? ENABLE_INTERRUPT 
 			: DISABLE_INTERRUPT) << P_EECF);
 }

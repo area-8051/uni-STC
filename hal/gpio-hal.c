@@ -242,6 +242,7 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 
 // -- P5 ----------------------------------
 
+#ifdef GPIO_HAS_P5
 	case GPIO_PORT5:
 		P5M1 = __gpio_setBits(P5M1, gpioConfig->pinMode & 2, gpioConfig);
 		P5M0 = __gpio_setBits(P5M0, gpioConfig->pinMode & 1, gpioConfig);
@@ -273,6 +274,7 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		
 		DISABLE_EXTENDED_SFR();
 		break;
+#endif // GPIO_HAS_P5
 
 // -- P6 ----------------------------------
 
@@ -348,7 +350,7 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	}
 }
 
-uint8_t gpioRead(GpioConfig *gpioConfig) REENTRANT {
+uint8_t gpioRead(GpioConfig *gpioConfig) {
 	uint8_t value = 0;
 	
 	switch (gpioConfig->port) {
@@ -393,9 +395,11 @@ uint8_t gpioRead(GpioConfig *gpioConfig) REENTRANT {
 
 // -- P5 ----------------------------------
 	
+#ifdef GPIO_HAS_P5
 	case GPIO_PORT5:
 		value = P5;
 		break;
+#endif // GPIO_HAS_P5
 
 // -- P6 ----------------------------------
 
@@ -417,7 +421,7 @@ uint8_t gpioRead(GpioConfig *gpioConfig) REENTRANT {
 	return (value & gpioConfig->__setMask) >> gpioConfig->pin;
 }
 
-void gpioWrite(GpioConfig *gpioConfig, uint8_t value) REENTRANT {
+void gpioWrite(GpioConfig *gpioConfig, uint8_t value) {
 	if (gpioConfig->count == 1) {
 		// In case the caller wants to set a single bit and expects
 		// any non-zero value will be treated as a logical one (which
@@ -469,9 +473,11 @@ void gpioWrite(GpioConfig *gpioConfig, uint8_t value) REENTRANT {
 
 // -- P5 ----------------------------------
 
+#ifdef GPIO_HAS_P5
 	case GPIO_PORT5:
 		P5 = (P5 & gpioConfig->__clearMask) | value;
 		break;
+#endif // GPIO_HAS_P5
 
 // -- P6 ----------------------------------
 

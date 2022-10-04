@@ -30,9 +30,12 @@
 #include "project-defs.h"
 #include <delay.h>
 #include <gpio-hal.h>
-#include <uart-hal.h>
-#include <serial-console.h>
-#include <stdio.h>
+
+#if NB_UARTS > 0
+	#include <uart-hal.h>
+	#include <serial-console.h>
+	#include <stdio.h>
+#endif
 
 #ifdef MCU_HAS_PCA
 	#include <timer-hal.h>
@@ -141,6 +144,7 @@ void pwmUpdateGlowingDutyCycle() {
 
 // ---------------------------------------------------------------------
 
+#if NB_UARTS > 0
 void echoCharactersReceived() {
 	uint8_t c;
 	
@@ -152,6 +156,7 @@ void echoCharactersReceived() {
 		uartSendCharacter(CONSOLE_UART, c, BLOCKING);
 	}
 }
+#endif
 
 void stuffToDoWhileTheLedBlinks(uint16_t delay) {
 #ifdef MCU_HAS_PCA
@@ -167,19 +172,25 @@ void stuffToDoWhileTheLedBlinks(uint16_t delay) {
 	pwmUpdateGlowingDutyCycle();
 #endif // MCU_HAS_ADVANCED_PWM
 	
+#if NB_UARTS > 0
 	// Echo characters typed on the host
 	echoCharactersReceived();
+#endif
 	
 	// Leave time for the blinking LED to be perceptible.
 	delay1ms(delay);
 }
 
 void main() {
+	INIT_EXTENDED_SFR()
+	
+#if NB_UARTS > 0
 	serialConsoleInitialise(
 		CONSOLE_UART, 
 		CONSOLE_SPEED, 
 		CONSOLE_PIN_CONFIG
 	);
+#endif
 	
 	gpioConfigure(&blinkingPin);
 	

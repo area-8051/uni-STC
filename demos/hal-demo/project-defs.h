@@ -30,10 +30,6 @@
 #ifndef _PROJECT_DEFS_H
 #define _PROJECT_DEFS_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
 #ifdef __SDCC
 	#ifdef BUILD_FOR_STC8G1K08A_DIP8
 		#include <STC/8G1KxxA/DIP8.h>

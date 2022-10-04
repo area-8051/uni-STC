@@ -8,47 +8,54 @@
 #define _UNISTC_PCA_H
 
 /**
- * When using an STC15W408AS:
+ * When using an STC15W10x/STC15W20xS/STC15W40xS:
+ *     The PCA_CHANNELS macro must be set to 0.
+ * 
+ * When using an STC15W40xAS:
  *     The PCA_CHANNELS macro must be set to 3.
  * 
- * When using an STC8G1K08A:
+ * When using an STC8G1KxxA:
  *     The MCU_HAS_PCA macro must be defined.
  */
 
-#if MCU_FAMILY == 12
-	#define MCU_HAS_PCA
-	#define PCA_CHANNELS 2
-#endif
-
-#if MCU_FAMILY == 15
-	#define MCU_HAS_PCA
-	#define PCA_HAS_67BIT_PWM
-	
-	#ifndef PCA_CHANNELS
-		#define PCA_CHANNELS 2
-	#endif // PCA_CHANNELS
-#endif
-
-#if MCU_FAMILY == 8 && MCU_SERIES != 'H'
-	#if MCU_PINS > 8
+// On MCU without PCA whereas their family normally supports it,
+// PCA_CHANNELS must be defined to 0.
+#if !defined(PCA_CHANNELS) || PCA_CHANNELS > 0
+	#if MCU_FAMILY == 12
 		#define MCU_HAS_PCA
+		#define PCA_CHANNELS 2
 	#endif
-	
-	#define PCA_HAS_67BIT_PWM
-	#define PCA_HAS_10BIT_PWM
 
-	#if MCU_SERIES == 'A'
-		#define PCA_CHANNELS 4
+	#if MCU_FAMILY == 15
+		#define MCU_HAS_PCA
+		#define PCA_HAS_67BIT_PWM
+		
+		#ifndef PCA_CHANNELS
+			#define PCA_CHANNELS 2
+		#endif // PCA_CHANNELS
+	#endif
 
-		#ifdef STC8A8KxxD4
-			#define PCA_CHANNEL3_XSFR
-		#endif // STC8A8KxxD4
-	#endif // MCU_SERIES == 'A'
+	#if MCU_FAMILY == 8 && MCU_SERIES != 'H'
+		#if MCU_PINS > 8
+			#define MCU_HAS_PCA
+		#endif
+		
+		#define PCA_HAS_67BIT_PWM
+		#define PCA_HAS_10BIT_PWM
 
-	#if MCU_SERIES == 'G'
-		#define PCA_CHANNELS 3
-	#endif // MCU_SERIES == 'G'
-#endif
+		#if MCU_SERIES == 'A'
+			#define PCA_CHANNELS 4
+
+			#ifdef STC8A8KxxD4
+				#define PCA_CHANNEL3_XSFR
+			#endif // STC8A8KxxD4
+		#endif // MCU_SERIES == 'A'
+
+		#if MCU_SERIES == 'G'
+			#define PCA_CHANNELS 3
+		#endif // MCU_SERIES == 'G'
+	#endif
+#endif // !defined(PCA_CHANNELS) || PCA_CHANNELS > 0
 
 #ifdef MCU_HAS_PCA
 	// SFR CCON: PCA control register

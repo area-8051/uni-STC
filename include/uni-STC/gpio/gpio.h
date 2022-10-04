@@ -36,6 +36,11 @@
 	#define GPIO_HAS_P7
 #endif // MCU_PINS >= 64
 
+// Most STC MCU have P5, not having one is an exception.
+#ifndef MCU_HAS_NO_P5
+	#define GPIO_HAS_P5
+#endif
+
 #if MCU_FAMILY == 8
 	#if MCU_SERIES == 'A' || MCU_SERIES == 'F'
 		// Internal pull-up resistors & Schmidt-trigger
@@ -82,7 +87,9 @@
 	#include <uni-STC/gpio/gpio4.h>
 #endif // GPIO_HAS_P4
 
-#include <uni-STC/gpio/gpio5.h>
+#ifdef GPIO_HAS_P5
+	#include <uni-STC/gpio/gpio5.h>
+#endif // GPIO_HAS_P5
 
 #ifdef GPIO_HAS_P6
 	#include <uni-STC/gpio/gpio6.h>
@@ -119,8 +126,10 @@
 		#define P_P4IP 4
 	#endif // GPIO_HAS_P4
 
-	#define M_P5IP 0x20
-	#define P_P5IP 5
+	#ifdef GPIO_HAS_P5
+		#define M_P5IP 0x20
+		#define P_P5IP 5
+	#endif // GPIO_HAS_P5
 
 	#ifdef GPIO_HAS_P6
 		#define M_P6IP 0x40
@@ -178,7 +187,9 @@ typedef enum {
 #ifdef GPIO_HAS_P4
 	GPIO_PORT4 = 4,
 #endif // GPIO_HAS_P4
+#ifdef GPIO_HAS_P5
 	GPIO_PORT5 = 5,
+#endif // GPIO_HAS_P5
 #ifdef GPIO_HAS_P6
 	GPIO_PORT6 = 6,
 #endif // GPIO_HAS_P6

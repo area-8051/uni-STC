@@ -37,9 +37,8 @@
 #if MCU_FAMILY == 8
 	#define TIMER_HAS_AUXINTIF
 	
-	#if MCU_SERIES == 'G'
-		#define TIMER_HAS_PRESCALERS
-	#endif // MCU_SERIES == 'G'
+	// Only the STC8G2* have prescalers, so TIMER_HAS_PRESCALERS
+	// is defined in its specific header.
 	
 	#if MCU_SERIES == 'H' || defined(STC8A8KxxD4)
 		#define TIMER_HAS_PRESCALERS

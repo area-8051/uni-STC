@@ -11,6 +11,7 @@
 #define PWM_CHANNELS 8
 #define ADC_CHANNELS 15
 #define NB_TIMERS 5
+#define TIMER_HAS_PRESCALERS
 
 #include <uni-STC/stcmcu.h>
 

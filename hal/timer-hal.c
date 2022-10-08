@@ -69,20 +69,46 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 	uint8_t sysclkDiv1 = 1;
 	
 	if (sysclkDivisor == 0) {
-		// Baud rate too high
+		// Too high
 		rc = TIMER_FREQUENCY_TOO_HIGH;
-	} else if (sysclkDivisor >= (COUNTER_MAX * 12UL)) {
-		// Baud rate too low
+	} else if (sysclkDivisor > (COUNTER_MAX * 12UL)) {
+#ifdef TIMER_HAS_PRESCALERS
+		uint8_t prescaler;
+		
+		switch (timer) {
+		case TIMER0:
+		case TIMER1:
+			// Too low: T0 and T1 don't have a prescaler.
+			rc = TIMER_FREQUENCY_TOO_LOW;
+			break;
+		
+		default:
+			// Prescalers are 8-bit counters, so PRESCALER_MAX = 256.
+			// For sysclkDivisor to excede COUNTER_MAX * PRESCALER_MAX * 12UL,
+			// sysclk should be greater than 201MHz, so no need to test that.
+			prescaler = sysclkDivisor / (COUNTER_MAX * 12UL);
+			
+			if (sysclkDivisor % (COUNTER_MAX * 12UL)) {
+				prescaler++;
+			}
+			
+			sysclkDivisor /= prescaler;
+			setTimerPrescaler(timer, prescaler);
+			break;
+		}
+#else
+		// Too low
 		rc = TIMER_FREQUENCY_TOO_LOW;
-	} else {
+#endif // TIMER_HAS_PRESCALERS
+	}
+
+	if (rc == TIMER_FREQUENCY_OK) {
 		if (sysclkDivisor > COUNTER_MAX) {
 			// sysclkDiv1 = 0 => pre-divide sysclk by 12
 			sysclkDiv1 = 0;
 			sysclkDivisor /= 12UL;
 		}
-	}
-
-	if (rc == TIMER_FREQUENCY_OK) {
+		
 		uint16_t reloadValue = (uint16_t) (COUNTER_MAX - sysclkDivisor);
 		
 		switch (timer) {
@@ -342,6 +368,9 @@ uint16_t stopTimer(Timer timer) {
 #ifdef TIMER_HAS_PRESCALERS
 
 	void setTimerPrescaler(Timer timer, uint8_t divisor) {
+		// sysclk is divided by (TMxPS + 1)
+		divisor--;
+		
 		switch (timer) {
 	#ifdef TIMER_HAS_T2
 		case TIMER2:

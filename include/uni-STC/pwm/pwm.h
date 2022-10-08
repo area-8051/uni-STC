@@ -33,6 +33,8 @@
 			#define PWMB_INTERRUPT 27
 			#define PWMB_VECTOR_ADDR 0x00DB
 		#elif MCU_SERIES == 'G' || defined(STC8A8KxxD4)
+			// Note: STC8G1 MCU don't have enhanced PWM, so they just
+			// don't define PWM_CHANNELS and only the STC8G2 gets there.
 			#include <uni-STC/pwm/pwm8g.h>
 			#define MCU_HAS_ENHANCED_PWM 'G'
 		#elif MCU_SERIES == 'A'

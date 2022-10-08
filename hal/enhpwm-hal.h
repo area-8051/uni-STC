@@ -46,36 +46,48 @@
  * 
  *     gpio-hal
  * 
- * IMPORTANT1: on the STC8G2K*, only PWM20..27 are supported, and 
- * correspond to PWM_Channel0..7 respectively.
+ * IMPORTANT 1:
  * 
- * Rationale: the STC8G2K* seems to be an exception as STC never
- * manufactured another MCU with as many PWM channels. Instead, the
- * advanced 16-bit PWM of the STC8H family offers 8 channels again.
- * It seems the industry just wants more _independent_ PWM channels, 
- * and _not_ a higher total count of PWM outputs.
+ * On the STC8G2K*, only PWM20..27 are supported, and correspond to 
+ * PWM_Channel0..7 respectively.
+ * 
+ * Rationale: the STC8G2KxxS4 seems to be an exception as STC never
+ * manufactured another MCU with as many PWM channels. Moreover, the
+ * STC8G2KxxS2 variant has only PWM2!
+ * 
+ * Furthermore, the advanced 16-bit PWM of the STC8H family also offers
+ * only 8 channels. It seems the industry just wants more *independent*
+ * PWM channels, rather than a higher total count of PWM outputs.
  * 
  * The purpose of a HAL being to reduce complexity and increase 
  * hardware independence, using a maximum of 8 PWM channels was
- * the most sensible option.
+ * thus the most sensible option.
  * 
- * IMPORTANT2: on the STC15W4K*, STC numbered enhanced PWM channels 
- * PWM2..7 (the 2 available CCP channels counting for PWM0 and PWM1 
- * in their mind). However, enhanced PWM channels on the STC8A are 
- * numbered from 0 to 7. Furthermore, PWM2 SFRs on the STC15 are at 
- * the same addresses as PWM0's on the STC8A.
+ * IMPORTANT 2:
+ * 
+ * On the STC15W4K*, STC numbered enhanced PWM channels PWM2..7 (the 
+ * 2 available CCP channels counting for PWM0 and PWM1 in their mind).
+ * However, enhanced PWM channels on the STC8A are numbered from 0 to 7. 
+ * Furthermore, PWM2 SFRs on the STC15 are at the same addresses as 
+ * PWM0's on the STC8A.
  * 
  * For consistency, I decided to number the enhanced PWM channels
  * of the STC15 from 0 to 5, aligned with those of the STC8A, as 
  * this improves portability between MCU families (the first enhanced
  * PWM channel is always PWM0 on all MCU).
  * 
- * IMPORTANT3: when using interrupts, don't forget to declare your
- * interrupt service routine, this HAL module doesn't provide one.
+ * IMPORTANT 3:
+ * 
+ * When using interrupts, don't forget to declare your ISR, this HAL
+ * module doesn't provide one.
+ * 
  * Its prototype must be either, for the STC8G2K:
- *     INTERRUPT_USING(__enhpwm_isr, PWM2_INTERRUPT, 1);
+ * 
+ *     INTERRUPT_USING(enhpwm_isr, PWM2_INTERRUPT, 1);
+ * 
  * or, for all other MCU:
- *     INTERRUPT_USING(__enhpwm_isr, PWM0_INTERRUPT, 1);
+ * 
+ *     INTERRUPT_USING(enhpwm_isr, PWM0_INTERRUPT, 1);
  */
 
 #include <hal-defs.h>
@@ -244,8 +256,7 @@ INTERRUPT_USING(pwm_isr, PWM_INTERRUPT, 1) {
 	
 	if (PWM_CHANNEL_IF_SFR & M_C0IF) {
 		PWM_COUNTER_IF_SFR &= ~M_C0IF;
-		// do something (possibly after PWM_CHANNEL_IF_SFR_DISABLE
-		// if you need to manipulate SFR).
+		// do something
 	}
 	
 	PWM_CHANNEL_IF_SFR_DISABLE
@@ -256,8 +267,7 @@ INTERRUPT_USING(pwmfd_isr, PWMFD_INTERRUPT, 1) {
 	
 	if (PWMFD_SFR & M_FDIF) {
 		PWMFD_SFR &= ~M_FDIF;
-		// do something (possibly after PWMFD_SFR_DISABLE
-		// if you need to manipulate SFR).
+		// do something
 	}
 	
 	PWMFD_SFR_DISABLE
@@ -282,11 +292,11 @@ INTERRUPT_USING(pwmfd_isr, PWMFD_INTERRUPT, 1) {
 		#define PWMFD_SFR PWM2FDCR
 	#endif
 	
-	#define PWM_CHANNEL_IF_SFR_ENABLE ENABLE_EXTENDED_SFR();
-	#define PWM_CHANNEL_IF_SFR_DISABLE DISABLE_EXTENDED_SFR();
+	#define PWM_CHANNEL_IF_SFR_ENABLE ENABLE_EXTENDED_SFR()
+	#define PWM_CHANNEL_IF_SFR_DISABLE DISABLE_EXTENDED_SFR()
 	
-	#define PWMFD_SFR_ENABLE ENABLE_EXTENDED_SFR();
-	#define PWMFD_SFR_DISABLE DISABLE_EXTENDED_SFR();
+	#define PWMFD_SFR_ENABLE ENABLE_EXTENDED_SFR()
+	#define PWMFD_SFR_DISABLE DISABLE_EXTENDED_SFR()
 #else
 	#if MCU_HAS_ENHANCED_PWM == 'A'
 		#define PWM_COUNTER_IF_SFR PWMCFG

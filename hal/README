@@ -28,13 +28,16 @@ and 256 bytes RAM seems a minimum to write any decent application.
 However, the less capable the MCU, the smaller the HAL too, so your
 mileage may vary.
 
-Some peripheral support is incomplete (e.g. uart-hal doesn't support 
-9-bit mode), because I haven't had the need for all their features yet.
+Some peripheral support is incomplete because I haven't had the need 
+for all their features yet. For instance:
 
-All STC periperals aren't supported yet (e.g. advanced PWM) for the 
-same reason.
+- uart-hal doesn't support 9-bit mode
+- PWM abstractions (pca-hal, enhpwm-hal, advpwm-hal) don't support 
+  the use of an external clock
 
+All STC periperals (e.g. RTC, LCM) aren't supported for the same reason.
 I'll add more as the need arises in the course of my projects.
+I would also consider feature requests based on concrete use cases.
 
 I'm also aware documentation is... well, perfectible.
 Feel free to ask if you have any question.

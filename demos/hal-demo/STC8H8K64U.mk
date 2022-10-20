@@ -83,6 +83,7 @@ PROJECT_NAME := hal-demo
 PROJECT_FLAGS = -DBUILD_FOR_STC8H8K64U_PDIP40
 
 SRCS := \
+	$(HAL_DIR)/advpwm-hal.c \
 	$(HAL_DIR)/delay.c \
 	$(HAL_DIR)/fifo-buffer.c \
 	$(HAL_DIR)/gpio-hal.c \

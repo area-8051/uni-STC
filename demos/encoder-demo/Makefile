@@ -57,48 +57,39 @@
 
 # Target MCU settings --------------------------------------------------
 
-# Note: using a system clock around 24MHz works with all MCU
-# having an internal RC oscillator.
-MCU_FREQ := 23961600
+MCU_FREQ := 45000000
 
-STACK_SIZE := 112
+STACK_SIZE := 128
 
-# Tested on STC8H3K64S4-45I-LQFP32
 MEMORY_SIZES := \
 	--xram-loc 0 \
-	--xram-size 3072 \
+	--xram-size 8192 \
 	--stack-size $(STACK_SIZE) \
 	--code-size 65536
 
-MEMORY_MODEL := --model-large
-
 HAS_DUAL_DPTR := y
 
+MEMORY_MODEL := --model-large
+
 # Define UNISTC_DIR, HAL_DIR, DRIVER_DIR, and MAKE_DIR -----------------
-include ../../makefiles/0-directories.mk
+# TODO: Adjust path to match you installation directory
+include /home/vincent/src/git/uni-STC/makefiles/0-directories.mk
 
 # Project settings -----------------------------------------------------
-PROJECT_NAME := hal-demo
-
-PROJECT_FLAGS = -DBUILD_FOR_STC8H3K64S4_LQFP32
-
-SRCS := \
-	$(HAL_DIR)/advpwm-hal.c \
-	$(HAL_DIR)/delay.c \
-	$(HAL_DIR)/fifo-buffer.c \
-	$(HAL_DIR)/gpio-hal.c \
-	$(HAL_DIR)/serial-console.c \
-	$(HAL_DIR)/timer-hal.c \
-	$(HAL_DIR)/uart-hal.c \
-	main.c
-
-CONSOLE_BAUDRATE := 57600
-CONSOLE_PORT := ttyUSB0
 
 ISP_PORT := ttyUSB0
+#STCGAL_OPTIONS := -A rts -a
 
-# Default is -a, override here if you have specific needs.
-# STCGAL_OPTIONS := -A rts -a
+PROJECT_NAME := encoder-demo
+
+# The --nogcse option suppresses the following error:
+# ?ASlink-Error-Could not get 16 consecutive bytes in internal RAM for area OSEG.
+#PROJECT_FLAGS := --nogcse
+
+SRCS := \
+	$(HAL_DIR)/gpio-hal.c \
+	$(HAL_DIR)/advpwm-hal.c \
+	main.c
 
 # Boilerplate rules ----------------------------------------------------
 include $(MAKE_DIR)/1-settings.mk

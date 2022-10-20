@@ -83,6 +83,7 @@ PROJECT_NAME := hal-demo
 PROJECT_FLAGS = -DBUILD_FOR_STC8H3K64S2_TSSOP20
 
 SRCS := \
+	$(HAL_DIR)/advpwm-hal.c \
 	$(HAL_DIR)/delay.c \
 	$(HAL_DIR)/fifo-buffer.c \
 	$(HAL_DIR)/gpio-hal.c \

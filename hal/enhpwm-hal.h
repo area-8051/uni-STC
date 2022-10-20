@@ -201,7 +201,7 @@ void pwmStopCounter();
  * Configures the output pin of a PWM channel.
  * Must be called (once is enough) before using pwmStartCounter().
  */
-void pwmConfigureChannel(
+void pwmConfigureOutput(
 	PWM_Channel channel, 
 	uint8_t pinSwitch, 
 	GpioPinMode pinMode

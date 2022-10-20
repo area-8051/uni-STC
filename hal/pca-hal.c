@@ -150,12 +150,24 @@ static HAL_PCA_SEGMENT PCA_ChannelConfig __pca_channelConfig[HAL_PCA_CHANNELS];
 // On all STC8G, STC8H and the STC8A8K64D4, GPIO ports are configured
 // in high-impedance mode by default, so configuring the channel output
 // pin mode is *REQUIRED*.
-void pcaConfigureChannel(PCA_Channel channel, GpioPinMode pinMode) {
+static void pcaConfigureChannel(PCA_Channel channel, GpioPinMode pinMode) {
 	uint8_t channelPin = __pca_pinConfigurations[__pca_pinSwitch][channel];
 	GpioPort port = (GpioPort) (channelPin >> 4);
 	GpioPin pin = (GpioPin) (channelPin & 0x0f);
 	GpioConfig pinConfig = GPIO_PIN_CONFIG(port, pin, pinMode);
 	gpioConfigure(&pinConfig);
+}
+
+void pcaConfigureOutput(PCA_Channel channel, GpioPinMode pinMode) {
+	if (pinMode == GPIO_HIGH_IMPEDANCE_MODE) {
+		pinMode = GPIO_PUSH_PULL_MODE;
+	}
+	
+	pcaConfigureChannel(channel, pinMode);
+}
+
+void pcaConfigureInput(PCA_Channel channel) {
+	pcaConfigureChannel(channel, GPIO_HIGH_IMPEDANCE_MODE);
 }
 
 #if MCU_FAMILY == 12

@@ -47,8 +47,7 @@
 #endif // MCU_HAS_ENHANCED_PWM
 
 #ifdef MCU_HAS_ADVANCED_PWM
-	// Not supported yet
-	#undef MCU_HAS_ADVANCED_PWM
+	#include <advpwm-hal.h>
 #endif // MCU_HAS_ADVANCED_PWM
 
 static GpioConfig blinkingPin = GPIO_PIN_CONFIG(GPIO_PORT3, BLINKING_PIN, GPIO_BIDIRECTIONAL_MODE);
@@ -118,7 +117,6 @@ void pwmUpdateGlowingDutyCycle() {
 // ---------------------------------------------------------------------
 
 #ifdef MCU_HAS_ADVANCED_PWM
-#define PWM_COUNTER_VALUE 65535U
 
 static const uint16_t PWM_GLOWING_GRADIENT[] = {
 	363, 684, 1159, 1814, 2680, 3785, 5159, 6830, 8827, 11181, 13919, 
@@ -131,7 +129,7 @@ static int8_t pwmGlowingStep = 0;
 static int8_t pwmGlowingIncrement = 1;
 
 void pwmUpdateGlowingDutyCycle() {
-//	pwmSetFlipPoints(PWM_GLOWING_GROUP, PWM_GLOWING_CHANNEL, 0, PWM_COUNTER_VALUE - PWM_GLOWING_GRADIENT[pwmGlowingStep]);
+	pwmSetDutyCycle(PWM_GLOWING_CHANNEL, PWM_GLOWING_GRADIENT[pwmGlowingStep]);
 	int8_t newStep = pwmGlowingStep + pwmGlowingIncrement;
 	
 	if (newStep < 0 || newStep >= PWM_GLOWING_STEPS) {
@@ -140,6 +138,17 @@ void pwmUpdateGlowingDutyCycle() {
 	
 	pwmGlowingStep += pwmGlowingIncrement;
 }
+
+#pragma save
+// Suppress warning "unreferenced function argument"
+#pragma disable_warning 85
+void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) USING(1) {
+}
+
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, uint8_t countDown) USING(1) {
+}
+#pragma restore
+
 #endif // MCU_HAS_ADVANCED_PWM
 
 // ---------------------------------------------------------------------
@@ -241,6 +250,45 @@ void main() {
 		0,
 		PWM_COUNTER_VALUE - PWM_GLOWING_GRADIENT[0]
 	);
+#endif // MCU_HAS_ENHANCED_PWM
+
+// ---------------------------------------------------------------------
+
+#ifdef MCU_HAS_ADVANCED_PWM
+	pwmConfigureCounter(
+		PWM_GLOWING_COUNTER, 
+		PWM_GLOWING_SIGNAL_FREQ * 65535UL, 
+		PWM_GLOWING_SIGNAL_FREQ, 
+		PWM_FREE_RUNNING, 
+		PWM_NO_TRIGGER,
+		0, 
+		PWM_BUFFERED_UPDATE,
+		PWM_CONTINUOUS,
+		PWM_EDGE_ALIGNED_UP,
+		PWM_DISABLE_ALL_UE,
+		DISABLE_INTERRUPT
+	);
+	
+	pwmInitialisePWM(
+		PWM_Channel0, 
+		OUTPUT_HIGH, 
+		DISABLE_INTERRUPT, 
+		PWM_IMMEDIATE_UPDATE,
+		PWM_GLOWING_GRADIENT[0]
+	);
+	
+	pwmConfigureOutput(
+		PWM_GLOWING_CHANNEL, 
+		PWM_GLOWING_PIN_CONFIG, 
+		GPIO_BIDIRECTIONAL_MODE,
+		PWM_ACTIVE_LOW, 
+		PWM_DISABLE_FAULT_CONTROL, 
+		OUTPUT_HIGH,
+		PWM_OUTPUT_P_ONLY
+	);
+	
+	pwmEnableMainOutput(PWM_GLOWING_COUNTER);
+	pwmEnableCounter(PWM_GLOWING_COUNTER);
 #endif // MCU_HAS_ENHANCED_PWM
 
 // ---------------------------------------------------------------------

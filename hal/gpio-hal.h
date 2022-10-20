@@ -185,4 +185,8 @@ uint8_t gpioRead(GpioConfig *config);
  */
 void gpioWrite(GpioConfig *config, uint8_t value);
 
+INLINE void gpioToggle(GpioConfig *config) {
+	gpioWrite(config, ~gpioRead(config));
+}
+
 #endif // _GPIO_HAL_H

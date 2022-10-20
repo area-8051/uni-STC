@@ -131,7 +131,8 @@ void pcaStartCounter(PCA_ClockSource clockSource, CounterControl counterMode, In
  * Configures the I/O pin used by the channel.
  * MUST be called (once is enough) before any pcaStartXxx() function.
  */
-void pcaConfigureChannel(PCA_Channel channel, GpioPinMode pinMode);
+void pcaConfigureOutput(PCA_Channel channel, GpioPinMode pinMode);
+void pcaConfigureInput(PCA_Channel channel);
 
 /**
  * Configures a PCA channel to measure the width of a pulse.

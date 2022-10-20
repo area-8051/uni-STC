@@ -174,8 +174,11 @@
 	// -------------+-----------------
 	// All STC8H    | P1.0
 
-	#define PWM_GLOWING_GROUP   PWMA
-	#define PWM_GLOWING_CHANNEL PWM1P
+	#define PWM_GLOWING_SIGNAL_FREQ 100UL
+	#define PWM_GLOWING_COUNTER PWM_COUNTER_A
+	#define PWM_GLOWING_CHANNEL PWM_Channel0
+	// All MCU have this pin configuration
+	#define PWM_GLOWING_PIN_CONFIG 0
 #endif // MCU_HAS_ADVANCED_PWM
 
 #ifdef SMALL_FLASH

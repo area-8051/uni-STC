@@ -64,20 +64,15 @@ static uint8_t __pinSwitchAndMode[PWM_CHANNELS];
 // On the STC8G2K* and the STC8A8KxxD4, GPIO ports are configured
 // in high-impedance mode by default, so configuring the channel 
 // output pin mode is *REQUIRED*.
-void pwmConfigureChannel(PWM_Channel channel, uint8_t pinSwitch, GpioPinMode pinMode) {
+void pwmConfigureOutput(PWM_Channel channel, uint8_t pinSwitch, GpioPinMode pinMode) {
 	if (pinSwitch >= PIN_CONFIG_MAX) {
 		pinSwitch = 0;
 	}
 	
 	__pinSwitchAndMode[channel] = pinSwitch | (pinMode << 4);
 	
-	switch (pinMode) {
-	case GPIO_BIDIRECTIONAL_MODE:
-	case GPIO_PUSH_PULL_MODE:
-		break;
-	default:
-		pinMode = GPIO_BIDIRECTIONAL_MODE;
-		break;
+	if (pinMode == GPIO_HIGH_IMPEDANCE_MODE) {
+		pinMode = GPIO_PUSH_PULL_MODE;
 	}
 	
 	uint8_t channelPin = __pinConfigurations[pinSwitch][channel];

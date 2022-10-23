@@ -92,6 +92,6 @@ CONSOLE_PORT := ttyUSB0
 ISP_PORT := ttyUSB0
 
 # Boilerplate rules ----------------------------------------------------
-include $(MAKE_DIR)/1-settings.mk
+include $(MAKE_DIR)/1-mcu-settings.mk
 -include $(DEP_FILE)
-include $(MAKE_DIR)/2-rules.mk
+include $(MAKE_DIR)/2-mcu-rules.mk

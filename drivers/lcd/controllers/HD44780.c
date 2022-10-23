@@ -33,9 +33,10 @@
  * @file HD44780.c
  * 
  * Driver for text-only LCD devices using an HD44780-compatible controller.
+ * Examples include the SPLC780D1 and the KS0066U.
  * 
- * These devices support 1-line (up to 80 columns) and 2-line (up to 40 
- * columns) display configurations.
+ * These devices support 1-line (up to 80 columns), 2-line (up to 40 
+ * columns), and 4-line (up to 20 columns) display configurations.
  * 
  * This file implements the abstraction layer described in 
  * lcd-controller.h, which is why it doesn't have its own header file. 
@@ -82,6 +83,7 @@
 #include <lcd/lcd-controller.h>
 #include <delay.h>
 
+// Microseconds
 #define WRITE_DELAY 50
 
 static void __waitWhileBusy(LCDInterface *interface) {
@@ -235,55 +237,44 @@ void lcdSetTextDisplayPosition(LCDDevice *device, uint8_t row, uint8_t column)  
 	if (device->textHeight > 1) {
 		rowAddr = (row & 0x01) << 6;
 		colAddr &= 0x3f;
+		
+		if (row > 1) {
+			colAddr += 0x14;
+		}
 	}
 	
 	lcdSetTextDisplayAddress(device, rowAddr | colAddr);
 }
 
+// Functionalities below are not available on this controller.
+// ---------------------------------------------------------------------
+
+#pragma save
 // Suppress warning "unreferenced function argument"
 #pragma disable_warning 85
+
 void lcdSetGraphicsDisplayAddress(LCDDevice *device, uint16_t pixelX, uint16_t pixelY) {
-	// Not available on this controller.
 }
 
-// Suppress warning "unreferenced function argument"
-#pragma disable_warning 85
 void lcdEnableGraphicsDisplay(LCDDevice *device)  {
-	// Not available on this controller.
 }
 
-// Suppress warning "unreferenced function argument"
-#pragma disable_warning 85
 void lcdDisableGraphicsDisplay(LCDDevice *device)  {
-	// Not available on this controller.
 }
 
-// Suppress warning "unreferenced function argument"
-#pragma disable_warning 85
 void lcdEnterStandbyMode(LCDDevice *device)  {
-	// Not available on this controller.
 }
 
-// Suppress warning "unreferenced function argument"
-#pragma disable_warning 85
 void lcdReverseRow(LCDDevice *device, uint8_t row)  {
-	// Not available on this controller.
 }
 
-// Suppress warning "unreferenced function argument"
-#pragma disable_warning 85
 void lcdSetScrollAddress(LCDDevice *device, uint8_t address)  {
-	// Not available on this controller.
 }
 
-// Suppress warning "unreferenced function argument"
-#pragma disable_warning 85
 void lcdEnableVerticalScroll(LCDDevice *device) {
-	// Not available on this controller.
 }
 
-// Suppress warning "unreferenced function argument"
-#pragma disable_warning 85
 void lcdDisableVerticalScroll(LCDDevice *device) {
-	// Not available on this controller.
 }
+
+#pragma restore

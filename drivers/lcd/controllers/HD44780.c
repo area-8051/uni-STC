@@ -111,7 +111,7 @@ static uint8_t __readData(LCDInterface *interface) {
 	return lcdReadData(interface);
 }
 
-static void __displayControl(LCDDevice *device, uint8_t displayOn, uint8_t cursorOn, uint8_t blinkCursor) {
+static void __displayControl(LCDDevice *device, bool displayOn, bool cursorOn, bool blinkCursor) {
 	// Set entire display on/off
 	uint8_t d = displayOn ? 4 : 0;
 	// Set cursor on/off
@@ -127,7 +127,7 @@ static void __clearTextDisplay(LCDDevice *device) {
 	delay1us(1600 - WRITE_DELAY);
 }
 
-static void __setEntryMode(LCDDevice *device, uint8_t textDirection, uint8_t shiftDisplay) {
+static void __setEntryMode(LCDDevice *device, bool textDirection, bool shiftDisplay) {
 	// 1 = shift display when cursor goes beyond display edge
 	// 0 = don't shift
 	uint8_t s = shiftDisplay ? 1 : 0;
@@ -206,15 +206,15 @@ void lcdReturnHome(LCDDevice *device)  {
 	delay1us(1600 - WRITE_DELAY);
 }
 
-void lcdSetEntryMode(LCDDevice *device, uint8_t textDirection, uint8_t shiftDisplay)  {
+void lcdSetEntryMode(LCDDevice *device, bool textDirection, bool shiftDisplay)  {
 	__setEntryMode(device, textDirection, shiftDisplay);
 }
 
-void lcdDisplayControl(LCDDevice *device, uint8_t displayOn, uint8_t cursorOn, uint8_t blinkCursor)  {
+void lcdDisplayControl(LCDDevice *device, bool displayOn, bool cursorOn, bool blinkCursor)  {
 	__displayControl(device, displayOn, cursorOn, blinkCursor);
 }
 
-void lcdCursorDisplayShiftControl(LCDDevice *device, uint8_t shiftDisplay, uint8_t shiftRight)  {
+void lcdCursorDisplayShiftControl(LCDDevice *device, bool shiftDisplay, bool shiftRight)  {
 	// 1 = Shift display, 0 = Move cursor
 	uint8_t sc = shiftDisplay ? 8 : 0;
 	// 1 = Shift/move to the right, 0 = Shift/move to the left

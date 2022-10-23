@@ -45,30 +45,30 @@ void lcdClearTextDisplay(LCDDevice *device);
 void lcdReturnHome(LCDDevice *device);
 
 /**
- * @param textDirection 1 = shift display when cursor goes beyond display edge,
- * 0 = don't shift.
- * @param shiftDisplay 1 = increment address counter => move cursor right (LTR text) or shift display left, 
- * 0 = decrement address counter => move cursor left (RTL text) or shift display right.
+ * @param textDirection true = shift display when cursor goes beyond display edge,
+ * false = don't shift.
+ * @param shiftDisplay true = increment address counter => move cursor right (LTR text) or shift display left, 
+ * false = decrement address counter => move cursor left (RTL text) or shift display right.
  */
-void lcdSetEntryMode(LCDDevice *device, uint8_t textDirection, uint8_t shiftDisplay);
+void lcdSetEntryMode(LCDDevice *device, bool textDirection, bool shiftDisplay);
 
 /**
  * @param displayOn Set entire display on/off
  * @param cursorOn Set cursor on/off
  * @param blinkCursor Cursor blink on/off
  */
-void lcdDisplayControl(LCDDevice *device, uint8_t displayOn, uint8_t cursorOn, uint8_t blinkCursor);
+void lcdDisplayControl(LCDDevice *device, bool displayOn, bool cursorOn, bool blinkCursor);
 
 /**
- * @param shiftDisplay 1 = shift display, 0 = move cursor.
- * @param shiftRight 1 = display shifts or cursor moves right, 0 = display shifts or cursor moves left.
+ * @param shiftDisplay true = shift display, false = move cursor.
+ * @param shiftRight true = display shifts or cursor moves right, false = display shifts or cursor moves left.
  * 
- * shiftDisplay == 1 && shiftRight == 1 => display shifts right, cursor follows, address counter does not change.
- * shiftDisplay == 1 && shiftRight == 0 => display shifts left,  cursor follows, address counter does not change.
- * shiftDisplay == 0 && shiftRight == 1 => cursor moves right, address counter is incremented.
- * shiftDisplay == 0 && shiftRight == 0 => cursor moves left,  address counter is decremented.
+ * shiftDisplay && shiftRight => display shifts right, cursor follows, address counter does not change.
+ * shiftDisplay && !shiftRight => display shifts left,  cursor follows, address counter does not change.
+ * !shiftDisplay && shiftRight => cursor moves right, address counter is incremented.
+ * !shiftDisplay && !shiftRight => cursor moves left,  address counter is decremented.
  */
-void lcdCursorDisplayShiftControl(LCDDevice *device, uint8_t shiftDisplay, uint8_t shiftRight);
+void lcdCursorDisplayShiftControl(LCDDevice *device, bool shiftDisplay, bool shiftRight);
 
 void lcdEnableGraphicsDisplay(LCDDevice *device);
 

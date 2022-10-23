@@ -130,7 +130,7 @@ static uint8_t __readData(LCDInterface *interface) {
 	return result;
 }
 
-static void __displayControl(LCDDevice *device, uint8_t displayOn, uint8_t cursorOn, uint8_t blinkCursor) {
+static void __displayControl(LCDDevice *device, bool displayOn, bool cursorOn, bool blinkCursor) {
 	// Set entire display on/off
 	uint8_t d = displayOn ? 4 : 0;
 	// Set cursor on/off
@@ -146,7 +146,7 @@ static void __clearTextDisplay(LCDDevice *device) {
 	delay1us((uint8_t) (1600 - WRITE_DELAY));
 }
 
-static void __setEntryMode(LCDDevice *device, uint8_t textDirection, uint8_t shiftDisplay) {
+static void __setEntryMode(LCDDevice *device, bool textDirection, bool shiftDisplay) {
 	// 1 = shift display when cursor goes beyond display edge
 	// 0 = don't shift
 	uint8_t s = shiftDisplay ? 1 : 0;
@@ -215,7 +215,7 @@ static void __selectBasicInstructionSet(LCDDevice *device) {
 	}
 }
 
-static void __setVerticalScrollMode(LCDDevice *device, uint8_t sr) {
+static void __setVerticalScrollMode(LCDDevice *device, bool sr) {
 	if (device->__status.verticalScroll != sr) {
 		__selectExtendedInstructionSet(device);
 		// sr == 1 => enable vertical scroll mode
@@ -255,17 +255,17 @@ void lcdReturnHome(LCDDevice *device)  {
 	__sendCommand(device, 0x02);
 }
 
-void lcdSetEntryMode(LCDDevice *device, uint8_t textDirection, uint8_t shiftDisplay)  {
+void lcdSetEntryMode(LCDDevice *device, bool textDirection, bool shiftDisplay)  {
 	__selectBasicInstructionSet(device);
 	__setEntryMode(device, textDirection, shiftDisplay);
 }
 
-void lcdDisplayControl(LCDDevice *device, uint8_t displayOn, uint8_t cursorOn, uint8_t blinkCursor)  {
+void lcdDisplayControl(LCDDevice *device, bool displayOn, bool cursorOn, bool blinkCursor)  {
 	__selectBasicInstructionSet(device);
 	__displayControl(device, displayOn, cursorOn, blinkCursor);
 }
 
-void lcdCursorDisplayShiftControl(LCDDevice *device, uint8_t shiftDisplay, uint8_t shiftRight)  {
+void lcdCursorDisplayShiftControl(LCDDevice *device, bool shiftDisplay, bool shiftRight)  {
 	__selectBasicInstructionSet(device);
 	// shiftDisplay == 1 && shiftRight == 1 => display shifts right, cursor follows, address counter does not change
 	// shiftDisplay == 1 && shiftRight == 0 => display shifts left,  cursor follows, address counter does not change

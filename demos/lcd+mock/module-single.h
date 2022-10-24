@@ -27,29 +27,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "project-defs.h"
-#include <lcd/lcd-link-impl.h>
+#ifndef _MODULE_SINGLE_H
+#define _MODULE_SINGLE_H
+
+#include "module-defs.h"
 
 /**
- * @file lcd-link-dummy.c
+ * @file module-single.h
  * 
- * Dummy communication link.
+ * Single-line menu module definitions.
  */
 
-void lcdLinkInitialise(LCDInterface *interface) {
-}
+void singleModule_initialise(LCDDevice *lcdDevice);
+void singleModule_onMove(bool moveForward, bool withButtonPressed);
+ModuleId singleModule_onAction(bool buttonPushed);
+void singleModule_onIdle();
 
-uint8_t lcdLinkGetDataWidth(LCDInterface *interface) {
-	return 8;
-}
-
-uint8_t lcdLinkIsParallel(LCDInterface *interface) {
-	return 1;
-}
-
-void lcdLinkDataOut(LCDInterface *interface, LCDDataType dataType, uint8_t byteValue) {
-}
-
-uint8_t lcdLinkDataIn(LCDInterface *interface, LCDDataType dataType) {
-	return 0;
-}
+#endif // _MODULE_SINGLE_H

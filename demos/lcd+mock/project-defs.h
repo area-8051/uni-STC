@@ -27,29 +27,9 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "project-defs.h"
-#include <lcd/lcd-link-impl.h>
+#ifndef _PROJECT_DEFS_H
+#define _PROJECT_DEFS_H
 
-/**
- * @file lcd-link-dummy.c
- * 
- * Dummy communication link.
- */
+#include <uni-STC/uni-STC.h>
 
-void lcdLinkInitialise(LCDInterface *interface) {
-}
-
-uint8_t lcdLinkGetDataWidth(LCDInterface *interface) {
-	return 8;
-}
-
-uint8_t lcdLinkIsParallel(LCDInterface *interface) {
-	return 1;
-}
-
-void lcdLinkDataOut(LCDInterface *interface, LCDDataType dataType, uint8_t byteValue) {
-}
-
-uint8_t lcdLinkDataIn(LCDInterface *interface, LCDDataType dataType) {
-	return 0;
-}
+#endif // _PROJECT_DEFS_H

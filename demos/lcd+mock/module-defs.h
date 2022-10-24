@@ -27,29 +27,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "project-defs.h"
-#include <lcd/lcd-link-impl.h>
+#ifndef _MODULE_DEFS_H
+#define _MODULE_DEFS_H
 
 /**
- * @file lcd-link-dummy.c
+ * @file module-defs.h
  * 
- * Dummy communication link.
+ * Definitions common to all modules.
+ * 
+ * A so-called "module" is a compilation unit responsible for
+ * a given single-function user interface of the firmware.
+ * 
+ * The firmware is seen as a hierarchy of single-function user
+ * interfaces. Menus allow to navigate between modules.
  */
 
-void lcdLinkInitialise(LCDInterface *interface) {
-}
+#include <lcd/lcd-device.h>
+#include <lcd/lcd-text.h>
 
-uint8_t lcdLinkGetDataWidth(LCDInterface *interface) {
-	return 8;
-}
+typedef enum {
+	Module_Root = 0,
+	Module_Position,
+	Module_SingleLine,
+	Module_Volume,
+} ModuleId;
 
-uint8_t lcdLinkIsParallel(LCDInterface *interface) {
-	return 1;
-}
 
-void lcdLinkDataOut(LCDInterface *interface, LCDDataType dataType, uint8_t byteValue) {
-}
-
-uint8_t lcdLinkDataIn(LCDInterface *interface, LCDDataType dataType) {
-	return 0;
-}
+#endif // _MODULE_DEFS_H

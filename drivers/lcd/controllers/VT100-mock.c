@@ -30,9 +30,9 @@
 
 
 /**
- * @file VT52-mock.c
+ * @file VT100-mock.c
  * 
- * Mocks a text-only LCD device using VT52 control codes.
+ * Mocks a text-only LCD device using VT100 control codes.
  * Designed to develop the user interface of a device on a PC.
  * 
  * Support 1-line (up to 80 columns), 2-line (up to 40 columns), and 
@@ -44,13 +44,61 @@
 
 #include "project-defs.h"
 #include <lcd/lcd-controller.h>
+
 #include <stdio.h>
+#include <stdlib.h>
+#include <termios.h>
+#include <string.h>
+
+static struct termios initialTermios;
+
+static void restoreInputMode() {
+	tcsetattr(0, TCSANOW, &initialTermios);
+}
+
+static void configureRawInputMode() {
+	struct termios tio;
+
+	// Save terminal configuration (0 is stdin)
+	tcgetattr(0, &initialTermios);
+	memcpy(&tio, &initialTermios, sizeof(tio));
+	
+	// Register exit handler
+	atexit(restoreInputMode);
+	
+	// Set terminal in raw mode so getchar() returns immediately
+	// without echoing the character.
+	cfmakeraw(&tio);
+	tcsetattr(0, TCSANOW, &tio);
+}
+
+static void disableOutputBuffering() {
+    setvbuf(stdout, NULL, _IONBF, 0);
+}
+
+static void restoreScreen() {
+	lcdClearTextDisplay(NULL);
+	
+	// Show cursor
+	printf("\x1b[?25h");
+}
+
+static void configureScreen() {
+	lcdClearTextDisplay(NULL);
+	
+	// Hide cursor
+	printf("\x1b[?25l");
+	
+	// Register exit handler
+	atexit(restoreScreen);
+}
 
 void lcdInitialiseController(LCDDevice *device)  {
     lcdLinkConfigurationComplete(device->interface);
-	// Disable output buffering
-    setvbuf(stdout, NULL, _IONBF, 0);
-	lcdClearTextDisplay(device);
+    
+    configureRawInputMode();
+    disableOutputBuffering();
+    configureScreen();
 }
 
 void lcdWriteByte(LCDDevice *device, uint8_t byte)  {
@@ -66,12 +114,12 @@ uint8_t lcdReadBusyFlagAndAddress(LCDDevice *device)  {
 }
 
 void lcdClearTextDisplay(LCDDevice *device)  {
-	putchar(0x1b); putchar('H');
-	putchar(0x1b); putchar('J');
+	lcdSetTextDisplayPosition(device, 0, 0);
+	printf("\x1b[0J");
 }
 
 void lcdReturnHome(LCDDevice *device)  {
-	putchar(0x1b); putchar('H');
+	lcdSetTextDisplayPosition(device, 0, 0);
 }
 
 void lcdSetEntryMode(LCDDevice *device, bool textDirection, bool shiftDisplay)  {
@@ -112,7 +160,7 @@ void lcdSetTextDisplayAddress(LCDDevice *device, uint8_t address)  {
 }
 
 void lcdSetTextDisplayPosition(LCDDevice *device, uint8_t row, uint8_t column)  {
-	putchar(0x1b); putchar('Y'); putchar(row + 0x20); putchar(column + 0x20);
+	printf("\x1b[%hhd;%hhdf", row + 1, column + 1);
 }
 
 // Functionalities below are not available on this controller.

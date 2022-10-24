@@ -27,29 +27,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "project-defs.h"
-#include <lcd/lcd-link-impl.h>
+#ifndef _MODULE_POSITION_H
+#define _MODULE_POSITION_H
+
+#include "module-defs.h"
 
 /**
- * @file lcd-link-dummy.c
+ * @file module-position.h
  * 
- * Dummy communication link.
+ * Positionned menu module definitions.
  */
 
-void lcdLinkInitialise(LCDInterface *interface) {
-}
+void positionModule_initialise(LCDDevice *lcdDevice);
+void positionModule_onMove(bool moveForward, bool withButtonPressed);
+ModuleId positionModule_onAction(bool buttonPushed);
+void positionModule_onIdle();
 
-uint8_t lcdLinkGetDataWidth(LCDInterface *interface) {
-	return 8;
-}
-
-uint8_t lcdLinkIsParallel(LCDInterface *interface) {
-	return 1;
-}
-
-void lcdLinkDataOut(LCDInterface *interface, LCDDataType dataType, uint8_t byteValue) {
-}
-
-uint8_t lcdLinkDataIn(LCDInterface *interface, LCDDataType dataType) {
-	return 0;
-}
+#endif // _MODULE_POSITION_H

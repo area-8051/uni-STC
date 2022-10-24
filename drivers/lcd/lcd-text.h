@@ -47,43 +47,44 @@ void lcdTxtPrintAt(LCDDevice *device, uint16_t row, uint16_t column, const char 
 typedef struct {
 	const char *label;
 	int value;
-	uint8_t isDefault;
+	bool isDefault;
 	uint8_t row;
 	uint8_t col;
 } LCDMenuOption;
+
+typedef enum {
+	LCD_SingleLineMenu,	/*!< Only the currently selected option is displayed at (startRow, startCol). */
+	LCD_ListMenu,		/*!< The LCDMenuOption are displayed as a vertical list starting at (startRow, startCol). */
+	LCD_PositionnedMenu,/*!< Each LCDMenuOption specifies its (row, col). menuWidth is ignored in this mode. */
+} LCDMenuDisplayMode;
 
 typedef struct {
 	LCDDevice *lcdDevice;
 	LCDMenuOption *menuOptions;
 	uint8_t nbOptions;
 	uint8_t selectedOption;
+	LCDMenuDisplayMode displayMode;
 	uint8_t menuWidth;
 	uint8_t startRow;
 	uint8_t startCol;
 } LCDMenuData;
 
-typedef enum {
-	LCD_SelectNext,
-	LCD_SelectPrevious,
-} LCDNewSelection;
-
-/**
- * menuWidth == 0 => each LCDMenuOption must specify row and col, 
- * and all options are displayed simultaneously.
- * 
- * menuWidth != 0 => the selected LCDMenuOption will be displayed 
- * at startRow, startCol. Changing selection will replace it with
- * the newly selected option. menuWidth < 0 => autodetect menu width.
- */
 void lcdTxtMenuInitialise(
 	LCDMenuData *menuData, 
 	LCDDevice *device, 
 	LCDMenuOption *menuOptions, 
 	uint8_t nbOptions, 
-	int8_t menuWidth, 
+	LCDMenuDisplayMode displayMode,
+	int8_t menuWidth, /*!< When <= 0, menuWidth is calculated automatically. */
 	uint8_t startRow, 
 	uint8_t startCol
 );
+
+typedef enum {
+	LCD_SelectNext,
+	LCD_SelectPrevious,
+	LCD_RefreshOption,
+} LCDNewSelection;
 
 void lcdTxtMenuOnChangeSelection(LCDMenuData *menuData, LCDNewSelection newSelection);
 

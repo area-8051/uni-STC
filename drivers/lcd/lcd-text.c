@@ -30,6 +30,7 @@
 #include "project-defs.h"
 #include <lcd/lcd-text.h>
 #include <lcd/lcd-controller.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -94,24 +95,31 @@ void lcdTxtPrintAt(LCDDevice *device, uint16_t row, uint16_t column, const char 
 	}
 }
 
-#define MENU_LABEL_MAX_LENGTH 14
+#define MENU_LABEL_MAX_LENGTH 18
 
 static void __lcdTxtMenuDisplayOption(LCDMenuData *menuData, uint8_t n) {
 	// static => Same trick as in lcdTxtPrintAt().
 	static char buffer[MENU_LABEL_MAX_LENGTH + 3];
 	uint8_t maxLabelLen = 0;
-	uint8_t row = menuData->menuOptions[n].row;
-	uint8_t col = menuData->menuOptions[n].col;
+	uint8_t row = menuData->startRow;
+	uint8_t col = menuData->startCol;
 	
-	if (menuData->menuWidth != 0) {
-		row = menuData->startRow;
-		col = menuData->startCol;
-		maxLabelLen = (menuData->menuWidth > 2) ? (menuData->menuWidth - 2) : 0;
-	} else {
+	switch (menuData->displayMode) {
+	case LCD_PositionnedMenu:
+		row = menuData->menuOptions[n].row;
+		col = menuData->menuOptions[n].col;
+		
 		if (menuData->lcdDevice->textWidth > col) {
 			maxLabelLen = menuData->lcdDevice->textWidth - col;
 			maxLabelLen = (maxLabelLen > 2) ? (maxLabelLen - 2) : 0;
 		}
+		break;
+	
+	case LCD_ListMenu:
+		row += n;
+	case LCD_SingleLineMenu:
+		maxLabelLen = menuData->menuWidth - 2;
+		break;
 	}
 	
 	if (maxLabelLen > MENU_LABEL_MAX_LENGTH) {
@@ -119,10 +127,13 @@ static void __lcdTxtMenuDisplayOption(LCDMenuData *menuData, uint8_t n) {
 	}
 	
 	strncpy(buffer + 1, menuData->menuOptions[n].label, maxLabelLen);
-	buffer[0] = (n == menuData->selectedOption) ? '>' : ' ';
 	buffer[++maxLabelLen] = '\0';
 	
-	if (menuData->menuWidth != 0) {
+	// The selected option is highlighted with reverse angle brackets.
+	buffer[0] = (n == menuData->selectedOption) ? '>' : ' ';
+	
+	if (menuData->displayMode != LCD_PositionnedMenu) {
+		// Pad menu option text with spaces up to maxLabelLen.
 		while (strlen(buffer) < maxLabelLen) {
 			strcat(buffer, " ");
 		}
@@ -142,6 +153,7 @@ void lcdTxtMenuInitialise(
 	LCDDevice *device, 
 	LCDMenuOption *menuOptions, 
 	uint8_t nbOptions, 
+	LCDMenuDisplayMode displayMode,
 	int8_t menuWidth, 
 	uint8_t startRow, 
 	uint8_t startCol
@@ -149,12 +161,14 @@ void lcdTxtMenuInitialise(
 	menuData->lcdDevice = device;
 	menuData->menuOptions = menuOptions;
 	menuData->nbOptions = nbOptions;
+	menuData->displayMode = displayMode;
+	menuData->menuWidth = menuWidth;
 	menuData->startRow = startRow;
 	menuData->startCol = startCol;
 	menuData->selectedOption = 0;
 	
-	if (menuWidth < 0) {
-		// menuWidth < 0 => autodetect menu width.
+	if (menuData->menuWidth <= 0) {
+		// Autodetect menu width.
 		menuData->menuWidth = 0;
 		
 		for (uint8_t i = 0; i < menuData->nbOptions; i ++) {
@@ -169,16 +183,19 @@ void lcdTxtMenuInitialise(
 			}
 		}
 		
+		// menuWidth includes the current option visual markers.
 		menuData->menuWidth += 2;
+	}
+	
+	if (menuData->displayMode != LCD_PositionnedMenu) {
 		uint8_t availableWidth = menuData->lcdDevice->textWidth - menuData->startCol;
 		
 		if (menuData->menuWidth > availableWidth) {
 			menuData->menuWidth = availableWidth;
 		}
-	} else {
-		menuData->menuWidth = menuWidth;
 	}
 	
+	// Select default option.
 	for (uint8_t i = 0; i < menuData->nbOptions; i ++) {
 		if (menuData->menuOptions[i].isDefault) {
 			menuData->selectedOption = i;
@@ -186,12 +203,12 @@ void lcdTxtMenuInitialise(
 		}
 	}
 	
-	if (menuData->menuWidth == 0) {
+	if (menuData->displayMode == LCD_SingleLineMenu) {
+		__lcdTxtMenuDisplayOption(menuData, menuData->selectedOption);
+	} else {
 		for (uint8_t i = 0; i < menuData->nbOptions; i ++) {
 			__lcdTxtMenuDisplayOption(menuData, i);
 		}
-	} else {
-		__lcdTxtMenuDisplayOption(menuData, menuData->selectedOption);
 	}
 }
 
@@ -214,9 +231,12 @@ void lcdTxtMenuOnChangeSelection(LCDMenuData *menuData, LCDNewSelection newSelec
 		
 		menuData->selectedOption--;
 		break;
+	
+	case LCD_RefreshOption:
+		break;
 	}
 	
-	if (menuData->menuWidth == 0) {
+	if (menuData->displayMode != LCD_SingleLineMenu && newSelection != LCD_RefreshOption) {
 		__lcdTxtMenuDisplayOption(menuData, previousOption);
 	}
 	

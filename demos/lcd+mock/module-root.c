@@ -63,12 +63,11 @@ static struct {
 void rootModule_initialise(LCDDevice *lcdDevice) {
 	_moduleData.lcdDevice = lcdDevice;
 	lcdTxtClear(_moduleData.lcdDevice);
-	lcdTxtPrintAt(_moduleData.lcdDevice, 0, 0, "---- Main menu -----");
 	_moduleData.toggleValue = false;
 	lcdTxtMenuInitialise(
 		&_moduleData.menuData, _moduleData.lcdDevice, 
 		menu, sizeof(menu) / sizeof(LCDMenuOption), 
-		LCD_ListMenu, 0, 1, 0
+		LCD_ListMenu, 0, 0, 0
 	);
 }
 

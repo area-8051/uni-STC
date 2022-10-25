@@ -80,14 +80,14 @@ static void restoreScreen() {
 	lcdClearTextDisplay(NULL);
 	
 	// Show cursor
-	printf("\x1b[?25h");
+	lcdDisplayControl(NULL, true, true, true);
 }
 
-static void configureScreen() {
-	lcdClearTextDisplay(NULL);
+static void configureScreen(LCDDevice *device) {
+	lcdClearTextDisplay(device);
 	
 	// Hide cursor
-	printf("\x1b[?25l");
+	lcdDisplayControl(device, true, false, false);
 	
 	// Register exit handler
 	atexit(restoreScreen);
@@ -98,7 +98,7 @@ void lcdInitialiseController(LCDDevice *device)  {
     
     configureRawInputMode();
     disableOutputBuffering();
-    configureScreen();
+    configureScreen(device);
 }
 
 void lcdWriteByte(LCDDevice *device, uint8_t byte)  {
@@ -116,22 +116,41 @@ uint8_t lcdReadBusyFlagAndAddress(LCDDevice *device)  {
 void lcdClearTextDisplay(LCDDevice *device)  {
 	lcdSetTextDisplayPosition(device, 0, 0);
 	printf("\x1b[0J");
+	
+	if (device != NULL) {
+		// Print frame + line and column numbers
+		printf("\x1b[%hhd;%hhdf+", device->textHeight + 1, device->textWidth + 1);
+		
+		for (int i = 0; i < device->textHeight; i++) {
+			printf("\x1b[%hhd;%hhdf|%d", i + 1, device->textWidth + 1, i);
+		}
+		
+		
+		
+		for (int i = 0; i < device->textWidth; i++) {
+			printf("\x1b[%hhd;%hhdf-", device->textHeight + 1, i + 1, i);
+			printf("\x1b[%hhd;%hhdf%d", device->textHeight + 2, i + 1, i / 10);
+			printf("\x1b[%hhd;%hhdf%d", device->textHeight + 3, i + 1, i % 10);
+		}
+	}
 }
 
 void lcdReturnHome(LCDDevice *device)  {
 	lcdSetTextDisplayPosition(device, 0, 0);
 }
 
-void lcdSetEntryMode(LCDDevice *device, bool textDirection, bool shiftDisplay)  {
-	// Not implemented
-}
-
 void lcdDisplayControl(LCDDevice *device, bool displayOn, bool cursorOn, bool blinkCursor)  {
-	// Not implemented
-}
-
-void lcdCursorDisplayShiftControl(LCDDevice *device, bool shiftDisplay, bool shiftRight)  {
-	// Not implemented
+	if (blinkCursor) {
+		printf("\x1b[?12h");
+	} else {
+		printf("\x1b[?12l");
+	}
+	
+	if (cursorOn) {
+		printf("\x1b[?25h");
+	} else {
+		printf("\x1b[?25l");
+	}
 }
 
 // It's quite unlikely someone would call this function, 
@@ -165,6 +184,12 @@ void lcdSetTextDisplayPosition(LCDDevice *device, uint8_t row, uint8_t column)  
 
 // Functionalities below are not available on this controller.
 // ---------------------------------------------------------------------
+
+void lcdSetEntryMode(LCDDevice *device, bool textDirection, bool shiftDisplay)  {
+}
+
+void lcdCursorDisplayShiftControl(LCDDevice *device, bool shiftDisplay, bool shiftRight)  {
+}
 
 void lcdSetCharacterGeneratorAddress(LCDDevice *device, uint8_t address)  {
 }

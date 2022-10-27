@@ -44,10 +44,10 @@
 #define BACK 255
 
 static LCDMenuOption menu[] = {
-	{ .label = "Option 0", .value = 0, .isDefault = true, },
-	{ .label = "Option 1", .value = 1, .isDefault = false, },
-	{ .label = "Option 2", .value = 2, .isDefault = false, },
-	{ .label = "Back", .value = BACK, .isDefault = false, },
+	{ .label = "Option 0", .value = 0, .isDefault = true, .isEnabled = true, },
+	{ .label = "Option 1", .value = 1, .isDefault = false, .isEnabled = true, },
+	{ .label = "Option 2", .value = 2, .isDefault = false, .isEnabled = true, },
+	{ .label = "Back", .value = BACK, .isDefault = false, .isEnabled = true, },
 };
 
 static struct {
@@ -63,7 +63,7 @@ void singleModule_initialise(LCDDevice *lcdDevice) {
 	lcdTxtMenuInitialise(
 		&_moduleData.menuData, _moduleData.lcdDevice, 
 		menu, sizeof(menu) / sizeof(LCDMenuOption), 
-		LCD_SingleLineMenu, 0, 1, 8
+		LCD_SingleLineMenu, 0, 1, 8, false
 	);
 }
 

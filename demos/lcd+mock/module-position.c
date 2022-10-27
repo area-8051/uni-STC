@@ -44,10 +44,10 @@
 #define BACK 255
 
 static LCDMenuOption menu[] = {
-	{ .label = "Option 0", .value = 0, .isDefault = true, .row = 1, .col = 0, },
-	{ .label = "Option 1", .value = 1, .isDefault = false, .row = 1, .col = 10, },
-	{ .label = "Option 2", .value = 2, .isDefault = false, .row = 2, .col = 0, },
-	{ .label = "Back", .value = BACK, .isDefault = false, .row = 3, .col = 14, },
+	{ .label = "Option 0", .value = 0, .isDefault = true, .row = 1, .col = 0, .isEnabled = true, },
+	{ .label = "Option 1", .value = 1, .isDefault = false, .row = 1, .col = 10, .isEnabled = true, },
+	{ .label = "Option 2", .value = 2, .isDefault = false, .row = 2, .col = 0, .isEnabled = true, },
+	{ .label = "Back", .value = BACK, .isDefault = false, .row = 3, .col = 14, .isEnabled = true, },
 };
 
 static struct {
@@ -62,7 +62,7 @@ void positionModule_initialise(LCDDevice *lcdDevice) {
 	lcdTxtMenuInitialise(
 		&_moduleData.menuData, _moduleData.lcdDevice, 
 		menu, sizeof(menu) / sizeof(LCDMenuOption), 
-		LCD_PositionnedMenu, 0, 1, 0
+		LCD_PositionnedMenu, 0, 1, 0, false
 	);
 }
 

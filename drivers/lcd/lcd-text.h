@@ -48,6 +48,7 @@ typedef struct {
 	const char *label;
 	int value;
 	bool isDefault;
+	bool isEnabled;
 	uint8_t row;
 	uint8_t col;
 } LCDMenuOption;
@@ -55,7 +56,7 @@ typedef struct {
 typedef enum {
 	LCD_SingleLineMenu,	/*!< Only the currently selected option is displayed at (startRow, startCol). */
 	LCD_ListMenu,		/*!< The LCDMenuOption are displayed as a vertical list starting at (startRow, startCol). */
-	LCD_PositionnedMenu,/*!< Each LCDMenuOption specifies its (row, col). menuWidth is ignored in this mode. */
+	LCD_PositionnedMenu,/*!< Each LCDMenuOption specifies its (row, col). menuWidth, startRow and startCol are ignored. */
 } LCDMenuDisplayMode;
 
 typedef struct {
@@ -77,7 +78,8 @@ void lcdTxtMenuInitialise(
 	LCDMenuDisplayMode displayMode,
 	int8_t menuWidth, /*!< When <= 0, menuWidth is calculated automatically. */
 	uint8_t startRow, 
-	uint8_t startCol
+	uint8_t startCol,
+	bool keepSelectedOption
 );
 
 typedef enum {

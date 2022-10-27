@@ -101,14 +101,12 @@ static void __lcdTxtMenuDisplayOption(LCDMenuData *menuData, uint8_t n) {
 	// static => Same trick as in lcdTxtPrintAt().
 	static char buffer[MENU_LABEL_MAX_LENGTH + 3];
 	uint8_t maxLabelLen = 0;
-	uint8_t row = menuData->startRow;
-	uint8_t col = menuData->startCol;
+	// Values have been set by lcdTxtMenuInitialise().
+	uint8_t row = menuData->menuOptions[n].row;
+	uint8_t col = menuData->menuOptions[n].col;
 	
 	switch (menuData->displayMode) {
 	case LCD_PositionnedMenu:
-		row = menuData->menuOptions[n].row;
-		col = menuData->menuOptions[n].col;
-		
 		if (menuData->lcdDevice->textWidth > col) {
 			maxLabelLen = menuData->lcdDevice->textWidth - col;
 			maxLabelLen = (maxLabelLen > 2) ? (maxLabelLen - 2) : 0;
@@ -116,7 +114,6 @@ static void __lcdTxtMenuDisplayOption(LCDMenuData *menuData, uint8_t n) {
 		break;
 	
 	case LCD_ListMenu:
-		row += n;
 	case LCD_SingleLineMenu:
 		maxLabelLen = menuData->menuWidth - 2;
 		break;
@@ -156,7 +153,8 @@ void lcdTxtMenuInitialise(
 	LCDMenuDisplayMode displayMode,
 	int8_t menuWidth, 
 	uint8_t startRow, 
-	uint8_t startCol
+	uint8_t startCol,
+	bool keepSelectedOption
 ) {
 	menuData->lcdDevice = device;
 	menuData->menuOptions = menuOptions;
@@ -165,21 +163,40 @@ void lcdTxtMenuInitialise(
 	menuData->menuWidth = menuWidth;
 	menuData->startRow = startRow;
 	menuData->startCol = startCol;
-	menuData->selectedOption = 0;
 	
 	if (menuData->menuWidth <= 0) {
-		// Autodetect menu width.
+		// Autodetect menu width and calculate positions.
 		menuData->menuWidth = 0;
+		uint8_t optionRow = menuData->startRow;
 		
 		for (uint8_t i = 0; i < menuData->nbOptions; i ++) {
-			size_t l = strlen(menuData->menuOptions[i].label);
-			
-			if (l > MENU_LABEL_MAX_LENGTH) {
-				l = MENU_LABEL_MAX_LENGTH;
-			}
-			
-			if (l > menuData->menuWidth) {
-				menuData->menuWidth = l;
+			if (menuData->menuOptions[i].isEnabled) {
+				size_t l = strlen(menuData->menuOptions[i].label);
+				
+				if (l > MENU_LABEL_MAX_LENGTH) {
+					l = MENU_LABEL_MAX_LENGTH;
+				}
+				
+				if (l > menuData->menuWidth) {
+					menuData->menuWidth = l;
+				}
+				
+				switch (menuData->displayMode) {
+				case LCD_PositionnedMenu:
+					// row and col are already set.
+					break;
+				
+				case LCD_ListMenu:
+					menuData->menuOptions[i].row = optionRow;
+					menuData->menuOptions[i].col = menuData->startCol;
+					optionRow++;
+					break;
+				
+				case LCD_SingleLineMenu:
+					menuData->menuOptions[i].row = menuData->startRow;
+					menuData->menuOptions[i].col = menuData->startCol;
+					break;
+				}
 			}
 		}
 		
@@ -195,19 +212,34 @@ void lcdTxtMenuInitialise(
 		}
 	}
 	
-	// Select default option.
-	for (uint8_t i = 0; i < menuData->nbOptions; i ++) {
-		if (menuData->menuOptions[i].isDefault) {
-			menuData->selectedOption = i;
-			break;
+	if (!keepSelectedOption) {
+		// Find first enabled option.
+		for (uint8_t i = 0; i < menuData->nbOptions; i ++) {
+			if (menuData->menuOptions[i].isEnabled) {
+				menuData->selectedOption = i;
+				break;
+			}
+		}
+		
+		// Select default option if different.
+		for (uint8_t i = menuData->selectedOption; i < menuData->nbOptions; i ++) {
+			if (menuData->menuOptions[i].isEnabled && menuData->menuOptions[i].isDefault) {
+				menuData->selectedOption = i;
+				break;
+			}
 		}
 	}
 	
 	if (menuData->displayMode == LCD_SingleLineMenu) {
 		__lcdTxtMenuDisplayOption(menuData, menuData->selectedOption);
 	} else {
+		uint8_t n = 0;
+		
 		for (uint8_t i = 0; i < menuData->nbOptions; i ++) {
-			__lcdTxtMenuDisplayOption(menuData, i);
+			if (menuData->menuOptions[i].isEnabled) {
+				__lcdTxtMenuDisplayOption(menuData, n);
+				n++;
+			}
 		}
 	}
 }
@@ -217,19 +249,23 @@ void lcdTxtMenuOnChangeSelection(LCDMenuData *menuData, LCDNewSelection newSelec
 	
 	switch (newSelection) {
 	case LCD_SelectNext:
-		menuData->selectedOption++;
-		
-		if (menuData->selectedOption >= menuData->nbOptions) {
-			menuData->selectedOption = 0;
-		}
+		do {
+			menuData->selectedOption++;
+			
+			if (menuData->selectedOption >= menuData->nbOptions) {
+				menuData->selectedOption = 0;
+			}
+		} while (!menuData->menuOptions[menuData->selectedOption].isEnabled);
 		break;
 	
 	case LCD_SelectPrevious:
-		if (menuData->selectedOption == 0) {
-			menuData->selectedOption = menuData->nbOptions;
-		}
-		
-		menuData->selectedOption--;
+		do {
+			if (menuData->selectedOption == 0) {
+				menuData->selectedOption = menuData->nbOptions;
+			}
+			
+			menuData->selectedOption--;
+		} while (!menuData->menuOptions[menuData->selectedOption].isEnabled);
 		break;
 	
 	case LCD_RefreshOption:

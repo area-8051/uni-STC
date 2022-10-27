@@ -48,27 +48,31 @@ const char * const toggleValueON = "Toggle is ON";
 const char * const toggleValueOFF = "Toggle is OFF";
 
 static LCDMenuOption menu[] = {
-	{ .label = "Positionned menu", .value = Module_Position, .isDefault = true, },
-	{ .label = "Single-line menu", .value = Module_SingleLine, .isDefault = false, },
-	{ .label = "Adjust volume", .value = Module_Volume, .isDefault = false, },
-	{ .label = toggleValueOFF, .value = TOGGLE, .isDefault = false, },
+	{ .label = "Positionned menu", .value = Module_Position, .isDefault = true, .isEnabled = true, },
+	{ .label = "Single-line menu", .value = Module_SingleLine, .isDefault = false, .isEnabled = true, },
+	{ .label = "Adjust volume", .value = Module_Volume, .isDefault = false, .isEnabled = true, },
+	{ .label = toggleValueOFF, .value = TOGGLE, .isDefault = false, .isEnabled = true, },
 };
 
 static struct {
 	LCDDevice *lcdDevice;
 	LCDMenuData menuData;
 	bool toggleValue;
-} _moduleData;
+	bool keepSelectedOption;
+} _moduleData = {
+	.toggleValue = false,
+	.keepSelectedOption = false,
+};
 
 void rootModule_initialise(LCDDevice *lcdDevice) {
 	_moduleData.lcdDevice = lcdDevice;
 	lcdTxtClear(_moduleData.lcdDevice);
-	_moduleData.toggleValue = false;
 	lcdTxtMenuInitialise(
 		&_moduleData.menuData, _moduleData.lcdDevice, 
 		menu, sizeof(menu) / sizeof(LCDMenuOption), 
-		LCD_ListMenu, 0, 0, 0
+		LCD_ListMenu, 0, 0, 0, _moduleData.keepSelectedOption
 	);
+	_moduleData.keepSelectedOption = true;
 }
 
 void rootModule_onMove(bool moveForward, bool withButtonPressed) {

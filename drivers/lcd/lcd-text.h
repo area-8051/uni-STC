@@ -46,9 +46,9 @@ void lcdTxtPrintAt(LCDDevice *device, uint16_t row, uint16_t column, const char 
 
 typedef struct {
 	const char *label;
-	int value;
+	int value; /*!< Optional, user-defined value. */
 	bool isDefault;
-	bool isEnabled;
+	bool isEnabled; /*!< The menu option is displayed only if isEnabled is true. Don't forget to set it! */
 	uint8_t row;
 	uint8_t col;
 } LCDMenuOption;
@@ -79,7 +79,7 @@ void lcdTxtMenuInitialise(
 	int8_t menuWidth, /*!< When <= 0, menuWidth is calculated automatically. */
 	uint8_t startRow, 
 	uint8_t startCol,
-	bool keepSelectedOption
+	bool keepSelectedOption /*!< When true, keeps LCDMenuData.selectedOption unchanged. */
 );
 
 typedef enum {

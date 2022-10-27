@@ -130,7 +130,7 @@ static void __lcdTxtMenuDisplayOption(LCDMenuData *menuData, uint8_t n) {
 	buffer[++maxLabelLen] = '\0';
 	
 	// The selected option is highlighted with reverse angle brackets.
-	buffer[0] = (n == menuData->selectedOption) ? '>' : ' ';
+	buffer[0] = (n == menuData->selectedOption) ? '[' : ' ';
 	
 	if (menuData->displayMode != LCD_PositionnedMenu) {
 		// Pad menu option text with spaces up to maxLabelLen.
@@ -140,7 +140,7 @@ static void __lcdTxtMenuDisplayOption(LCDMenuData *menuData, uint8_t n) {
 	}
 	
 	if (n == menuData->selectedOption) {
-		strcat(buffer, "<");
+		strcat(buffer, "]");
 	} else {
 		strcat(buffer, " ");
 	}

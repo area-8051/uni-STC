@@ -88,6 +88,8 @@ typedef enum {
 	LCD_RefreshOption,
 } LCDNewSelection;
 
+void lcdTxtMenuSelectOptionByValue(LCDMenuData *menuData, int value);
+
 void lcdTxtMenuOnChangeSelection(LCDMenuData *menuData, LCDNewSelection newSelection);
 
 int lcdTxtMenuOnValidateSelection(LCDMenuData *menuData);

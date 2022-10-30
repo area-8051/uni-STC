@@ -244,6 +244,25 @@ void lcdTxtMenuInitialise(
 	}
 }
 
+void lcdTxtMenuSelectOptionByValue(LCDMenuData *menuData, int value) {
+	uint8_t previousOption = menuData->selectedOption;
+	
+	for (uint8_t i = 0; i < menuData->nbOptions; i ++) {
+		if (menuData->menuOptions[i].isEnabled && menuData->menuOptions[i].value == value) {
+			menuData->selectedOption = i;
+			break;
+		}
+	}
+	
+	if (previousOption != menuData->selectedOption) {
+		if (menuData->displayMode != LCD_SingleLineMenu) {
+			__lcdTxtMenuDisplayOption(menuData, previousOption);
+		}
+		
+		__lcdTxtMenuDisplayOption(menuData, menuData->selectedOption);
+	}
+}
+
 void lcdTxtMenuOnChangeSelection(LCDMenuData *menuData, LCDNewSelection newSelection) {
 	uint8_t previousOption = menuData->selectedOption;
 	

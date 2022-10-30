@@ -132,7 +132,7 @@ clean:
 	@rm -rf $(BUILD_ROOT)
 
 doc:
-	doxygen doxygen.conf
+	doxygen $(MAKE_DIR)/doxygen.conf
 
 upload:
 	stcgal $(STCGAL_OPTIONS) -p /dev/$(ISP_PORT) -t `echo "$(MCU_FREQ)" | rev | cut -c 4- | rev` $(FW_FILE)

@@ -79,6 +79,8 @@ LOCAL_OBJS := $(patsubst %.c, $(OBJDIR)/%.o, $(LOCAL_SRCS))
 
 all: $(DEP_FILE) $(FW_FILE)
 
+doc:
+	doxygen $(MAKE_DIR)/doxygen.conf
 
 run: $(FW_FILE)
 	@$(FW_FILE)

@@ -218,7 +218,7 @@ void main() {
 		DISABLE_INTERRUPT, 
 		PCA_GLOWING_PIN_CONFIG
 	);
-	pcaConfigureChannel(
+	pcaConfigureOutput(
 		PCA_GLOWING_CHANNEL, 
 		GPIO_BIDIRECTIONAL_MODE
 	);
@@ -238,7 +238,7 @@ void main() {
 		PWM_COUNTER_VALUE, 
 		DISABLE_INTERRUPT
 	);
-	pwmConfigureChannel(
+	pwmConfigureOutput(
 		PWM_GLOWING_CHANNEL, 
 		PWM_GLOWING_PIN_CONFIG, 
 		GPIO_BIDIRECTIONAL_MODE

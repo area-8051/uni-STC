@@ -77,7 +77,10 @@ include /home/vincent/src/git/uni-STC/makefiles/0-directories.mk
 
 # Project settings -----------------------------------------------------
 
-ISP_PORT := ttyUSB0
+CONSOLE_BAUDRATE := 57600
+CONSOLE_PORT := /dev/ttyUSB0
+
+ISP_PORT := /dev/ttyUSB0
 #STCGAL_OPTIONS := -A rts -a
 
 PROJECT_NAME := encoder-demo

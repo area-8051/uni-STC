@@ -94,9 +94,9 @@ SRCS := \
 	main.c
 
 CONSOLE_BAUDRATE := 57600
-CONSOLE_PORT := ttyUSB0
+CONSOLE_PORT := /dev/ttyUSB0
 
-ISP_PORT := ttyUSB0
+ISP_PORT := /dev/ttyUSB0
 
 # Default is -a, override here if you have specific needs.
 # STCGAL_OPTIONS := -A rts -a

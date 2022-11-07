@@ -135,7 +135,7 @@ doc:
 	doxygen $(MAKE_DIR)/doxygen.conf
 
 upload:
-	stcgal $(STCGAL_OPTIONS) -p /dev/$(ISP_PORT) -t `echo "$(MCU_FREQ)" | rev | cut -c 4- | rev` $(FW_FILE)
+	stcgal $(STCGAL_OPTIONS) -p $(ISP_PORT) -t `echo "$(MCU_FREQ)" | rev | cut -c 4- | rev` $(FW_FILE)
 
 console:
 	# TODO: Replace with your favorite terminal emulator

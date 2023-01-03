@@ -445,7 +445,7 @@ void pcaStartTimer(PCA_Channel channel, OutputEnable pulseOutput, uint16_t timer
 	}
 }
 
-INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1) CRITICAL {
+INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1) {
 	uint16_t ccap = 0;
 	uint8_t channel = HAL_PCA_CHANNELS;
 	

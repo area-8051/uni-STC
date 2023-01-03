@@ -75,8 +75,8 @@ void clearWatchdog();
 // Software reset ------------------------------------------------------
 
 typedef enum {
-	SWRST_FlashMemory = 0,
-	SWRST_EEPROM = 1,
+	SWRST_AP_area = 0,
+	SWRST_ISP_area = 1,
 } SWRST_ResetEntryPoint;
 
 void softwareReset(SWRST_ResetEntryPoint entryPoint);

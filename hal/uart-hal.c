@@ -36,7 +36,7 @@
 
 #ifndef UART_DEFAULT_SEGMENT
 	#if HAL_UARTS > 1
-		// __data and __idata are to small to be used as default values:
+		// __data and __idata are too small to be used as default values:
 		// default values should "just work", even when using all UART
 		// simultaneously.
 		// __xdata uses more flash but takes 1 cycle less than __pdata,
@@ -178,6 +178,12 @@ static FifoState *uartTransmitBuffer(Uart uart) {
 	}
 	
 	return result;
+}
+
+bool uartIsTransmissionComplete(Uart uart) {
+	FifoState *buffer = uartTransmitBuffer(uart);
+	
+	return buffer->status == STATUS_CLEAR;
 }
 
 bool uartTransmitBufferHasBytesFree(Uart uart, uint8_t bytes) {
@@ -351,12 +357,14 @@ TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudR
 			break;
 #endif // HAL_UARTS >= 3
 		}
+		
+		uartTransmitBuffer(uart)->status = STATUS_CLEAR;
 	}
 	
 	return rc;
 }
 
-INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
+INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 	uint8_t c;
 	
 	if (S1CON & M_TI) {
@@ -377,7 +385,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 }
 
 #if HAL_UARTS >= 2
-	INTERRUPT_USING(__uart2_isr, UART2_INTERRUPT, 1) CRITICAL {
+	INTERRUPT_USING(__uart2_isr, UART2_INTERRUPT, 1) {
 		uint8_t c;
 		
 		if (S2CON & M_TI) {
@@ -399,7 +407,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 #endif // HAL_UARTS >= 2
 
 #if HAL_UARTS >= 3
-	INTERRUPT_USING(__uart3_isr, UART3_INTERRUPT, 1) CRITICAL {
+	INTERRUPT_USING(__uart3_isr, UART3_INTERRUPT, 1) {
 		uint8_t c;
 		
 		if (S3CON & M_TI) {
@@ -419,7 +427,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) CRITICAL {
 		}
 	}
 
-	INTERRUPT_USING(__uart4_isr, UART4_INTERRUPT, 1) CRITICAL {
+	INTERRUPT_USING(__uart4_isr, UART4_INTERRUPT, 1) {
 		uint8_t c;
 		
 		if (S4CON & M_TI) {

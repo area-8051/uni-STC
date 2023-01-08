@@ -148,7 +148,9 @@ uint16_t adcBlockingRead(ADC_Channel channel);
  * 
  * INTERRUPT_USING(__adc_isr, ADC_INTERRUPT, 1);
  */
-void adcStartConversion(ADC_Channel channel) REENTRANT;
+void adcStartConversion(ADC_Channel channel);
+
+uint16_t adcReadResult();
 
 #ifdef M_ADC_EPWMT
 	/**

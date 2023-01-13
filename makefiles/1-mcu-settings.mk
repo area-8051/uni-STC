@@ -35,8 +35,8 @@ endif
 # You may also define PROJECT_FLAGS if you need specific build flags 
 # for your application, but this is not required, so not tested.
 
-ifeq ($(MCU_FREQ),)
-	$(error The MCU_FREQ variable must be defined.)
+ifeq ($(MCU_FREQ_KHZ),)
+	$(error The MCU_FREQ_KHZ variable must be defined.)
 endif
 
 ifeq ($(HAS_DUAL_DPTR),)
@@ -86,7 +86,7 @@ TARGET_ARCH := -mmcs51
 AS := sdas8051
 CC := sdcc
 ASFLAGS := -plosgffw
-CPPFLAGS := $(PROJECT_FLAGS) -DMCU_FREQ=$(MCU_FREQ)UL -I. -I$(HAL_DIR) -I$(UNISTC_DIR) -I$(DRIVER_DIR)
+CPPFLAGS := $(PROJECT_FLAGS) -DMCU_FREQ=$(MCU_FREQ_KHZ)000UL -I. -I$(HAL_DIR) -I$(UNISTC_DIR) -I$(DRIVER_DIR)
 CFLAGS := $(TARGET_ARCH) $(MEMORY_MODEL) $(CPPFLAGS)
 LDFLAGS := $(TARGET_ARCH) $(MEMORY_MODEL) $(MEMORY_SIZES)
 
@@ -135,7 +135,7 @@ doc:
 	doxygen $(MAKE_DIR)/doxygen.conf
 
 upload:
-	stcgal $(STCGAL_OPTIONS) -p $(ISP_PORT) -t `echo "$(MCU_FREQ)" | rev | cut -c 4- | rev` $(FW_FILE)
+	stcgal $(STCGAL_OPTIONS) -p $(ISP_PORT) -t $(MCU_FREQ_KHZ) $(FW_FILE)
 
 console:
 	# TODO: Replace with your favorite terminal emulator

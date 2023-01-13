@@ -59,7 +59,7 @@
 
 # Note: using a system clock around 24MHz works with all MCU
 # having an internal RC oscillator.
-MCU_FREQ := 23961600
+MCU_FREQ_KHZ := 23961
 
 STACK_SIZE := 112
 

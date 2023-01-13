@@ -57,7 +57,7 @@
 
 # Target MCU settings --------------------------------------------------
 
-MCU_FREQ := 45000000
+MCU_FREQ_KHZ := 45000
 
 STACK_SIZE := 128
 

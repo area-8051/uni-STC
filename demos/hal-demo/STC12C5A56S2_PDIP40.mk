@@ -58,7 +58,7 @@
 # Target MCU settings --------------------------------------------------
 
 # The STC12 doesn't have an internal RC oscillator.
-MCU_FREQ := 11059200
+MCU_FREQ_KHZ := 11059
 
 STACK_SIZE := 112
 

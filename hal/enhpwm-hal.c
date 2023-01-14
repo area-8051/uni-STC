@@ -419,7 +419,7 @@ void pwmStartChannel(PWM_Channel channel, OutputLevel initialLevel, PWM_Interrup
 #endif // MCU_HAS_ENHANCED_PWM == 'G'
 }
 
-void pwmStopChannel(PWM_Channel channel) REENTRANT {
+void pwmStopChannel(PWM_Channel channel) {
 	ENABLE_EXTENDED_SFR();
 	
 #if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4

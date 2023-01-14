@@ -222,7 +222,7 @@ void pwmStartChannel(
  * Resets the configuration of a PWM channel.
  * pwmStartChannel() must be called again to restart the channel.
  */
-void pwmStopChannel(PWM_Channel channel) REENTRANT;
+void pwmStopChannel(PWM_Channel channel);
 
 /**
  * Changes the flip points of a PWM channel.

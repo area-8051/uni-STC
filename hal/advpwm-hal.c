@@ -84,6 +84,7 @@ static uint8_t getChannelPin(PWM_Channel channel, uint8_t pinSwitch, uint8_t off
 	
 	uint8_t index = channel;
 	
+#if HAL_PWM_CHANNELS > 4
 	if (channel > PWM_Channel4) {
 		index--;
 	}
@@ -97,8 +98,11 @@ static uint8_t getChannelPin(PWM_Channel channel, uint8_t pinSwitch, uint8_t off
 	}
 	
 	if (channel < PWM_Channel4) {
+#endif
 		index += offset;
+#if HAL_PWM_CHANNELS > 4
 	}
+#endif
 	
 	return __channelPinConfigurations[pinSwitch][index];
 }
@@ -121,24 +125,34 @@ static void applyPinSwitch(PWM_Channel channel, uint8_t pinSwitch) {
 		pinSwitch = 0;
 	}
 	
+#if HAL_PWM_CHANNELS > 4
 	if (channel < PWM_Channel4) {
+#endif
 		PWMA_PS = (PWMA_PS & (3 << channel)) | (pinSwitch << channel);
+#if HAL_PWM_CHANNELS > 4
 	} else {
 		channel -= 8;
 		PWMB_PS = (PWMB_PS & (3 << channel)) | (pinSwitch << channel);
 	}
+#endif
 }
 
 static void enableOutput(PWM_Channel channel, uint8_t offset) {
+#if HAL_PWM_CHANNELS > 4
 	if (channel < PWM_Channel4) {
+#endif
 		PWMA_ENO |= 1 << (channel + offset);
+#if HAL_PWM_CHANNELS > 4
 	} else {
 		PWMB_ENO |= 1 << (channel - PWM_Channel4);
 	}
+#endif
 }
 
 static void enableChannel(PWM_Channel channel, uint8_t offset, PWM_Polarity polarity) {
+#if HAL_PWM_CHANNELS > 4
 	if (channel < PWM_Channel4) {
+#endif
 		switch (channel) {
 		case PWM_Channel0:
 			PWMA_CCER1 |= offset ? M_CC1NE : M_CC1E;
@@ -147,6 +161,7 @@ static void enableChannel(PWM_Channel channel, uint8_t offset, PWM_Polarity pola
 				PWMA_CCER1 |= offset ? M_CC1NP : M_CC1P;
 			}
 			break;
+#if HAL_PWM_CHANNELS > 1
 		case PWM_Channel1:
 			PWMA_CCER1 |= offset ? M_CC2NE : M_CC2E;
 			
@@ -154,6 +169,8 @@ static void enableChannel(PWM_Channel channel, uint8_t offset, PWM_Polarity pola
 				PWMA_CCER1 |= offset ? M_CC2NP : M_CC2P;
 			}
 			break;
+#endif
+#if HAL_PWM_CHANNELS > 2
 		case PWM_Channel2:
 			PWMA_CCER2 |= offset ? M_CC3NE : M_CC3E;
 			
@@ -168,7 +185,9 @@ static void enableChannel(PWM_Channel channel, uint8_t offset, PWM_Polarity pola
 				PWMA_CCER2 |= offset ? M_CC4NP : M_CC4P;
 			}
 			break;
+#endif
 		}
+#if HAL_PWM_CHANNELS > 4
 	} else {
 		switch (channel) {
 		case PWM_Channel4:
@@ -201,17 +220,22 @@ static void enableChannel(PWM_Channel channel, uint8_t offset, PWM_Polarity pola
 			break;
 		}
 	}
+#endif
 }
 
 static void enableFaultControl(PWM_Channel channel, uint8_t offset, PWM_FaultControl faultControl, OutputLevel idleLevel) {
 	if (faultControl == PWM_ENABLE_FAULT_CONTROL) {
+#if HAL_PWM_CHANNELS > 4
 		if (channel < PWM_Channel4) {
+#endif
 			PWMA_IOAUX |= 1 << (channel + offset);
 			PWMA_OISR |= idleLevel << (channel + offset);
+#if HAL_PWM_CHANNELS > 4
 		} else {
 			PWMB_IOAUX |= 1 << (channel - PWM_Channel4);
 			PWMB_OISR |= idleLevel << (channel - PWM_Channel4);
 		}
+#endif
 	}
 }
 
@@ -220,15 +244,20 @@ static void closeChannel(PWM_Channel channel) {
 	case PWM_Channel0:
 		PWMA_CCER1 &= 0xf0;
 		break;
+#if HAL_PWM_CHANNELS > 1
 	case PWM_Channel1:
 		PWMA_CCER1 &= 0x0f;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 2
 	case PWM_Channel2:
 		PWMA_CCER2 &= 0xf0;
 		break;
 	case PWM_Channel3:
 		PWMA_CCER2 &= 0x0f;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 4
 	case PWM_Channel4:
 		PWMB_CCER1 &= 0xf0;
 		break;
@@ -241,6 +270,7 @@ static void closeChannel(PWM_Channel channel) {
 	case PWM_Channel7:
 		PWMB_CCER2 &= 0x0f;
 		break;
+#endif
 	}
 }
 
@@ -263,7 +293,7 @@ void pwmConfigureOutput(
 	
 	bool ok = false;
 	
-	if (channel >= PWM_Channel4 || (outputEnable & PWM_OUTPUT_P_ONLY)) {
+	if (channel > PWM_Channel3 || (outputEnable & PWM_OUTPUT_P_ONLY)) {
 		if (configurePin(getChannelPin(channel, pinSwitch, 0), pinMode)) {
 			enableOutput(channel, 0);
 			enableChannel(channel, 0, polarity);
@@ -272,7 +302,7 @@ void pwmConfigureOutput(
 		}
 	}
 	
-	if (channel < PWM_Channel4 && (outputEnable & PWM_OUTPUT_N_ONLY)) {
+	if (channel <= PWM_Channel3 && (outputEnable & PWM_OUTPUT_N_ONLY)) {
 		if (configurePin(getChannelPin(channel, pinSwitch, 1), pinMode)) {
 			enableOutput(channel, 1);
 			enableChannel(channel, 1, polarity);
@@ -305,15 +335,20 @@ void pwmConfigureInput(
 	case PWM_Channel0:
 		PWMA_CCMR1 = ccmr;
 		break;
+#if HAL_PWM_CHANNELS > 1
 	case PWM_Channel1:
 		PWMA_CCMR2 = ccmr;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 2
 	case PWM_Channel2:
 		PWMA_CCMR3 = ccmr;
 		break;
 	case PWM_Channel3:
 		PWMA_CCMR4 = ccmr;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 4
 	case PWM_Channel4:
 		PWMB_CCMR1 = ccmr;
 		break;
@@ -326,6 +361,7 @@ void pwmConfigureInput(
 	case PWM_Channel7:
 		PWMB_CCMR4 = ccmr;
 		break;
+#endif
 	}
 	
 	enableChannel(channel, 0, polarity);
@@ -437,6 +473,7 @@ uint16_t pwmConfigureCounter(
 		PWMA_IER = (PWMA_IER & ~(M_COMIE | M_UIE)) | ier;
 		break;
 	
+#if HAL_PWM_CHANNELS > 4
 	case PWM_COUNTER_B:
 		PWMB_PSCRH = prescaler >> 8;
 		PWMB_PSCRL = prescaler;
@@ -447,6 +484,7 @@ uint16_t pwmConfigureCounter(
 		PWMB_CR1 = cr1;
 		PWMB_IER = (PWMB_IER & ~(M_COMIE | M_UIE)) | ier;
 		break;
+#endif
 	}
 	
 	DISABLE_EXTENDED_SFR()
@@ -462,9 +500,11 @@ void pwmEnableMainOutput(PWM_Counter counter) {
 		PWMA_BKR |= M_MOE;
 		break;
 	
+#if HAL_PWM_CHANNELS > 4
 	case PWM_COUNTER_B:
 		PWMB_BKR |= M_MOE;
 		break;
+#endif
 	}
 	
 	DISABLE_EXTENDED_SFR()
@@ -478,9 +518,11 @@ void pwmEnableCounter(PWM_Counter counter) {
 		PWMA_CR1 |= M_CEN;
 		break;
 	
+#if HAL_PWM_CHANNELS > 4
 	case PWM_COUNTER_B:
 		PWMB_CR1 |= M_CEN;
 		break;
+#endif
 	}
 	
 	DISABLE_EXTENDED_SFR()
@@ -494,9 +536,11 @@ void pwmDisableCounter(PWM_Counter counter) {
 		PWMA_CR1 &= ~M_CEN;
 		break;
 	
+#if HAL_PWM_CHANNELS > 4
 	case PWM_COUNTER_B:
 		PWMB_CR1 &= ~M_CEN;
 		break;
+#endif
 	}
 	
 	DISABLE_EXTENDED_SFR();
@@ -527,20 +571,26 @@ void pwmConfigureDeadTime(PWM_Counter counter, uint16_t clockPulses) {
 		PWMA_DTR = dtr;
 		break;
 	
+#if HAL_PWM_CHANNELS > 4
 	case PWM_COUNTER_B:
 		PWMB_DTR = dtr;
 		break;
+#endif
 	}
 	
 	DISABLE_EXTENDED_SFR()
 }
 
 static void enableChannelInterrupt(PWM_Channel channel) {
+#if HAL_PWM_CHANNELS > 4
 	if (channel < PWM_Channel4) {
+#endif
 		PWMA_IER |= 1 << ((channel >> 1) + 1);
+#if HAL_PWM_CHANNELS > 4
 	} else {
 		PWMB_IER |= 1 << (((channel - PWM_Channel4) >> 1) + 1);
 	}
+#endif
 }
 
 void pwmInitialisePWM(
@@ -572,15 +622,20 @@ void pwmInitialisePWM(
 	case PWM_Channel0:
 		PWMA_CCMR1 = ccmr;
 		break;
+#if HAL_PWM_CHANNELS > 1
 	case PWM_Channel1:
 		PWMA_CCMR2 = ccmr;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 2
 	case PWM_Channel2:
 		PWMA_CCMR3 = ccmr;
 		break;
 	case PWM_Channel3:
 		PWMA_CCMR4 = ccmr;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 4
 	case PWM_Channel4:
 		PWMB_CCMR1 = ccmr;
 		break;
@@ -593,6 +648,7 @@ void pwmInitialisePWM(
 	case PWM_Channel7:
 		PWMB_CCMR4 = ccmr;
 		break;
+#endif
 	}
 	
 	channelUsage[channel] = PWM_CHANNEL;
@@ -612,15 +668,20 @@ void pwmStopPWM(PWM_Channel channel) {
 	case PWM_Channel0:
 		PWMA_CCMR1 = 0;
 		break;
+#if HAL_PWM_CHANNELS > 1
 	case PWM_Channel1:
 		PWMA_CCMR2 = 0;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 2
 	case PWM_Channel2:
 		PWMA_CCMR3 = 0;
 		break;
 	case PWM_Channel3:
 		PWMA_CCMR4 = 0;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 4
 	case PWM_Channel4:
 		PWMB_CCMR1 = 0;
 		break;
@@ -633,6 +694,7 @@ void pwmStopPWM(PWM_Channel channel) {
 	case PWM_Channel7:
 		PWMB_CCMR4 = 0;
 		break;
+#endif
 	}
 	
 	DISABLE_EXTENDED_SFR()
@@ -647,15 +709,20 @@ void pwmLockPWM(PWM_Channel channel, OutputLevel outputLevel) {
 	case PWM_Channel0:
 		PWMA_CCMR1 = (PWMA_CCMR1 & ~M_OC_M) | ccmr;
 		break;
+#if HAL_PWM_CHANNELS > 1
 	case PWM_Channel1:
 		PWMA_CCMR2 = (PWMA_CCMR2 & ~M_OC_M) | ccmr;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 2
 	case PWM_Channel2:
 		PWMA_CCMR3 = (PWMA_CCMR3 & ~M_OC_M) | ccmr;
 		break;
 	case PWM_Channel3:
 		PWMA_CCMR4 = (PWMA_CCMR4 & ~M_OC_M) | ccmr;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 4
 	case PWM_Channel4:
 		PWMB_CCMR1 = (PWMB_CCMR1 & ~M_OC_M) | ccmr;
 		break;
@@ -668,6 +735,7 @@ void pwmLockPWM(PWM_Channel channel, OutputLevel outputLevel) {
 	case PWM_Channel7:
 		PWMB_CCMR4 = (PWMB_CCMR4 & ~M_OC_M) | ccmr;
 		break;
+#endif
 	}
 	
 	DISABLE_EXTENDED_SFR()
@@ -684,10 +752,13 @@ void pwmSetDutyCycle(PWM_Channel channel, uint16_t ticks) {
 		PWMA_CCR1H = ticksH;
 		PWMA_CCR1L = ticksL;
 		break;
+#if HAL_PWM_CHANNELS > 1
 	case PWM_Channel1:
 		PWMA_CCR2H = ticksH;
 		PWMA_CCR2L = ticksL;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 2
 	case PWM_Channel2:
 		PWMA_CCR3H = ticksH;
 		PWMA_CCR3L = ticksL;
@@ -696,6 +767,8 @@ void pwmSetDutyCycle(PWM_Channel channel, uint16_t ticks) {
 		PWMA_CCR4H = ticksH;
 		PWMA_CCR4L = ticksL;
 		break;
+#endif
+#if HAL_PWM_CHANNELS > 4
 	case PWM_Channel4:
 		PWMB_CCR1H = ticksH;
 		PWMB_CCR1L = ticksL;
@@ -712,6 +785,7 @@ void pwmSetDutyCycle(PWM_Channel channel, uint16_t ticks) {
 		PWMB_CCR4H = ticksH;
 		PWMB_CCR4L = ticksL;
 		break;
+#endif
 	}
 	
 	DISABLE_EXTENDED_SFR()
@@ -737,14 +811,17 @@ void pwmConfigureFaultDetection(
 	
 	ENABLE_EXTENDED_SFR()
 	
+#if HAL_PWM_CHANNELS > 4
 	switch (counter) {
 	case PWM_COUNTER_A:
+#endif
 		PWMA_ETRPS = (PWMA_ETRPS & ~M_BRK_PS) | (pinSwitch << P_BRK_PS);
 		PWMA_BKR = bkr;
 		
 		if (enableInterrupt == ENABLE_INTERRUPT) {
 			PWMA_IER |= M_BIE;
 		}
+#if HAL_PWM_CHANNELS > 4
 		break;
 	case PWM_COUNTER_B:
 		PWMB_ETRPS = (PWMB_ETRPS & ~M_BRK_PS) | (pinSwitch << P_BRK_PS);
@@ -755,6 +832,7 @@ void pwmConfigureFaultDetection(
 		}
 		break;
 	}
+#endif
 	
 	DISABLE_EXTENDED_SFR()
 }
@@ -784,14 +862,17 @@ void pwmConfigureExternalTrigger(
 		
 		ENABLE_EXTENDED_SFR()
 		
+#if HAL_PWM_CHANNELS > 4
 		switch (counter) {
 		case PWM_COUNTER_A:
+#endif
 			PWMA_ETRPS = (PWMA_ETRPS & ~M_ETR_PS) | (pinSwitch << P_ETR_PS);
 			PWMA_ETR = etr;
 			
 			if (enableInterrupt == ENABLE_INTERRUPT) {
 				PWMA_IER |= M_TIE;
 			}
+#if HAL_PWM_CHANNELS > 4
 			break;
 		case PWM_COUNTER_B:
 			PWMB_ETRPS = (PWMB_ETRPS & ~M_ETR_PS) | (pinSwitch << P_ETR_PS);
@@ -802,6 +883,7 @@ void pwmConfigureExternalTrigger(
 			}
 			break;
 		}
+#endif
 		
 		DISABLE_EXTENDED_SFR()
 	}
@@ -813,14 +895,22 @@ void pwmInitialiseQuadratureEncoder(
 	PWM_Polarity polarity, 
 	PWM_Filter filter
 ) {
+#if HAL_PWM_CHANNELS > 4
 	PWM_Counter counter = (firstChannel >= PWM_Channel4) ? PWM_COUNTER_B : PWM_COUNTER_A;
+#else
+	PWM_Counter counter = PWM_COUNTER_A;
+#endif
 	PWM_Channel secondChannel = firstChannel + 1;
 	
 	switch (firstChannel) {
 	case PWM_Channel1:
+#if HAL_PWM_CHANNELS > 2
 	case PWM_Channel3:
+#endif
+#if HAL_PWM_CHANNELS > 4
 	case PWM_Channel5:
 	case PWM_Channel7:
+#endif
 		// Both channels must belong to the same pair.
 		secondChannel = firstChannel - 1;
 		break;
@@ -893,11 +983,14 @@ INTERRUPT_USING(pwmA_isr, PWMA_INTERRUPT, 1) {
 		channel = PWM_Channel0;
 	}
 	
+#if HAL_PWM_CHANNELS > 1
 	if (PWMA_SR1 & M_CC2IF) {
 		PWMA_SR1 &= ~M_CC2IF;
 		channel = PWM_Channel1;
 	}
+#endif
 	
+#if HAL_PWM_CHANNELS > 2
 	if (PWMA_SR1 & M_CC3IF) {
 		PWMA_SR1 &= ~M_CC3IF;
 		channel = PWM_Channel2;
@@ -907,6 +1000,7 @@ INTERRUPT_USING(pwmA_isr, PWMA_INTERRUPT, 1) {
 		PWMA_SR1 &= ~M_CC4IF;
 		channel = PWM_Channel3;
 	}
+#endif
 	
 	if (PWMA_SR1 & M_TIF) {
 		PWMA_SR1 &= ~M_TIF;
@@ -942,10 +1036,13 @@ INTERRUPT_USING(pwmA_isr, PWMA_INTERRUPT, 1) {
 				counterValue = PWMA_CCR1H << 8;
 				counterValue |= PWMA_CCR1L;
 				break;
+#if HAL_PWM_CHANNELS > 1
 			case PWM_Channel1:
 				counterValue = PWMA_CCR2H << 8;
 				counterValue |= PWMA_CCR2L;
 				break;
+#endif
+#if HAL_PWM_CHANNELS > 2
 			case PWM_Channel2:
 				counterValue = PWMA_CCR3H << 8;
 				counterValue |= PWMA_CCR3L;
@@ -954,6 +1051,7 @@ INTERRUPT_USING(pwmA_isr, PWMA_INTERRUPT, 1) {
 				counterValue = PWMA_CCR4H << 8;
 				counterValue |= PWMA_CCR4L;
 				break;
+#endif
 			}
 			
 			uint8_t countDown = PWMA_CR1 & M_DIR;
@@ -968,6 +1066,7 @@ INTERRUPT_USING(pwmA_isr, PWMA_INTERRUPT, 1) {
 	DISABLE_EXTENDED_SFR()
 }
 
+#if HAL_PWM_CHANNELS > 4
 INTERRUPT_USING(pwmB_isr, PWMB_INTERRUPT, 1) {
 	uint8_t channel = 255;
 	uint8_t event = 255;
@@ -1053,3 +1152,4 @@ INTERRUPT_USING(pwmB_isr, PWMB_INTERRUPT, 1) {
 	
 	DISABLE_EXTENDED_SFR()
 }
+#endif

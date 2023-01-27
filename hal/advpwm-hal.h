@@ -53,9 +53,20 @@
 
 #include <hal-defs.h>
 
+#ifndef HAL_PWM_CHANNELS
+	#define HAL_PWM_CHANNELS 8
+#endif
+
+#if HAL_PWM_CHANNELS != 1 && HAL_PWM_CHANNELS != 2 && HAL_PWM_CHANNELS != 4 && HAL_PWM_CHANNELS != 8
+	#undef HAL_PWM_CHANNELS
+	#define HAL_PWM_CHANNELS 8
+#endif
+
 typedef enum {
 	PWM_COUNTER_A = 0,
+#if HAL_PWM_CHANNELS > 4
 	PWM_COUNTER_B = 1,
+#endif
 } PWM_Counter;
 
 typedef enum {
@@ -139,10 +150,12 @@ typedef enum {
 	PWM_Channel1 = 2,
 	PWM_Channel2 = 4,
 	PWM_Channel3 = 6,
+#if HAL_PWM_CHANNELS > 4
 	PWM_Channel4 = 8,
 	PWM_Channel5 = 10,
 	PWM_Channel6 = 12,
 	PWM_Channel7 = 14,
+#endif
 } PWM_Channel;
 
 typedef enum {
@@ -391,6 +404,9 @@ void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) USIN
 void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, uint8_t countDown) USING(1);
 
 INTERRUPT_USING(pwmA_isr, PWMA_INTERRUPT, 1);
-INTERRUPT_USING(pwmB_isr, PWMB_INTERRUPT, 1);
+
+#if HAL_PWM_CHANNELS > 4
+	INTERRUPT_USING(pwmB_isr, PWMB_INTERRUPT, 1);
+#endif
 
 #endif // _ENHPWM_HAL_H

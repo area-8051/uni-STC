@@ -62,6 +62,11 @@
 		#define SMALL_FLASH
 	#endif
 	
+	#ifdef BUILD_FOR_STC8H1K08T_TSSOP20
+		#include <STC/8H1KxxT/TSSOP20.h>
+		#define SMALL_FLASH
+	#endif
+	
 	#ifdef BUILD_FOR_STC8H1K28_LQFP32
 		#include <STC/8H1Kxx/LQFP32.h>
 	#endif
@@ -185,6 +190,8 @@
 	// Manage to fit in 8 KB flash...
 	#define HAL_UARTS 1
 	#define HAL_PCA_CHANNELS 1
+	#define HAL_PWM_CHANNELS 1
+	#define BASIC_GPIO_HAL
 #endif // SMALL_FLASH
 
 #ifdef SMALL_RAM

@@ -11,6 +11,9 @@
 	// COMPARATOR_1P2N => STC15 without ADC
 	// COMPARATOR_4P2N => new comparator in some STC8H + the STC8A8KxxD4
 	// COMPARATOR_2P2N => STC15 with ADC and all other STC8
+	// nP means n possible sources for the positive input of the comparator.
+	// nN means n possible sources for the negative input of the comparator.
+	// 1P2N can't select ADCIN because they have no ADC.
 	
 	#if !defined(COMPARATOR_1P2N) && !defined(COMPARATOR_4P2N)
 		#define COMPARATOR_2P2N

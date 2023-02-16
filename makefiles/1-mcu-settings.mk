@@ -107,13 +107,15 @@ OBJDIR := $(BUILD_ROOT)
 FW_FILE := $(OBJDIR)/$(PROJECT_NAME).ihx
 DEP_FILE := $(OBJDIR)/dependencies.mk
 
-DRIVER_SRCS := $(filter $(DRIVER_DIR)/%, $(SRCS))
-HAL_SRCS := $(filter $(HAL_DIR)/%, $(SRCS))
-LOCAL_SRCS := $(filter-out $(DRIVER_DIR)/%, $(filter-out $(HAL_DIR)/%, $(SRCS)))
+DRIVER_SRCS := $(filter $(DRIVER_DIR)%, $(SRCS))
+HAL_SRCS := $(filter $(HAL_DIR)%, $(SRCS))
+LOCAL_SRCS := $(filter-out $(DRIVER_DIR)%, $(filter-out $(HAL_DIR)%, $(SRCS)))
 
-DRIVER_OBJS := $(patsubst %.c, $(OBJDIR)/%.rel, $(shell srcDir="$(DRIVER_DIR)";for srcFile in $(DRIVER_SRCS); do echo "$${srcFile#$$srcDir/}"; done))
-HAL_OBJS := $(patsubst %.c, $(OBJDIR)/%.rel, $(shell srcDir="$(HAL_DIR)";for srcFile in $(HAL_SRCS); do echo "$${srcFile#$$srcDir/}"; done))
-LOCAL_OBJS := $(patsubst %.c, $(OBJDIR)/%.rel, $(LOCAL_SRCS))
+DRIVER_OBJS := $(subst $(DRIVER_DIR),$(OBJDIR),$(subst .c,.rel,$(DRIVER_SRCS)))
+HAL_OBJS := $(subst $(HAL_DIR),$(OBJDIR),$(subst .c,.rel,$(HAL_SRCS)))
+LOCAL_OBJS := $(addprefix $(OBJDIR)/,$(subst .c,.rel,$(LOCAL_SRCS)))
+
+OBJDIR_TREE := $(sort $(dir $(DRIVER_OBJS) $(HAL_OBJS) $(LOCAL_OBJS)))
 
 ifeq ($(HAS_DUAL_DPTR),y)
 	DUAL_DPTR_SUPPORT := $(OBJDIR)/crtxinit.rel

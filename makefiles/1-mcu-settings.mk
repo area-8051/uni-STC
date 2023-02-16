@@ -115,6 +115,8 @@ DRIVER_OBJS := $(subst $(DRIVER_DIR),$(OBJDIR),$(subst .c,.rel,$(DRIVER_SRCS)))
 HAL_OBJS := $(subst $(HAL_DIR),$(OBJDIR),$(subst .c,.rel,$(HAL_SRCS)))
 LOCAL_OBJS := $(addprefix $(OBJDIR)/,$(subst .c,.rel,$(LOCAL_SRCS)))
 
+OBJDIR_TREE := $(sort $(dir $(DRIVER_OBJS) $(HAL_OBJS) $(LOCAL_OBJS)))
+
 ifeq ($(HAS_DUAL_DPTR),y)
 	DUAL_DPTR_SUPPORT := $(OBJDIR)/crtxinit.rel
 else

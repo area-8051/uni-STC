@@ -26,24 +26,21 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
 
-$(OBJDIR):
-	@mkdir -p $(OBJDIR)
+$(OBJDIR) $(OBJDIR_TREE):
+	@mkdir -p $@
 
 $(DEP_FILE): $(OBJDIR)
 	$(CC) $(CFLAGS) -MM -MF - $(SRCS) > $(DEP_FILE)
-	sed -i "s/^\(.*\.o:.*\)/$(BUILD_ROOT)\/$(BUILD_DIR)\/\1/g" $(DEP_FILE)
-	@for objFile in $(DRIVER_OBJS); do objPath="$${objFile%/*}"; if [ ! -d "$${objPath}" ]; then mkdir -p "$${objPath}"; fi; done
-	@for objFile in $(HAL_OBJS); do objPath="$${objFile%/*}"; if [ ! -d "$${objPath}" ]; then mkdir -p "$${objPath}"; fi; done
-	@for objFile in $(LOCAL_OBJS); do objPath="$${objFile%/*}"; if [ ! -d "$${objPath}" ]; then mkdir -p "$${objPath}"; fi; done
+	@sed -i "s/^\(.*\.o:.*\)/$(BUILD_ROOT)\/$(BUILD_DIR)\/\1/g" $(DEP_FILE)
 
 $(FW_FILE): $(DRIVER_OBJS) $(HAL_OBJS) $(LOCAL_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-$(DRIVER_OBJS):
+$(DRIVER_OBJS): $(OBJDIR_TREE)
 	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR),$(DRIVER_DIR),$(subst .o,.c,$@))
 
-$(HAL_OBJS):
+$(HAL_OBJS): $(OBJDIR_TREE)
 	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR),$(HAL_DIR),$(subst .o,.c,$@))
 
-$(LOCAL_OBJS):
+$(LOCAL_OBJS): $(OBJDIR_TREE)
 	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR)/,,$(subst .o,.c,$@))

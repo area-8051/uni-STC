@@ -73,6 +73,8 @@ DRIVER_OBJS := $(subst $(DRIVER_DIR),$(OBJDIR),$(subst .c,.o,$(DRIVER_SRCS)))
 HAL_OBJS := $(subst $(HAL_DIR),$(OBJDIR),$(subst .c,.o,$(HAL_SRCS)))
 LOCAL_OBJS := $(addprefix $(OBJDIR)/,$(subst .c,.o,$(LOCAL_SRCS)))
 
+OBJDIR_TREE := $(sort $(dir $(DRIVER_OBJS) $(HAL_OBJS) $(LOCAL_OBJS)))
+
 # Rules ----------------------------------------------------------------
 
 .PHONY: all clean

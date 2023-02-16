@@ -30,13 +30,13 @@
 # documentation (which the SDCC manual says should apply), so we 
 # need to compensate for this. We also need to create subdirectories
 # under $(OBJDIR) as needed because SDCC can't do it.
-$(DEP_FILE):
-	@mkdir -p $(OBJDIR)
+
+$(OBJDIR) $(OBJDIR_TREE):
+	@mkdir -p $@
+
+$(DEP_FILE): $(OBJDIR)
 	@for srcFile in $(LOCAL_SRCS); do $(CC) $(CPPFLAGS) -MM $${srcFile} >> $(DEP_FILE); done
 	@sed -i "s/^\(.*\.rel:.*\)/$(BUILD_ROOT)\/\1/g" $(DEP_FILE)
-	@for objFile in $(DRIVER_OBJS); do objPath="$${objFile%/*}"; if [ ! -d "$${objPath}" ]; then mkdir -p "$${objPath}"; fi; done
-	@for objFile in $(HAL_OBJS); do objPath="$${objFile%/*}"; if [ ! -d "$${objPath}" ]; then mkdir -p "$${objPath}"; fi; done
-	@for objFile in $(LOCAL_OBJS); do objPath="$${objFile%/*}"; if [ ! -d "$${objPath}" ]; then mkdir -p "$${objPath}"; fi; done
 
 $(FW_FILE): $(DRIVER_OBJS) $(HAL_OBJS) $(LOCAL_OBJS) $(DUAL_DPTR_SUPPORT)
 	$(CC) $(LDFLAGS) -o $@ $^
@@ -44,11 +44,11 @@ $(FW_FILE): $(DRIVER_OBJS) $(HAL_OBJS) $(LOCAL_OBJS) $(DUAL_DPTR_SUPPORT)
 $(OBJDIR)/crtxinit.rel: $(HAL_DIR)/crtxinit.asm
 	$(AS) $(ASFLAGS) $@ $<
 
-$(DRIVER_OBJS):
+$(DRIVER_OBJS): $(OBJDIR_TREE)
 	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR),$(DRIVER_DIR),$(subst .rel,.c,$@))
 
-$(HAL_OBJS):
+$(HAL_OBJS): $(OBJDIR_TREE)
 	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR),$(HAL_DIR),$(subst .rel,.c,$@))
 
-$(LOCAL_OBJS):
+$(LOCAL_OBJS): $(OBJDIR_TREE)
 	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR)/,,$(subst .rel,.c,$@))

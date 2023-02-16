@@ -40,10 +40,10 @@ $(FW_FILE): $(DRIVER_OBJS) $(HAL_OBJS) $(LOCAL_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 $(DRIVER_OBJS):
-	$(CC) $(CFLAGS) -o $@ -c $(patsubst %.o, $(DRIVER_DIR)/%.c, $(shell srcDir="$(OBJDIR)";srcFile="$@";echo "$${srcFile#$$srcDir/}"))
+	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR),$(DRIVER_DIR),$(subst .o,.c,$@))
 
 $(HAL_OBJS):
-	$(CC) $(CFLAGS) -o $@ -c $(patsubst %.o, $(HAL_DIR)/%.c, $(shell srcDir="$(OBJDIR)";srcFile="$@";echo "$${srcFile#$$srcDir/}"))
+	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR),$(HAL_DIR),$(subst .o,.c,$@))
 
 $(LOCAL_OBJS):
-	$(CC) $(CFLAGS) -o $@ -c $(patsubst %.o, %.c, $(shell srcDir="$(OBJDIR)";srcFile="$@";echo "$${srcFile#$$srcDir/}"))
+	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR)/,,$(subst .o,.c,$@))

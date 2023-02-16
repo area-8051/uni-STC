@@ -26,8 +26,8 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
 
-UNISTC_ROOT_DIR := $(shell dirname "$(dir $(abspath $(lastword $(MAKEFILE_LIST))))")
-UNISTC_DIR := $(UNISTC_ROOT_DIR)/include
-HAL_DIR := $(UNISTC_ROOT_DIR)/hal
-DRIVER_DIR := $(UNISTC_ROOT_DIR)/drivers
-MAKE_DIR := $(UNISTC_ROOT_DIR)/makefiles
+UNISTC_ROOT_DIR := $(dir $(abspath $(dir $(lastword $(MAKEFILE_LIST)))))
+UNISTC_DIR := $(UNISTC_ROOT_DIR)include
+HAL_DIR := $(UNISTC_ROOT_DIR)hal
+DRIVER_DIR := $(UNISTC_ROOT_DIR)drivers
+MAKE_DIR := $(UNISTC_ROOT_DIR)makefiles

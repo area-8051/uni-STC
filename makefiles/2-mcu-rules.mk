@@ -45,10 +45,10 @@ $(OBJDIR)/crtxinit.rel: $(HAL_DIR)/crtxinit.asm
 	$(AS) $(ASFLAGS) $@ $<
 
 $(DRIVER_OBJS):
-	$(CC) $(CFLAGS) -o $@ -c $(patsubst %.rel, $(DRIVER_DIR)/%.c, $(shell srcDir="$(OBJDIR)";srcFile="$@";echo "$${srcFile#$$srcDir/}"))
+	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR),$(DRIVER_DIR),$(subst .rel,.c,$@))
 
 $(HAL_OBJS):
-	$(CC) $(CFLAGS) -o $@ -c $(patsubst %.rel, $(HAL_DIR)/%.c, $(shell srcDir="$(OBJDIR)";srcFile="$@";echo "$${srcFile#$$srcDir/}"))
+	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR),$(HAL_DIR),$(subst .rel,.c,$@))
 
 $(LOCAL_OBJS):
-	$(CC) $(CFLAGS) -o $@ -c $(patsubst %.rel, %.c, $(shell srcDir="$(OBJDIR)";srcFile="$@";echo "$${srcFile#$$srcDir/}"))
+	$(CC) $(CFLAGS) -o $@ -c $(subst $(OBJDIR)/,,$(subst .rel,.c,$@))

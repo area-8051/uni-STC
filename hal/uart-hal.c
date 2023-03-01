@@ -370,7 +370,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 	if (S1CON & M_TI) {
 		S1CON &= ~M_TI;
 		
-		if (fifoRead_using1(&UART1_transmitBuffer, &c, 1)) {
+		if (fifoRead(&UART1_transmitBuffer, &c, 1)) {
 			S1BUF = c;
 		} else {
 			UART1_transmitBuffer.status = STATUS_CLEAR;
@@ -380,7 +380,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 	if (S1CON & M_RI) {
 		S1CON &= ~M_RI;
 		c = S1BUF;
-		fifoWrite_using1(&UART1_receiveBuffer, &c, 1);
+		fifoWrite(&UART1_receiveBuffer, &c, 1);
 	}
 }
 
@@ -391,7 +391,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 		if (S2CON & M_TI) {
 			S2CON &= ~M_TI;
 			
-			if (fifoRead_using1(&UART2_transmitBuffer, &c, 1)) {
+			if (fifoRead(&UART2_transmitBuffer, &c, 1)) {
 				S2BUF = c;
 			} else {
 				UART2_transmitBuffer.status = STATUS_CLEAR;
@@ -401,7 +401,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 		if (S2CON & M_RI) {
 			S2CON &= ~M_RI;
 			c = S2BUF;
-			fifoWrite_using1(&UART2_receiveBuffer, &c, 1);
+			fifoWrite(&UART2_receiveBuffer, &c, 1);
 		}
 	}
 #endif // HAL_UARTS >= 2
@@ -413,7 +413,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 		if (S3CON & M_TI) {
 			S3CON &= ~M_TI;
 			
-			if (fifoRead_using1(&UART3_transmitBuffer, &c, 1)) {
+			if (fifoRead(&UART3_transmitBuffer, &c, 1)) {
 				S3BUF = c;
 			} else {
 				UART3_transmitBuffer.status = STATUS_CLEAR;
@@ -423,7 +423,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 		if (S3CON & M_RI) {
 			S3CON &= ~M_RI;
 			c = S3BUF;
-			fifoWrite_using1(&UART3_receiveBuffer, &c, 1);
+			fifoWrite(&UART3_receiveBuffer, &c, 1);
 		}
 	}
 
@@ -433,7 +433,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 		if (S4CON & M_TI) {
 			S4CON &= ~M_TI;
 			
-			if (fifoRead_using1(&UART4_transmitBuffer, &c, 1)) {
+			if (fifoRead(&UART4_transmitBuffer, &c, 1)) {
 				S4BUF = c;
 			} else {
 				UART4_transmitBuffer.status = STATUS_CLEAR;
@@ -443,7 +443,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 		if (S4CON & M_RI) {
 			S4CON &= ~M_RI;
 			c = S4BUF;
-			fifoWrite_using1(&UART4_receiveBuffer, &c, 1);
+			fifoWrite(&UART4_receiveBuffer, &c, 1);
 		}
 	}
 #endif // HAL_UARTS >= 3
@@ -474,7 +474,7 @@ bool uartGetBlock(Uart uart, uint8_t *data, uint8_t size, BlockingOperation bloc
 	return rc;
 }
 
-inline void __uartStartSending(Uart uart, FifoState *buffer) {
+static void __uartStartSending(Uart uart, FifoState *buffer) {
 	buffer->status = STATUS_SENDING;
 	uint8_t data;
 	fifoRead(buffer, &data, 1);

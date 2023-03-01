@@ -36,7 +36,7 @@
  * FIFO circular buffer implementation.
  */
 
-bool fifoWrite(FifoState *buffer, const void *data, uint8_t count) {
+bool fifoWrite(FifoState *buffer, const void *data, uint8_t count) REENTRANT {
 	bool rc = (buffer->size - fifoLength(buffer)) >= count;
 	
 	if (rc) {
@@ -57,50 +57,7 @@ bool fifoWrite(FifoState *buffer, const void *data, uint8_t count) {
 	return rc;
 }
 
-bool fifoWrite_using1(FifoState *buffer, const void * FIFO_SEGMENT data, uint8_t FIFO_SEGMENT count) USING(1) {
-	bool rc = (buffer->size - fifoLength(buffer)) >= count;
-	
-	if (rc) {
-		uint8_t wIndex = buffer->wIndex;
-		
-		for (uint8_t n = 0; n < count; n++) {
-			buffer->data[wIndex] = ((uint8_t *) data)[n];
-			wIndex++;
-			
-			if (wIndex > buffer->size) {
-				wIndex = 0;
-			}
-		}
-		
-		buffer->wIndex = wIndex;
-	}
-	
-	return rc;
-}
-
-bool fifoRead(FifoState *buffer, void *data, uint8_t count) {
-	bool rc = fifoLength(buffer) >= count;
-	
-	if (rc) {
-		uint8_t rIndex = buffer->rIndex;
-		
-		for (uint8_t n = 0; n < count; n++) {
-			// Buffer is not empty, read rIndex character.
-			((uint8_t *) data)[n] = buffer->data[rIndex];
-			rIndex++;
-			
-			if (rIndex > buffer->size) {
-				rIndex = 0;
-			}
-		}
-		
-		buffer->rIndex = rIndex;
-	}
-	
-	return rc;
-}
-
-bool fifoRead_using1(FifoState *buffer, void * FIFO_SEGMENT data, uint8_t FIFO_SEGMENT count) USING(1) {
+bool fifoRead(FifoState *buffer, void *data, uint8_t count) REENTRANT {
 	bool rc = fifoLength(buffer) >= count;
 	
 	if (rc) {

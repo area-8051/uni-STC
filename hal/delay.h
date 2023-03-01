@@ -58,6 +58,7 @@ void delay10us(uint8_t n);
 	#ifndef SUPPRESS_delay1us_WARNING
 		#warning "CAUTION! delay1us() is *NOT* available in this MCU family + frequency"
 		#warning "configuration, using delay10us() to emulate it, but with less accuracy."
+		#warning "To remove this warning, define the SUPPRESS_delay1us_WARNING macro."
 	#endif
 	
 	#define delay1us(d) delay10us(d / 10)

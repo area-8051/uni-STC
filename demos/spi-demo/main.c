@@ -40,7 +40,7 @@ static GpioConfig csPin = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN6, GPIO_BIDIRECTIO
 
 uint16_t readTemperature() {
 	uint16_t result = 0;
-	volatile uint8_t dataReady = 0;
+	volatile bool dataReady = 0;
 	union {
 		uint16_t word;
 		uint8_t byte[2];
@@ -87,6 +87,7 @@ void main() {
 		SPI_MASTER, 
 		SPI_MSB_FIRST, 
 		SPI_CLK_IDLE_LOW, 
+		SPI_SAMPLE_ON_TRAILING_EDGE, 
 		spiSelectSpeed(MAX6675_MAX_SPEED), 
 		SPI_PIN_CONFIG, 
 		GPIO_BIDIRECTIONAL_MODE

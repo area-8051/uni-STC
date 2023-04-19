@@ -102,6 +102,7 @@ static void __spi_configurePins(SpiMode spiMode, uint8_t pinSwitch, GpioPinMode 
 	for (uint8_t i = 0; i < (sizeof(__pinConfigurations) / SPI_ROW_SIZE); i++) {
 		if (__pinConfigurations[i][SPI_PIN_SWITCH] == pinSwitch) {
 			P_SW1 = (P_SW1 & ~M_SPI_S) | ((pinSwitch << P_SPI_S) & M_SPI_S);
+			// .port and .pin don't matter, they'll be overriden later.
 			GpioConfig pinConfig = GPIO_PIN_CONFIG(GPIO_PORT3, GPIO_PIN0, outputPinMode);
 			uint8_t pinDefinition;
 			
@@ -143,6 +144,11 @@ static void __spi_configurePins(SpiMode spiMode, uint8_t pinSwitch, GpioPinMode 
 				gpioConfigure(&pinConfig);
 				
 				pinDefinition = __pinConfigurations[i][SPI_SCLK_PIN];
+				pinConfig.port = (GpioPort) (pinDefinition >> 4);
+				pinConfig.pin = (GpioPin) (pinDefinition & 0x0f);
+				gpioConfigure(&pinConfig);
+				
+				pinDefinition = __pinConfigurations[i][SPI_SS_PIN];
 				pinConfig.port = (GpioPort) (pinDefinition >> 4);
 				pinConfig.pin = (GpioPin) (pinDefinition & 0x0f);
 				gpioConfigure(&pinConfig);
@@ -214,10 +220,10 @@ SpiSpeed spiSelectSpeed(uint32_t maxDeviceRate) {
 	return result;
 }
 
-void spiConfigure(SpiMode spiMode, SpiBitOrder bitOrder, SpiPolarity polarity, SpiSpeed speed, uint8_t pinSwitch, GpioPinMode outputPinMode) {
+void spiConfigure(SpiMode spiMode, SpiBitOrder bitOrder, SpiPolarity polarity, SpiPhase phase, SpiSpeed speed, uint8_t pinSwitch, GpioPinMode outputPinMode) {
 	__spi_configurePins(spiMode, pinSwitch, outputPinMode);
 	__spiState.mode = spiMode;
-	SPCTL = spiMode | bitOrder | polarity | speed;
+	SPCTL = spiMode | bitOrder | polarity | phase | speed;
 	IE2 = (spiMode == SPI_DISABLE)
 		? (IE2 & ~M_ESPI)
 		: (IE2 | M_ESPI);

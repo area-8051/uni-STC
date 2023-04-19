@@ -114,7 +114,8 @@
 typedef enum {
 	SPI_DISABLE = 0,
 	SPI_MASTER = 0xd4,
-	SPI_SLAVE = 0xc4,
+	// Slave is enabled when SS pin is low.
+	SPI_SLAVE = 0x40,
 } SpiMode;
 
 typedef enum {
@@ -126,6 +127,14 @@ typedef enum {
 	SPI_CLK_IDLE_LOW = 0,
 	SPI_CLK_IDLE_HIGH = 8,
 } SpiPolarity;
+
+// Used only when SpiMode == SPI_SLAVE, ignored otherwise.
+typedef enum {
+	// Data changes on trailing edge, and is sampled on leading edge of SCLK.
+	SPI_SAMPLE_ON_LEADING_EDGE = 0,
+	// Data changes on leading edge, and is sampled on trailing edge of SCLK.
+	SPI_SAMPLE_ON_TRAILING_EDGE = 4,
+} SpiPhase;
 
 typedef enum {
 	SPI_SYSCLK_DIV_4 = 0,
@@ -151,7 +160,7 @@ typedef enum {
 } SpiSpeed;
 
 SpiSpeed spiSelectSpeed(uint32_t maxDeviceRate);
-void spiConfigure(SpiMode spiMode, SpiBitOrder bitOrder, SpiPolarity polarity, SpiSpeed speed, uint8_t pinSwitch, GpioPinMode outputPinMode);
+void spiConfigure(SpiMode spiMode, SpiBitOrder bitOrder, SpiPolarity polarity, SpiPhase phase, SpiSpeed speed, uint8_t pinSwitch, GpioPinMode outputPinMode);
 void spiSend(uint8_t *buffer, size_t bufferSize, bool *readyFlag);
 void spiReceive(uint8_t *buffer, size_t bufferSize, bool *readyFlag);
 

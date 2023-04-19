@@ -44,6 +44,10 @@ ifeq ($(UNISTC_DIR),)
 	$(error The UNISTC_DIR variable must be defined.)
 endif
 
+ifeq ($(BUILD_ROOT),)
+	BUILD_ROOT := build
+endif
+
 # Toolchain settings ---------------------------------------------------
 
 CC := cc
@@ -57,8 +61,6 @@ else
 	CFLAGS += -O2
 	BUILD_DIR := release
 endif
-
-BUILD_ROOT := build
 
 OBJDIR := $(BUILD_ROOT)/$(BUILD_DIR)
 

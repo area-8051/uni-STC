@@ -79,6 +79,10 @@ ifeq ($(STCGAL_OPTIONS),)
 	STCGAL_OPTIONS := -a
 endif
 
+ifeq ($(BUILD_ROOT),)
+	BUILD_ROOT := build
+endif
+
 # Toolchain settings ---------------------------------------------------
 
 TARGET_ARCH := -mmcs51
@@ -97,8 +101,6 @@ else
 	CFLAGS += --opt-code-size
 	BUILD_DIR := release
 endif
-
-BUILD_ROOT := build
 
 # Because we can't use debug mode, the extra directory level is useless.
 # OBJDIR := $(BUILD_ROOT)/$(BUILD_DIR)

@@ -82,6 +82,8 @@ PROJECT_NAME := hal-demo
 
 PROJECT_FLAGS = -DBUILD_FOR_STC8H1K28_LQFP32
 
+BUILD_ROOT := STC8H1K28_LQFP32
+
 SRCS := \
 	$(HAL_DIR)/advpwm-hal.c \
 	$(HAL_DIR)/delay.c \

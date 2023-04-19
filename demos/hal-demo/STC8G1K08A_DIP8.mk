@@ -83,6 +83,8 @@ PROJECT_NAME := hal-demo
 
 PROJECT_FLAGS = -DBUILD_FOR_STC8G1K08A_DIP8
 
+BUILD_ROOT := STC8G1K08A_DIP8
+
 SRCS := \
 	$(HAL_DIR)/delay.c \
 	$(HAL_DIR)/fifo-buffer.c \

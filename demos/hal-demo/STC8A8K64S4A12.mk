@@ -82,6 +82,8 @@ PROJECT_NAME := hal-demo
 
 PROJECT_FLAGS = -DBUILD_FOR_STC8A8K64S4A12
 
+BUILD_ROOT := STC8A8K64S4A12
+
 SRCS := \
 	$(HAL_DIR)/delay.c \
 	$(HAL_DIR)/enhpwm-hal.c \

@@ -80,7 +80,9 @@ include ../../makefiles/0-directories.mk
 # Project settings -----------------------------------------------------
 PROJECT_NAME := hal-demo
 
-PROJECT_FLAGS = -DBUILD_FOR_STC8A8K64D4
+PROJECT_FLAGS := -DBUILD_FOR_STC8A8K64D4
+
+BUILD_ROOT := STC8A8K64D4
 
 SRCS := \
 	$(HAL_DIR)/delay.c \

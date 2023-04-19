@@ -82,6 +82,8 @@ PROJECT_NAME := hal-demo
 
 PROJECT_FLAGS = -DBUILD_FOR_STC8H8K64U_PDIP40
 
+BUILD_ROOT := STC8H8K64U
+
 SRCS := \
 	$(HAL_DIR)/advpwm-hal.c \
 	$(HAL_DIR)/delay.c \

@@ -83,6 +83,8 @@ PROJECT_NAME := hal-demo
 
 PROJECT_FLAGS = -DBUILD_FOR_STC8H1K08_TSSOP20
 
+BUILD_ROOT := STC8H1K08_TSSOP20
+
 SRCS := \
 	$(HAL_DIR)/advpwm-hal.c \
 	$(HAL_DIR)/delay.c \

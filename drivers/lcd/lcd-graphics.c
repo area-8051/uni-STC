@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  * 
- * Copyright (c) 2022 Vincent DEFERT. All rights reserved.
+ * Copyright (c) 2023 Vincent DEFERT. All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions 
@@ -30,6 +30,7 @@
 #include "project-defs.h"
 #include <lcd/lcd-graphics.h>
 #include <lcd/lcd-controller.h>
+#include <stdlib.h>
 
 /**
  * @file lcd-graphics.c
@@ -37,7 +38,7 @@
  * Graphics operations for LCD devices: implementation.
  */
 
-static uint8_t reverseBits(uint8_t byte) {
+static uint8_t __reverseBits(uint8_t byte) {
 	uint8_t result = 0;
 	uint8_t mask = 0x80;
 	
@@ -49,70 +50,8 @@ static uint8_t reverseBits(uint8_t byte) {
 	return result;
 }
 
-static void __lcdGfxSetGraphicsDisplayAddress(LCDDevice *device, uint16_t pixelX, uint16_t pixelY) {
-	if (device->displayBuffer) {
-		device->__displayAddressX = pixelX & ~7;
-		device->__displayAddressY = pixelY;
-	} else {
-		lcdSetGraphicsDisplayAddress(device, pixelX, pixelY);
-	}
-}
-
-static void __lcdGfxUpdateExtents(LCDDevice *device) {
-	if (device->__displayAddressX < device->__minExtentX) {
-		device->__minExtentX = device->__displayAddressX;
-	}
-	
-	if (device->__displayAddressX > device->__maxExtentX) {
-		device->__maxExtentX = device->__displayAddressX;
-	}
-	
-	if (device->__displayAddressY < device->__minExtentY) {
-		device->__minExtentY = device->__displayAddressY;
-	}
-	
-	if (device->__displayAddressY > device->__maxExtentY) {
-		device->__maxExtentY = device->__displayAddressY;
-	}
-}
-
-static uint16_t __lcdGfxGetAndAutoIncrementByteOffset(LCDDevice *device) {
-	uint16_t result = (device->__displayAddressY * device->__bytesWidth) + (device->__displayAddressX / 8);
-	
-	// For consistency, we reproduce the behaviour of the underlying 
-	// LCD controller when working with the buffer.
-	device->__displayAddressX += 8;
-	
-	if (device->__displayAddressX >= device->pixelWidth) {
-		device->__displayAddressX = 0;
-	}
-	
-	return result;
-}
-
-static uint8_t __lcdGfxReadByte(LCDDevice *device) {
-	uint8_t result = 0;
-	
-	if (device->displayBuffer) {
-		result = device->displayBuffer[__lcdGfxGetAndAutoIncrementByteOffset(device)];
-	} else {
-		result = lcdReadByte(device);
-	}
-	
-	return result;
-}
-
-static void __lcdGfxWriteByte(LCDDevice *device, uint8_t byte) {
-	if (device->displayBuffer) {
-		__lcdGfxUpdateExtents(device);
-		device->displayBuffer[__lcdGfxGetAndAutoIncrementByteOffset(device)] = byte;
-	} else {
-		lcdWriteByte(device, byte);
-	}
-}
-
-static void __lcdGfxBeginOperation(LCDDevice *device) {
-	if (device->displayBuffer && !device->__batchStarted) {
+static void __beginOperation(LCDDevice *device) {
+	if (!device->__batchStarted) {
 		device->__batchStarted = 1;
 		device->__minExtentX = device->pixelWidth;
 		device->__minExtentY = device->pixelHeight;
@@ -121,8 +60,8 @@ static void __lcdGfxBeginOperation(LCDDevice *device) {
 	}
 }
 
-static void __lcdGfxEndOperation(LCDDevice *device) {
-	if (device->displayBuffer && device->__autoUpdate) {
+static void __endOperation(LCDDevice *device) {
+	if (device->__autoUpdate) {
 		lcdGfxUpdateDisplay(device);
 	}
 }
@@ -131,13 +70,23 @@ void lcdGfxInitialiseDisplayMode(LCDDevice *device) {
 	device->__autoUpdate = 0;
 	device->__batchStarted = 0;
 	lcdGfxClear(device);
+	
+	if (device->textWidth) {
+		// The ST7920 supports both text and graphics modes
+		
+		// This is the fastest way to clear the graphics display (< 2 ms)
+		lcdDisableGraphicsDisplay(device);
+		lcdClearTextDisplay(device);
+		
+		// Switch to graphics mode
+		lcdEnableGraphicsDisplay(device);
+		
+		device->__batchStarted = 0;
+	}
 }
 
 void lcdGfxEnableAutoUpdate(LCDDevice *device) {
-	// A graphics display buffer must be available to use batch updates.
-	if (device->displayBuffer) {
-		device->__autoUpdate = 1;
-	}
+	device->__autoUpdate = 1;
 }
 
 void lcdGfxDisableAutoUpdate(LCDDevice *device) {
@@ -145,79 +94,190 @@ void lcdGfxDisableAutoUpdate(LCDDevice *device) {
 	device->__autoUpdate = 0;
 }
 
+static void __updateST7920(LCDDevice *device) {
+	// The ST7920 requires data bytes be sent in pairs, so we 
+	// want to align xMin and xMax on 16-bit boundaries.
+	uint8_t xMin = device->__minExtentX & ~0x0f;
+	uint8_t xMax = device->__maxExtentX | 0x0f;
+	
+	for (uint8_t y = device->__minExtentY; y <= device->__maxExtentY; y++) {
+		lcdSetGraphicsDisplayAddress(device, xMin, y);
+		unsigned int byteOffset = (y * device->__bytesWidth + (xMin / 8));
+		
+		for (uint8_t x = 0; x <= (xMax - xMin) / 8; x++) {
+			lcdWriteByte(device, device->displayBuffer[byteOffset + x]);
+		}
+	}
+}
+
+static void __updateST756X(LCDDevice *device) {
+	// Align yMin and yMax on byte boundaries.
+	uint8_t yMin = device->__minExtentY & ~7;
+	uint8_t yMax = device->__maxExtentY | 7;
+	
+	for (uint8_t y = yMin; y <= yMax; y += 8) {
+		lcdSetGraphicsDisplayAddress(device, device->__minExtentX, y);
+		
+		for (uint8_t x = device->__minExtentX; x <= device->__maxExtentX; x++) {
+			uint8_t byte = 0;
+			
+			for (uint8_t i = 0; i < 8; i++) {
+				unsigned int byteOffset = ((y + i) * device->__bytesWidth + (x / 8));
+				uint8_t bitMask = 1 << (7 - x % 8);
+				byte >>= 1;
+				
+				if (device->displayBuffer[byteOffset] & bitMask) {
+					byte |= 0x80;
+				}
+			}
+			
+			lcdWriteByte(device, byte);
+		}
+	}
+}
+
 void lcdGfxUpdateDisplay(LCDDevice *device) {
-	if (device->displayBuffer && device->__batchStarted) {
+	if (device->__batchStarted) {
 		device->__batchStarted = 0;
 		
-		for (uint16_t y = device->__minExtentY; y <= device->__maxExtentY; y++) {
-			lcdSetGraphicsDisplayAddress(device, device->__minExtentX, y);
-			__lcdGfxSetGraphicsDisplayAddress(device, device->__minExtentX, y);
-			
-			for (uint16_t x = device->__minExtentX; x <= device->__maxExtentX; x += 8) {
-				lcdWriteByte(device, device->displayBuffer[__lcdGfxGetAndAutoIncrementByteOffset(device)]);
-			}
+		if (device->textWidth) {
+			// The ST7920 supports both text and graphics modes
+			__updateST7920(device);
+		} else {
+			// Graphics-only displays
+			__updateST756X(device);
 		}
 	}
 }
 
 void lcdGfxClear(LCDDevice *device) {
-	// This is the fastest way to clear the graphics display (< 2 ms)
-	lcdDisableGraphicsDisplay(device);
-	lcdClearTextDisplay(device);
-	lcdEnableGraphicsDisplay(device);
+	__beginOperation(device);
 	
-	// But don't forget to update our buffer if we're using one.
-	if (device->displayBuffer) {
-		for (uint16_t y = 0; y < device->pixelHeight; y++) {
-			__lcdGfxSetGraphicsDisplayAddress(device, 0, y);
-			
-			for (uint16_t col = 0; col < device->__bytesWidth; col++) {
-				__lcdGfxWriteByte(device, 0);
-			}
-		}
-		
-		device->__batchStarted = 0;
+	for (unsigned int i = 0; i < (device->pixelHeight * device->__bytesWidth); i++) {
+		device->displayBuffer[i] = 0;
+	}
+	
+	device->__minExtentX = 0;
+	device->__minExtentY = 0;
+	device->__maxExtentX = device->pixelWidth - 1;
+	device->__maxExtentY = device->pixelHeight - 1;
+	
+	__endOperation(device);
+}
+
+void __drawPoint(LCDDevice *device, uint8_t x, uint8_t y, LCDColour colour) {
+	unsigned int byteOffset = (y * device->__bytesWidth) + (x / 8);
+	
+	uint8_t byte = device->displayBuffer[byteOffset];
+	uint8_t bitMask = 1 << (7 - x % 8);
+	
+	// Set the bit according to the requested "colour"
+	if (colour == LCD_ON) {
+		byte |= bitMask;
+	} else {
+		byte &= ~bitMask;
+	}
+	
+	device->displayBuffer[byteOffset] = byte;
+	
+	if (x < device->__minExtentX) {
+		device->__minExtentX = x;
+	}
+	
+	if (x > device->__maxExtentX) {
+		device->__maxExtentX = x;
+	}
+	
+	if (y < device->__minExtentY) {
+		device->__minExtentY = y;
+	}
+	
+	if (y > device->__maxExtentY) {
+		device->__maxExtentY = y;
 	}
 }
 
-void lcdGfxPoint(LCDDevice *device, uint16_t x, uint16_t y, uint8_t colour) {
-	__lcdGfxBeginOperation(device);
+void lcdGfxPoint(LCDDevice *device, uint8_t x, uint8_t y, LCDColour colour) {
+	__beginOperation(device);
+	__drawPoint(device, x, y, colour);
+	__endOperation(device);
+}
+
+void lcdGfxLine(LCDDevice *device, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, LCDColour colour) {
+	__beginOperation(device);
 	
-	__lcdGfxSetGraphicsDisplayAddress(device, x, y);
-	uint16_t word = (__lcdGfxReadByte(device) << 8) | __lcdGfxReadByte(device);
-	uint16_t bitMask = 1 << (15 - x % 16);
-	
-	// Set the bit according to the requested "colour"
-	if (colour) {
-		word |= bitMask;
+	if (x0 == x1) {
+		if (y0 > y1) {
+			uint8_t n = y1;
+			y1 = y0;
+			y0 = n;
+		}
+		
+		for (uint8_t y = y0; y <= y1; y++) {
+			__drawPoint(device, x0, y, colour);
+		}
+	} else if (y0 == y1) {
+		if (x0 > x1) {
+			uint8_t n = x1;
+			x1 = x0;
+			x0 = n;
+		}
+		
+		for (uint8_t x = x0; x <= x1; x++) {
+			__drawPoint(device, x, y0, colour);
+		}
 	} else {
-		word &= ~bitMask;
+		int dx = abs(x1 - x0);
+		int sx = x0 < x1 ? 1 : -1;
+		int dy = -abs(y1 - y0);
+		int sy = y0 < y1 ? 1 : -1;
+		int err = dx + dy;
+		int e2;
+		int x = x0;
+		int y = y0;
+		
+		while (1) {
+			__drawPoint(device, x, y, colour);
+			e2 = 2 * err;
+			
+			if (e2 >= dy) {
+				if (x == x1)
+					break;
+				
+				err += dy;
+				x += sx;
+			}
+			
+			if (e2 <= dx) {
+				if (y == y1)
+					break;
+				
+				err += dx;
+				y += sy;
+			}
+		}
 	}
 	
-	__lcdGfxSetGraphicsDisplayAddress(device, x, y);
-	__lcdGfxWriteByte(device, word >> 8);
-	__lcdGfxWriteByte(device, word);
-	
-	__lcdGfxEndOperation(device);
+	__endOperation(device);
 }
 
 void lcdGfxXbmImage(
 	LCDDevice *device, 
-	uint16_t imageWidth, 
-	uint16_t imageHeight, 
+	uint8_t imageWidth, 
+	uint8_t imageHeight, 
 	uint8_t *imageBits, 
 	LCDAlignment alignment, 
-	uint16_t positionX, 
-	uint16_t positionY
+	uint8_t positionX, 
+	uint8_t positionY
 ) {
-	__lcdGfxBeginOperation(device);
+	__beginOperation(device);
 	
 	// XBM format: if imageWidth is not a multiple of 8, unused bits in the last byte are ignored.
-	uint16_t bytesPerImageRow = imageWidth / 8 + ((imageWidth % 8) ? 1 : 0);
+	uint8_t bytesPerImageRow = imageWidth / 8 + ((imageWidth % 8) ? 1 : 0);
 	// The LCD display expects to receive pairs of bytes.
-	uint16_t bytesPerDisplayRow = bytesPerImageRow + (bytesPerImageRow % 2);
-	uint16_t offsetX = 0;
-	uint16_t offsetY = 0;
+	uint8_t bytesPerDisplayRow = bytesPerImageRow + (bytesPerImageRow % 2);
+	uint8_t offsetX = 0;
+	uint8_t offsetY = 0;
 	
 	switch (alignment) {
 	case LCD_ALIGN_TOP_LEFT:
@@ -261,20 +321,37 @@ void lcdGfxXbmImage(
 		break;
 	}
 	
-	for (uint16_t row = 0; row < imageHeight; row++) {
-		__lcdGfxSetGraphicsDisplayAddress(device, offsetX, offsetY + row);
+	for (uint8_t row = 0; row < imageHeight; row++) {
+		unsigned int baseOffset = ((offsetY + row) * device->__bytesWidth) + (offsetX / 8);
 		
-		for (uint16_t col = 0; col < bytesPerDisplayRow; ) {
-			uint8_t msByte = imageBits[row * bytesPerImageRow + col];
-			col++;
-			uint8_t lsByte = (col < bytesPerImageRow) ? imageBits[row * bytesPerImageRow + col] : 0;
-			col++;
+		for (uint8_t col = 0; col < bytesPerDisplayRow; col++) {
+			uint8_t byte = (col < bytesPerImageRow) ? imageBits[row * bytesPerImageRow + col] : 0;
 			// XBM format: the leftmost pixel is represented by the least significant bit,
 			// so XBM bytes need to be reversed before being sent to the display.
-			__lcdGfxWriteByte(device, reverseBits(msByte));
-			__lcdGfxWriteByte(device, reverseBits(lsByte));
+			device->displayBuffer[baseOffset + col] = __reverseBits(byte);
 		}
 	}
 	
-	__lcdGfxEndOperation(device);
+	uint8_t xMin = offsetX;
+	uint8_t yMin = offsetY;
+	uint8_t xMax = xMin + imageWidth;
+	uint8_t yMax = yMin + imageHeight;
+	
+	if (xMin < device->__minExtentX) {
+		device->__minExtentX = xMin;
+	}
+	
+	if (xMax > device->__maxExtentX) {
+		device->__maxExtentX = xMax;
+	}
+	
+	if (yMin < device->__minExtentY) {
+		device->__minExtentY = yMin;
+	}
+	
+	if (yMax > device->__maxExtentY) {
+		device->__maxExtentY = yMax;
+	}
+	
+	__endOperation(device);
 }

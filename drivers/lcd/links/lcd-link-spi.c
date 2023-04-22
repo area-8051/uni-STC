@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  * 
- * Copyright (c) 2022 Vincent DEFERT. All rights reserved.
+ * Copyright (c) 2023 Vincent DEFERT. All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions 
@@ -29,87 +29,67 @@
  */
 #include "project-defs.h"
 #include <lcd/lcd-link-impl.h>
-#include <lcd/links/lcd-link-i2c.h>
-#include <i2c-hal.h>
+#include <lcd/links/lcd-link-spi.h>
+#include <spi-hal.h>
 
 /**
- * @file lcd-link-i2c.c
+ * @file lcd-link-spi.c
  * 
- * LCD I2C communication implementation.
+ * LCD "4-line" SPI communication implementation.
  */
-
-/*
- * PCF8574 pin assignments
- * 
- * P7 = D7
- * P6 = D6
- * P5 = D5
- * P4 = D4
- * P3 = Backlight Enable
- * P2 = E
- * P1 = RW
- * P0 = RS
- */
-
-#define MASK_BL 0x08
-#define MASK_EN 0x04
-#define MASK_RW 0x02
-#define MASK_RS 0x01
-
-static void __sendByte(LCDI2CLinkConfig *config, uint8_t byte) {
-	i2cStartCommand(config->slaveAddress, I2C_WRITE);
-	i2cSendByte(byte);
-	i2cStop();
-}
-
-static uint8_t __readByte(LCDI2CLinkConfig *config) {
-	i2cStartCommand(config->slaveAddress, I2C_READ);
-	uint8_t result = i2cReadByteSendAck(I2C_ACK);
-	i2cStop();
-	
-	return result;
-}
 
 void lcdLinkInitialise(LCDInterface *interface) {
-	LCDI2CLinkConfig *config = (LCDI2CLinkConfig *) interface->linkConfig;
-	i2cInitialiseMaster(config->pinSwitch, I2C_CLOCK_100kHz);
-	__sendByte(config, 0);
+	LCDSPILinkConfig *config = (LCDSPILinkConfig *) interface->linkConfig;
+	
+	gpioConfigure(&config->csOutput);
+	gpioWrite(&config->csOutput, 1);
+	
+	gpioConfigure(&config->commandDataOutput);
+	gpioWrite(&config->commandDataOutput, 0);
+	
+	spiConfigure(
+		SPI_MASTER, 
+		SPI_MSB_FIRST, 
+		SPI_CLK_IDLE_HIGH, 
+		SPI_SAMPLE_ON_TRAILING_EDGE, 
+		spiSelectSpeed(config->spiClockFrequency), 
+		config->spiPinSwitch, 
+		GPIO_BIDIRECTIONAL_MODE
+	);
 }
 
 // Suppress warning "unreferenced function argument"
 #pragma save
 #pragma disable_warning 85
-
 uint8_t lcdLinkGetDataWidth(LCDInterface *interface) {
-	return 4;
+	return 8;
 }
 
 uint8_t lcdLinkIsParallel(LCDInterface *interface) {
-	return 1;
+	return 0;
 }
 
 #pragma restore
 
 void lcdLinkDataOut(LCDInterface *interface, LCDDataType dataType, uint8_t byteValue) {
-	LCDI2CLinkConfig *config = (LCDI2CLinkConfig *) interface->linkConfig;
-	uint8_t data = (byteValue & 0xf0) | MASK_BL | MASK_EN | (LCD_Write << 1) | dataType;
-	__sendByte(config, data);
-
-	if (interface->__controllerLinkConfigured) {
-		__sendByte(config, data & ~MASK_EN);
-		data = (byteValue << 4) | MASK_BL | MASK_EN | (LCD_Write << 1) | dataType;
-		__sendByte(config, data);
-	}
+	LCDSPILinkConfig *config = (LCDSPILinkConfig *) interface->linkConfig;
 	
-	__sendByte(config, data & ~MASK_EN);
+	gpioWrite(&config->commandDataOutput, dataType);
+	gpioWrite(&config->csOutput, 0);
+	
+	volatile bool readyFlag = false;
+	
+	spiSend(&byteValue, 1, &readyFlag);
+	
+	while (!readyFlag);
+	
+	gpioWrite(&config->csOutput, 1);
 }
 
 // Suppress warning "unreferenced function argument"
 #pragma save
 #pragma disable_warning 85
-
 uint8_t lcdLinkDataIn(LCDInterface *interface, LCDDataType dataType) {
-	// Read operations are NOT supported through I2C.
 	return 0;
 }
 

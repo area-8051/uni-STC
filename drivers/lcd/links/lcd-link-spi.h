@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  * 
- * Copyright (c) 2022 Vincent DEFERT. All rights reserved.
+ * Copyright (c) 2023 Vincent DEFERT. All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions 
@@ -27,32 +27,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _LCD_INTERFACE_H
-#define _LCD_INTERFACE_H
-
-/**
- * @file lcd-interface.h
- * 
- * LCD communication interface abstraction: definitions.
- */
+#ifndef _LCD_LINK_SPI_H
+#define _LCD_LINK_SPI_H
 
 #include <gpio-hal.h>
 
+/**
+ * @file lcd-link-spi.h
+ * 
+ * LCD "4-line" SPI communication link definitions.
+ */
+
 typedef struct {
-	void *linkConfig;
-	GpioConfig resetOutput;
-	
-	uint8_t __controllerLinkConfigured;
-} LCDInterface;
+	GpioConfig csOutput;
+	GpioConfig commandDataOutput;
+	uint32_t spiClockFrequency;
+	uint8_t spiPinSwitch;
+} LCDSPILinkConfig;
 
-void lcdInitialiseInterface(LCDInterface *interface);
-void lcdLinkConfigurationBegins(LCDInterface *interface);
-void lcdLinkConfigurationComplete(LCDInterface *interface);
-void lcdSendCommand(LCDInterface *interface, uint8_t command);
-void lcdSendData(LCDInterface *interface, uint8_t data);
-uint8_t lcdReadStatus(LCDInterface *interface);
-uint8_t lcdReadData(LCDInterface *interface);
-uint8_t lcdGetLinkWidth(LCDInterface *interface);
-uint8_t lcdIsLinkParallel(LCDInterface *interface);
-
-#endif // _LCD_INTERFACE_H
+#endif // _LCD_LINK_SPI_H

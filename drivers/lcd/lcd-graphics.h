@@ -51,6 +51,11 @@ typedef enum {
 	LCD_ALIGN_CUSTOM_OFFSET,
 } LCDAlignment;
 
+typedef enum {
+	LCD_ON = 1,
+	LCD_OFF = 0,
+} LCDColour;
+
 void lcdGfxInitialiseDisplayMode(LCDDevice *device);
 
 void lcdGfxEnableBatchUpdates(LCDDevice *device);
@@ -61,7 +66,9 @@ void lcdGfxUpdateDisplay(LCDDevice *device);
 
 void lcdGfxClear(LCDDevice *device);
 
-void lcdGfxPoint(LCDDevice *device, uint16_t x, uint16_t y, uint8_t colour);
+void lcdGfxPoint(LCDDevice *device, uint8_t x, uint8_t y, LCDColour colour);
+
+void lcdGfxLine(LCDDevice *device, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, LCDColour colour);
 
 /*
  * Usage:
@@ -73,12 +80,12 @@ void lcdGfxPoint(LCDDevice *device, uint16_t x, uint16_t y, uint8_t colour);
 */
 void lcdGfxXbmImage(
 	LCDDevice *device, 
-	uint16_t imageWidth, 
-	uint16_t imageHeight, 
+	uint8_t imageWidth, 
+	uint8_t imageHeight, 
 	uint8_t *imageBits, 
 	LCDAlignment alignment, 
-	uint16_t positionX, 
-	uint16_t positionY
+	uint8_t positionX, 
+	uint8_t positionY
 );
 
 #endif // _LCD_GRAPHICS_H

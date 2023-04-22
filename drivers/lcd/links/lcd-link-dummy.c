@@ -36,6 +36,10 @@
  * Dummy communication link.
  */
 
+// Suppress warning "unreferenced function argument"
+#pragma save
+#pragma disable_warning 85
+
 void lcdLinkInitialise(LCDInterface *interface) {
 }
 
@@ -53,3 +57,5 @@ void lcdLinkDataOut(LCDInterface *interface, LCDDataType dataType, uint8_t byteV
 uint8_t lcdLinkDataIn(LCDInterface *interface, LCDDataType dataType) {
 	return 0;
 }
+
+#pragma restore

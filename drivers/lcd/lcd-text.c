@@ -49,7 +49,7 @@ void lcdTxtClear(LCDDevice *device) {
 	lcdClearTextDisplay(device);
 }
 
-void lcdTxtPrintAt(LCDDevice *device, uint16_t row, uint16_t column, const char *__fmt, ...) {
+void lcdTxtPrintAt(LCDDevice *device, uint8_t row, uint8_t column, const char *__fmt, ...) {
 	va_list vaList;
 	
 	// Using a static buffer avoids consuming most of our scarce stack space.
@@ -73,7 +73,7 @@ void lcdTxtPrintAt(LCDDevice *device, uint16_t row, uint16_t column, const char 
 	
 	// Make sure the length of the string is an even number
 	// by adding a space if it isn't.
-	uint16_t l = strlen(buffer);
+	uint8_t l = strlen(buffer);
 	
 	if (l & 1) {
 		buffer[l] = ' ';
@@ -81,7 +81,7 @@ void lcdTxtPrintAt(LCDDevice *device, uint16_t row, uint16_t column, const char 
 	}
 	
 	// Truncate the string if it would go past the end of the row.
-	uint16_t lMax = device->textWidth - column;
+	uint8_t lMax = device->textWidth - column;
 	lMax &= ~1;
 	
 	if (l > lMax) {

@@ -311,7 +311,7 @@ void lcdSetTextDisplayPosition(LCDDevice *device, uint8_t row, uint8_t column)  
 	lcdSetTextDisplayAddress(device, ((row & 0x01) << 4) | ((row & 0x02) ? 0x08 : 0x00) | ((column >> 1) & 0x07));
 }
 
-void lcdSetGraphicsDisplayAddress(LCDDevice *device, uint16_t pixelX, uint16_t pixelY) {
+void lcdSetGraphicsDisplayAddress(LCDDevice *device, uint8_t pixelX, uint8_t pixelY) {
 	__selectExtendedInstructionSet(device);
 	uint8_t colAddr = pixelX >> 4;
 	uint8_t verticalAddr = pixelY & 0x1f;
@@ -346,3 +346,18 @@ void lcdEnableVerticalScroll(LCDDevice *device) {
 void lcdDisableVerticalScroll(LCDDevice *device) {
 	__setVerticalScrollMode(device, 0);
 }
+
+// Functionalities below are not available on this controller.
+// ---------------------------------------------------------------------
+
+#pragma save
+// Suppress warning "unreferenced function argument"
+#pragma disable_warning 85
+
+void lcdInverseDisplay(LCDDevice *device, bool on) {
+}
+
+void lcdAllPixelsOn(LCDDevice *device, bool on) {
+}
+
+#pragma restore

@@ -42,7 +42,7 @@ void lcdTxtInitialiseDisplayMode(LCDDevice *device);
 
 void lcdTxtClear(LCDDevice *device);
 
-void lcdTxtPrintAt(LCDDevice *device, uint16_t row, uint16_t column, const char *__fmt, ...);
+void lcdTxtPrintAt(LCDDevice *device, uint8_t row, uint8_t column, const char *__fmt, ...);
 
 typedef struct {
 	const char *label;

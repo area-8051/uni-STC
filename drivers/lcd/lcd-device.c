@@ -43,6 +43,6 @@ void lcdInitialiseDevice(LCDDevice *device) {
 	device->__status.extendedInstructionSet = 0;
 	device->__status.verticalScroll = 0;
 	device->__status.setAddressInvoked = 0;
-	device->__bytesWidth = device->pixelWidth / 8;
+	device->__bytesWidth = (device->pixelWidth + 7) / 8;
 	lcdInitialiseController(device);
 }

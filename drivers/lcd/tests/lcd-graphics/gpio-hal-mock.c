@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  * 
- * Copyright (c) 2022 Vincent DEFERT. All rights reserved.
+ * Copyright (c) 2023 Vincent DEFERT. All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions 
@@ -27,32 +27,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _LCD_INTERFACE_H
-#define _LCD_INTERFACE_H
-
-/**
- * @file lcd-interface.h
- * 
- * LCD communication interface abstraction: definitions.
- */
-
+#include "project-defs.h"
 #include <gpio-hal.h>
 
-typedef struct {
-	void *linkConfig;
-	GpioConfig resetOutput;
-	
-	uint8_t __controllerLinkConfigured;
-} LCDInterface;
+void gpioConfigure(GpioConfig *gpioConfig) {
+}
 
-void lcdInitialiseInterface(LCDInterface *interface);
-void lcdLinkConfigurationBegins(LCDInterface *interface);
-void lcdLinkConfigurationComplete(LCDInterface *interface);
-void lcdSendCommand(LCDInterface *interface, uint8_t command);
-void lcdSendData(LCDInterface *interface, uint8_t data);
-uint8_t lcdReadStatus(LCDInterface *interface);
-uint8_t lcdReadData(LCDInterface *interface);
-uint8_t lcdGetLinkWidth(LCDInterface *interface);
-uint8_t lcdIsLinkParallel(LCDInterface *interface);
+uint8_t gpioRead(GpioConfig *gpioConfig) REENTRANT {
+	return 0;
+}
 
-#endif // _LCD_INTERFACE_H
+void gpioWrite(GpioConfig *gpioConfig, uint8_t value) REENTRANT {
+}

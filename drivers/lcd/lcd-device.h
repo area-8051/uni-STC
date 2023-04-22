@@ -51,39 +51,44 @@ typedef struct {
 typedef struct {
 	LCDInterface *interface;
 	
-	uint16_t textWidth;
-	uint16_t textHeight;
+	uint8_t textWidth;
+	uint8_t textHeight;
 	
-	uint16_t pixelWidth;
-	uint16_t pixelHeight;
+	uint8_t pixelWidth;
+	uint8_t pixelHeight;
 	
 	/**
-	 * Display buffers may be used either when the communication 
-	 * interface is write-only (e.g. serial interface of the ST7920)
-	 * and the application needs to be able to read the display RAM,
-	 * or in order to optimise performance in graphics mode using 
-	 * batch updates.
+	 * The display buffer is used in graphics mode.
 	 */
 	uint8_t *displayBuffer;
 	
 	uint8_t __autoUpdate;
 	uint8_t __batchStarted;
-	uint16_t __displayAddressX;
-	uint16_t __displayAddressY;
-	uint16_t __minExtentX;
-	uint16_t __minExtentY;
-	uint16_t __maxExtentX;
-	uint16_t __maxExtentY;
-	uint16_t __bytesWidth;
+	uint8_t __displayAddressX;
+	uint8_t __displayAddressY;
+	uint8_t __minExtentX;
+	uint8_t __minExtentY;
+	uint8_t __maxExtentX;
+	uint8_t __maxExtentY;
+	uint8_t __bytesWidth;
 	
 	LCDDeviceStatus __status;
 } LCDDevice;
 
-#define LCD_TEXT_ONLY_DEVICE(varName, ifcConfig, txtRows, txtColumns) \
+#define LCD_DEVICE_INTERFACE_NO_RESET(varName, ifcConfig) \
 static LCDInterface varName ## Interface = {\
 	.linkConfig = ifcConfig, \
-};\
-\
+	.resetOutput = { .count = 0, }, \
+};
+
+#define LCD_DEVICE_INTERFACE_WITH_RESET(varName, ifcConfig, resetPort, resetPin) \
+static LCDInterface varName ## Interface = {\
+	.linkConfig = ifcConfig, \
+	.resetOutput = { .port = resetPort, .pin = resetPin, .count = 1, .pinMode = GPIO_BIDIRECTIONAL_MODE, \
+		DEFAULTS_PU_NCS  DEFAULTS_SR_DR_IE  DEFAULTS_INT_WK }, \
+};
+
+#define LCD_DEVICE_TEXT_ONLY(varName, txtRows, txtColumns) \
 static LCDDevice varName = {\
 	.interface = &varName ## Interface, \
 	.textWidth = txtColumns, \
@@ -93,26 +98,8 @@ static LCDDevice varName = {\
 	.displayBuffer = NULL, \
 };
 
-#define LCD_GRAPHICS_DEVICE(varName, ifcConfig, txtRows, txtColumns, gfxWidth, gfxHeight) \
-static LCDInterface varName ## Interface = {\
-	.linkConfig = ifcConfig, \
-};\
-\
-static LCDDevice varName = {\
-	.interface = &varName ## Interface, \
-	.textWidth = txtColumns, \
-	.textHeight = txtRows, \
-	.pixelWidth = gfxWidth, \
-	.pixelHeight = gfxHeight, \
-	.displayBuffer = NULL, \
-};
-
-#define LCD_GRAPHICS_DEVICE_WITH_BUFFER(varName, ifcConfig, txtRows, txtColumns, gfxWidth, gfxHeight) \
-static LCDInterface varName ## Interface = {\
-	.linkConfig = ifcConfig, \
-};\
-\
-static uint8_t varName ## Buffer[gfxHeight * (gfxWidth / 8)];\
+#define LCD_DEVICE_GRAPHICS(varName, txtRows, txtColumns, gfxWidth, gfxHeight) \
+static uint8_t varName ## Buffer[((gfxHeight + 7) / 8) * ((gfxWidth + 7) / 8) * 8];\
 \
 static LCDDevice varName = {\
 	.interface = &varName ## Interface, \
@@ -123,6 +110,10 @@ static LCDDevice varName = {\
 	.displayBuffer = varName ## Buffer, \
 };
 
+/**
+ * IMPORTANT: interrupts must be enabled before calling lcdInitialiseDevice()
+ * as communication with the device might need them.
+ */
 void lcdInitialiseDevice(LCDDevice *device);
 
 #endif // _LCD_DEVICE_H

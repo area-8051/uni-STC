@@ -81,16 +81,18 @@ void lcdLinkInitialise(LCDInterface *interface) {
 }
 
 // Suppress warning "unreferenced function argument"
+#pragma save
 #pragma disable_warning 85
+
 uint8_t lcdLinkGetDataWidth(LCDInterface *interface) {
 	return 8;
 }
 
-// Suppress warning "unreferenced function argument"
-#pragma disable_warning 85
 uint8_t lcdLinkIsParallel(LCDInterface *interface) {
 	return 0;
 }
+
+#pragma restore
 
 void lcdLinkDataOut(LCDInterface *interface, LCDDataType dataType, uint8_t byteValue) {
 	LCDSerialLinkConfig *config = (LCDSerialLinkConfig *) interface->linkConfig;
@@ -101,7 +103,9 @@ void lcdLinkDataOut(LCDInterface *interface, LCDDataType dataType, uint8_t byteV
 }
 
 // Suppress warning "unreferenced function argument"
+#pragma save
 #pragma disable_warning 85
+
 uint8_t lcdLinkDataIn(LCDInterface *interface, LCDDataType dataType) {
 	/*
 	 * Data sheet says read operations are NOT supported in serial mode, 
@@ -110,3 +114,5 @@ uint8_t lcdLinkDataIn(LCDInterface *interface, LCDDataType dataType) {
 	 */
 	return 0;
 }
+
+#pragma restore

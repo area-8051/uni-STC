@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  * 
- * Copyright (c) 2022 Vincent DEFERT. All rights reserved.
+ * Copyright (c) 2023 Vincenbt DEFERT. All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions 
@@ -27,32 +27,45 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _LCD_INTERFACE_H
-#define _LCD_INTERFACE_H
 
-/**
- * @file lcd-interface.h
- * 
- * LCD communication interface abstraction: definitions.
- */
+#ifndef _PROJECT_DEFS_H
+#define _PROJECT_DEFS_H
 
-#include <gpio-hal.h>
+#include <uni-STC/uni-STC.h>
 
-typedef struct {
-	void *linkConfig;
-	GpioConfig resetOutput;
-	
-	uint8_t __controllerLinkConfigured;
-} LCDInterface;
+#define LCD_WIDTH 16
+#define LCD_HEIGHT 16
+#define LCD_MEMORY_SIZE (LCD_WIDTH * LCD_HEIGHT / 8)
 
-void lcdInitialiseInterface(LCDInterface *interface);
-void lcdLinkConfigurationBegins(LCDInterface *interface);
-void lcdLinkConfigurationComplete(LCDInterface *interface);
-void lcdSendCommand(LCDInterface *interface, uint8_t command);
-void lcdSendData(LCDInterface *interface, uint8_t data);
-uint8_t lcdReadStatus(LCDInterface *interface);
-uint8_t lcdReadData(LCDInterface *interface);
-uint8_t lcdGetLinkWidth(LCDInterface *interface);
-uint8_t lcdIsLinkParallel(LCDInterface *interface);
+#define BASIC_GPIO_HAL
 
-#endif // _LCD_INTERFACE_H
+typedef enum {
+	GPIO_BIDIRECTIONAL_MODE = 0,
+	GPIO_PUSH_PULL_MODE = 1,
+	GPIO_HIGH_IMPEDANCE_MODE = 2,
+	GPIO_OPEN_DRAIN_MODE = 3,
+} GpioPinMode;
+
+typedef enum {
+	GPIO_PORT0 = 0,
+	GPIO_PORT1 = 1,
+	GPIO_PORT2 = 2,
+	GPIO_PORT3 = 3,
+	GPIO_PORT4 = 4,
+	GPIO_PORT5 = 5,
+	GPIO_PORT6 = 6,
+	GPIO_PORT7 = 7,
+} GpioPort;
+
+typedef enum {
+	GPIO_PIN0 = 0,
+	GPIO_PIN1,
+	GPIO_PIN2,
+	GPIO_PIN3,
+	GPIO_PIN4,
+	GPIO_PIN5,
+	GPIO_PIN6,
+	GPIO_PIN7,
+} GpioPin;
+
+#endif // _PROJECT_DEFS_H

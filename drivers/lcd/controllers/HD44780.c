@@ -253,7 +253,7 @@ void lcdSetTextDisplayPosition(LCDDevice *device, uint8_t row, uint8_t column)  
 // Suppress warning "unreferenced function argument"
 #pragma disable_warning 85
 
-void lcdSetGraphicsDisplayAddress(LCDDevice *device, uint16_t pixelX, uint16_t pixelY) {
+void lcdSetGraphicsDisplayAddress(LCDDevice *device, uint8_t pixelX, uint8_t pixelY) {
 }
 
 void lcdEnableGraphicsDisplay(LCDDevice *device)  {
@@ -275,6 +275,12 @@ void lcdEnableVerticalScroll(LCDDevice *device) {
 }
 
 void lcdDisableVerticalScroll(LCDDevice *device) {
+}
+
+void lcdInverseDisplay(LCDDevice *device, bool on) {
+}
+
+void lcdAllPixelsOn(LCDDevice *device, bool on) {
 }
 
 #pragma restore

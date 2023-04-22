@@ -58,10 +58,14 @@ uint8_t lcdLinkGetDataWidth(LCDInterface *interface) {
 }
 
 // Suppress warning "unreferenced function argument"
+#pragma save
 #pragma disable_warning 85
+
 uint8_t lcdLinkIsParallel(LCDInterface *interface) {
 	return 1;
 }
+
+#pragma restore
 
 void lcdLinkDataOut(LCDInterface *interface, LCDDataType dataType, uint8_t byteValue) {
 	LCDParallelLinkConfig *config = (LCDParallelLinkConfig *) interface->linkConfig;

@@ -88,7 +88,7 @@ void lcdSetTextDisplayPosition(LCDDevice *device, uint8_t row, uint8_t column);
 /**
  * Sets the GDRAM address to point at the 16-bit word containing the specified pixel.
  */
-void lcdSetGraphicsDisplayAddress(LCDDevice *device, uint16_t pixelX, uint16_t pixelY);
+void lcdSetGraphicsDisplayAddress(LCDDevice *device, uint8_t pixelX, uint8_t pixelY);
 
 uint8_t lcdReadBusyFlagAndAddress(LCDDevice *device);
 
@@ -111,5 +111,11 @@ void lcdDisableVerticalScroll(LCDDevice *device);
 void lcdReverseRow(LCDDevice *device, uint8_t row);
 
 void lcdSetScrollAddress(LCDDevice *device, uint8_t address);
+
+// For graphics-only controllers.
+
+void lcdInverseDisplay(LCDDevice *device, bool on);
+
+void lcdAllPixelsOn(LCDDevice *device, bool on);
 
 #endif // _LCD_CONTROLLER_H

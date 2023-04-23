@@ -124,15 +124,25 @@ typedef enum {
 } SpiBitOrder;
 
 typedef enum {
+	// CPOL == 0
 	SPI_CLK_IDLE_LOW = 0,
+	// CPOL == 1
 	SPI_CLK_IDLE_HIGH = 8,
 } SpiPolarity;
 
 // Used only when SpiMode == SPI_SLAVE, ignored otherwise.
 typedef enum {
-	// Data changes on trailing edge, and is sampled on leading edge of SCLK.
+	// CPHA == 0
+	// MOSI: master outputs data on trailing edge of SCLK (or /CS falling edge for the first bit).
+	// MOSI: slave samples data on next leading edge of SCLK.
+	// MISO: slave outputs data on trailing edge of SCLK (or /CS falling edge for the first bit).
+	// MISO: master samples data on next leading edge of SCLK.
 	SPI_SAMPLE_ON_LEADING_EDGE = 0,
-	// Data changes on leading edge, and is sampled on trailing edge of SCLK.
+	// CPHA == 1
+	// MOSI: master outputs data on leading edge of SCLK.
+	// MOSI: slave samples data on next trailing edge of SCLK.
+	// MISO: slave outputs data on leading edge of SCLK.
+	// MISO: master samples data on next trailing edge of SCLK.
 	SPI_SAMPLE_ON_TRAILING_EDGE = 4,
 } SpiPhase;
 

@@ -32,10 +32,9 @@
  * @file PCD8584.c
  * 
  * Driver for graphics-only LCD devices using a PCD8584 controller,
- * also known as "Nokia 5110".
+ * also known as "Nokia 5110" (84x48 pixels, 4-pin SPI interface).
  * 
- * These have a 84x48 dot matrix and a 4-pin SPI interface with
- * a maximum clock frequency of 4 MHz.
+ * SPI configuration: CPOL = 1, CPHA = 1, MSB first, max. 4MHz.
  * 
  * == Nokia5110 display module connections =============================
  * 

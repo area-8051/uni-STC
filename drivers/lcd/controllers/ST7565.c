@@ -32,8 +32,9 @@
  * @file ST7565.c
  * 
  * Driver for graphics-only LCD devices using an ST7565 display
- * controller, connected through a 4-pin SPI interface with a
- * maximum clock frequency of 20 MHz.
+ * controller (128x64 pixels, 4-pin SPI interface).
+ * 
+ * SPI configuration: CPOL = 1, CPHA = 1, MSB first, max. 20MHz.
  * 
  * == GMG12864-06D display module connections ==========================
  * 

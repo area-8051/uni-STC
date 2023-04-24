@@ -31,9 +31,10 @@
 /**
  * @file UC1609.c
  * 
- * Driver for graphics-only LCD devices using an UC1609C controller,
- * connected through a 4-pin SPI interface with a maximum clock
- * frequency of 12.5 MHz.
+ * Driver for graphics-only LCD devices using an UC1609C controller
+ * (192x64 pixels, 4-pin SPI interface).
+ * 
+ * SPI configuration: CPOL = 1, CPHA = 1, MSB first, max. 12.5MHz.
  * 
  * == 19254-05 display module connections ==============================
  * 

@@ -58,9 +58,9 @@ typedef enum {
 
 void lcdGfxInitialiseDisplayMode(LCDDevice *device);
 
-void lcdGfxEnableBatchUpdates(LCDDevice *device);
+void lcdGfxEnableAutoUpdate(LCDDevice *device);
 
-void lcdGfxDisableBatchUpdates(LCDDevice *device);
+void lcdGfxDisableAutoUpdate(LCDDevice *device);
 
 void lcdGfxUpdateDisplay(LCDDevice *device);
 

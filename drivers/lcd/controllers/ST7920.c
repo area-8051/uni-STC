@@ -65,8 +65,10 @@
  * BLA		Backlight anode. Connect to +5V.
  * BLK		Backlight cathode. Connect to GND.
  * PSB		Parallel Serial Bit. 0 = Serial, 1 = Parallel. Connect to +5V.
+ * RST      Optional external reset, active low.
  * 
  * **Pin assignments - SERIAL interface**
+ * Maximum clock frequency: 2.5MHz
  * 
  * Signal	Description
  * ---------------------------------------------------------------------
@@ -79,6 +81,7 @@
  * BLA		Backlight anode. Connect to +5V.
  * BLK		Backlight cathode. Connect to GND.
  * PSB		Parallel Serial Bit. 0 = Serial, 1 = Parallel. Connect to GND.
+ * RST      Optional external reset, active low.
  * 
  * **Notes**
  * 
@@ -87,7 +90,7 @@
  * DDRAM/CGRAM/GDRAM (you need to manage a display buffer, so your MCU 
  * have enough RAM for this).
  * 
- * - If you find backlight too bright, you may connect A to +5V through 
+ * - If you find backlight too bright, you may connect BLA to +5V through 
  * a resistor of, say 150 or 180 Ohm.
  * 
  * - If contrast is too weak with VO connected to +5V (text only visible 
@@ -161,6 +164,14 @@ void lcdInitialiseController(LCDDevice *device) {
 	
 	// Data sheet says to wait for > 40ms
 	delay1ms(45);
+    
+	// Issue external reset if needed.
+	if (device->interface->resetOutput.count) {
+		gpioWrite(&device->interface->resetOutput, 0);
+		// Data sheet says 10us
+		delay1us(10);
+		gpioWrite(&device->interface->resetOutput, 1);
+	}
 
 	if (lcdIsLinkParallel(device->interface)) {
 		// Configure parallel interface mode (Function Set command)

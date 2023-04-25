@@ -34,7 +34,7 @@
 /**
  * @file lcd-link-serial.c
  * 
- * LCD serial communication implementation.
+ * ST7920 LCD serial communication implementation.
  */
 
 static void __sendByte(LCDSerialLinkConfig *config, uint8_t byteValue) {

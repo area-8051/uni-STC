@@ -35,7 +35,7 @@
 /**
  * @file lcd-link-serial.h
  * 
- * LCD serial communication link definitions.
+ * ST7920 LCD serial communication link definitions.
  */
 
 typedef struct {

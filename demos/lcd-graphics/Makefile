@@ -59,7 +59,7 @@
 
 # Note: using a system clock around 24MHz works with all MCU
 # having an internal RC oscillator.
-MCU_FREQ_KHZ := 40000
+MCU_FREQ_KHZ := 37500
 
 STACK_SIZE := 96
 
@@ -81,12 +81,14 @@ include ../../makefiles/0-directories.mk
 PROJECT_NAME := lcd-graphics-demo
 
 # TODO: Change to match your controller (supported controler names are:
-# PCD8544, ST7565, ST7920, and UC1609).
-LCD_CONTROLLER := ST7565
+# PCD8544, ST7565, ST7567, ST7920, and UC1609).
+LCD_CONTROLLER := PCD8544
 
 # IMPORTANT: If your LCD display doesn't use 4-line SPI, you also need
 # to replace lcd-link-spi.c with the correct driver and update main.c
-# accordingly.
+# accordingly if needed. For the ST7920, it's lcd-link-serial.c.
+
+# TIP: in case the display stay empty, try disconnecting the RST line.
 
 PROJECT_FLAGS := -DUSES_$(LCD_CONTROLLER)
 
@@ -105,6 +107,7 @@ CONSOLE_BAUDRATE := 57600
 CONSOLE_PORT := /dev/ttyUSB0
 
 ISP_PORT := /dev/ttyUSB0
+#STCGAL_OPTIONS := -a -A rts
 
 # Boilerplate rules ----------------------------------------------------
 include $(MAKE_DIR)/1-mcu-settings.mk

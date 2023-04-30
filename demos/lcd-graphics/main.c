@@ -28,14 +28,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
-#include <lcd/links/lcd-link-spi.h>
 #include <lcd/lcd-device.h>
 #include <lcd/lcd-graphics.h>
 #include <delay.h>
 #include <gpio-hal.h>
-#include <spi-hal.h>
 
-#if defined(USES_ST7565)
+#if defined(USES_ST7565) || defined(USES_ST7567)
 	#define SPI_MAX_FREQ 20000000UL
 #elif defined(USES_UC1609)
 	#define SPI_MAX_FREQ 12500000UL
@@ -43,24 +41,40 @@
 	#define SPI_MAX_FREQ 4000000UL
 #endif
 
-#if defined(SPI_MAX_FREQ)
-	static LCDSPILinkConfig lcdLink = {
-		// CS# = P1.6
+#if defined(USES_ST7920)
+	// We assume the LCD display is connected using the ST7920's serial interface.
+	#include <lcd/links/lcd-link-serial.h>
+	
+	static LCDSerialLinkConfig lcdLink = {
+		// RS (CS#) = P1.6
 		.csOutput = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN6, GPIO_BIDIRECTIONAL_MODE),
+		// E (SCLK) = P1.5
+		.sclkOutput = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN5, GPIO_BIDIRECTIONAL_MODE),
+		// RW (MOSI) = P1.3
+		.dataInOut = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN3, GPIO_BIDIRECTIONAL_MODE),
+	};
+#elif defined(SPI_MAX_FREQ)
+	#include <lcd/links/lcd-link-spi.h>
+	#include <spi-hal.h>
+	
+	static LCDSPILinkConfig lcdLink = {
 		// D/C# = P1.7
 		.commandDataOutput = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN7, GPIO_BIDIRECTIONAL_MODE),
-		// MOSI = P1.3 | SCLK = P1.5
+		// CS# = P1.6
+		.csOutput = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN6, GPIO_BIDIRECTIONAL_MODE),
+		// SCLK = P1.5
+		// MOSI = P1.3
 		.spiPinSwitch = SPI_PIN_CONFIG,
 		.spiClockFrequency = SPI_MAX_FREQ,
 	};
 #else
-	#error "Please define the link configuration matching lcd-link-XXX.c in Makefile."
+	#error "Please define the link configuration matching the lcd-link-XXX.c in Makefile."
 #endif
 
 // RST# = P1.1
 LCD_DEVICE_INTERFACE_WITH_RESET(lcdDevice, &lcdLink, GPIO_PORT1, GPIO_PIN1)
 
-#if defined(USES_ST7565)
+#if defined(USES_ST7565) || defined(USES_ST7567)
 	LCD_DEVICE_GRAPHICS(lcdDevice, 0, 0, 128, 64)
 #elif defined(USES_ST7920)
 	LCD_DEVICE_GRAPHICS(lcdDevice, 4, 16, 128, 64)
@@ -79,7 +93,7 @@ enum FixedPoint {
 	BOTTOM_LEFT,
 };
 
-#define SPLASH_SCREEN_DURATION 2000
+#define SPLASH_SCREEN_DURATION_MS 2000
 
 void main() {
 	INIT_EXTENDED_SFR()
@@ -96,8 +110,9 @@ void main() {
 	
 	// Splash screen ---------------------------------------------------
 	
+	lcdGfxClear(&lcdDevice);
 	lcdGfxXbmImage(&lcdDevice, smiley_width, smiley_height, smiley_bits, LCD_ALIGN_MIDDLE_CENTER, 0, 0);
-	delay1ms(SPLASH_SCREEN_DURATION);
+	delay1ms(SPLASH_SCREEN_DURATION_MS);
 	
 	// Main loop -------------------------------------------------------
 	

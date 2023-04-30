@@ -65,7 +65,6 @@
  * BLA		Backlight anode. Connect to +5V.
  * BLK		Backlight cathode. Connect to GND.
  * PSB		Parallel Serial Bit. 0 = Serial, 1 = Parallel. Connect to +5V.
- * RST      Optional external reset, active low.
  * 
  * **Pin assignments - SERIAL interface**
  * Maximum clock frequency: 2.5MHz
@@ -81,7 +80,6 @@
  * BLA		Backlight anode. Connect to +5V.
  * BLK		Backlight cathode. Connect to GND.
  * PSB		Parallel Serial Bit. 0 = Serial, 1 = Parallel. Connect to GND.
- * RST      Optional external reset, active low.
  * 
  * **Notes**
  * 
@@ -90,12 +88,15 @@
  * DDRAM/CGRAM/GDRAM (you need to manage a display buffer, so your MCU 
  * have enough RAM for this).
  * 
- * - If you find backlight too bright, you may connect BLA to +5V through 
- * a resistor of, say 150 or 180 Ohm.
+ * - Don't connect the RST pin of the LCD module, it doesn't behave
+ * as expected.
  * 
- * - If contrast is too weak with VO connected to +5V (text only visible 
- * when viewed under a small angle), check your power supply voltage 
- * (must be greater than 4.5V).
+ * - If you find backlight too bright, you may connect BLA to +5V 
+ * through a resistor of, say 150 or 180 Ohm.
+ * 
+ * - If contrast is too weak with VO connected to +5V (text is only 
+ * visible when viewed under a small angle), check your power supply 
+ * voltage (must be greater than 4.5V).
  * 
  * - In 4-bit parallel mode, only D7..D4 are used, and most significant 
  * nibble is always transfered first.

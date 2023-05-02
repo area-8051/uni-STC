@@ -37,8 +37,8 @@ CC = gcc
 CFLAGS = -I. -I../.. -I../../../include -O2
 
 test: $(PROJECT_NAME)
-	./$(PROJECT_NAME)
-	rm $(PROJECT_NAME)
+	@./$(PROJECT_NAME)
+	@rm $(PROJECT_NAME)
 
 $(PROJECT_NAME): $(SRCS)
-	$(CC) $(CFLAGS) -o $@ $^
+	@$(CC) $(CFLAGS) -o $@ $^

@@ -46,4 +46,4 @@ test: $(PROJECT_NAME)
 	@rm $(PROJECT_NAME)
 
 $(PROJECT_NAME): $(SRCS)
-	$(CC) $(CFLAGS) -o $@ $^
+	@$(CC) $(CFLAGS) -o $@ $^

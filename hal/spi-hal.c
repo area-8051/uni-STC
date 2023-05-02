@@ -168,24 +168,24 @@ static SPI_SEGMENT struct {
 } __spiState;
 
 SpiSpeed spiSelectSpeed(uint32_t maxDeviceRate) {
-	SpiSpeed result = SPI_SYSCLK_DIV_4;
-	uint8_t divisor = (uint8_t) (MCU_FREQ / maxDeviceRate);
+	uint16_t divisor = (uint16_t) (MCU_FREQ / maxDeviceRate);
+	
+	if (MCU_FREQ % maxDeviceRate) {
+		divisor++;
+	}
+	
 	uint8_t pot = 0;
-	uint8_t n = divisor;
 	
 	// Determine the power of two ("pot") equal or immediately greater
 	// to the value of the divisor.
-	for (uint8_t i = 7; n && i; n = n >> 1, pot++, i--);
+	for (uint16_t n = divisor; n > 1; n = n >> 1, pot++);
 	
-	n = 1;
-	
-	for (uint8_t i = pot - 2; i; n = (n << 1) | 1, i--);
-	
-	if (divisor & n) {
+	if (divisor > (1 << pot)) {
 		pot++;
 	}
 	
 	// Determine SPI clock equal or immediately greater to "pot".
+	SpiSpeed result = SPI_SYSCLK_DIV_4;
 	
 #if MCU_FAMILY == 12 || MCU_FAMILY == 15
 	if (pot > 2 && pot <= 4) {
@@ -198,23 +198,25 @@ SpiSpeed spiSelectSpeed(uint32_t maxDeviceRate) {
 #endif // MCU_FAMILY == 12 || MCU_FAMILY == 15
 	
 #if MCU_FAMILY == 8
-	if (pot > 2 && pot <= 3) {
-		result = SPI_SYSCLK_DIV_8;
-	
 	#ifdef SPI_HAS_HIGH_SPEED
 		// STC8H3 (B version), STC8H8 (B version), STC8H4
+		if (pot > 2 && pot <= 3) {
+			result = SPI_SYSCLK_DIV_8;
 		} else if (pot < 2) {
 			result = SPI_SYSCLK_DIV_2;
 		} else if (pot > 3) {
 			result = SPI_SYSCLK_DIV_16;
+		}
 	#else
 		// All other STC8
+		if (pot > 2 && pot <= 3) {
+			result = SPI_SYSCLK_DIV_8;
 		} else if (pot == 4) {
 			result = SPI_SYSCLK_DIV_16;
 		} else if (pot > 4) {
 			result = SPI_SYSCLK_DIV_32;
+		}
 	#endif // SPI_HAS_HIGH_SPEED
-	}
 #endif // MCU_FAMILY == 8
 	
 	return result;

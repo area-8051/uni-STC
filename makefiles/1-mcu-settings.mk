@@ -106,7 +106,7 @@ endif
 # OBJDIR := $(BUILD_ROOT)/$(BUILD_DIR)
 OBJDIR := $(BUILD_ROOT)
 
-FW_FILE := $(OBJDIR)/$(PROJECT_NAME).ihx
+FW_FILE := $(OBJDIR)/$(PROJECT_NAME).hex
 DEP_FILE := $(OBJDIR)/dependencies.mk
 
 DRIVER_SRCS := $(filter $(DRIVER_DIR)%, $(SRCS))

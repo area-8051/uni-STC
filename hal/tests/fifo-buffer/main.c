@@ -53,22 +53,23 @@ const TestData items[] = {
 	{ /*  2 */ .test = WRITE, .data =  3, .size = 3, .retcode = true, },
 	{ /*  3 */ .test = WRITE, .data =  4, .size = 4, .retcode = true, },
 	{ /*  4 */ .test = WRITE, .data =  5, .size = 4, .retcode = false, },
-	{ /*  5 */ .test = READ,  .data =  1, .size = 3, },
-	{ /*  6 */ .test = READ,  .data =  2, .size = 2, },
-	{ /*  7 */ .test = READ,  .data =  3, .size = 1, },
-	{ /*  8 */ .test = READ,  .data =  4, .size = 0, },
+	{ /*  5 */ .test = READ,  .data =  1, .size = 3, .retcode = true, },
+	{ /*  6 */ .test = READ,  .data =  2, .size = 2, .retcode = true, },
+	{ /*  7 */ .test = READ,  .data =  3, .size = 1, .retcode = true, },
+	{ /*  8 */ .test = READ,  .data =  4, .size = 0, .retcode = true, },
 	{ /*  9 */ .test = WRITE, .data =  6, .size = 1, .retcode = true, },
 	{ /* 10 */ .test = WRITE, .data =  7, .size = 2, .retcode = true, },
 	{ /* 11 */ .test = WRITE, .data =  8, .size = 3, .retcode = true, },
 	{ /* 12 */ .test = WRITE, .data =  9, .size = 4, .retcode = true, },
-	{ /* 13 */ .test = READ,  .data =  6, .size = 3, },
-	{ /* 14 */ .test = READ,  .data =  7, .size = 2, },
+	{ /* 13 */ .test = READ,  .data =  6, .size = 3, .retcode = true, },
+	{ /* 14 */ .test = READ,  .data =  7, .size = 2, .retcode = true, },
 	{ /* 15 */ .test = WRITE, .data = 10, .size = 3, .retcode = true, },
 	{ /* 16 */ .test = WRITE, .data = 11, .size = 4, .retcode = true, },
-	{ /* 17 */ .test = READ,  .data =  8, .size = 3, },
-	{ /* 18 */ .test = READ,  .data =  9, .size = 2, },
-	{ /* 19 */ .test = READ,  .data = 10, .size = 1, },
-	{ /* 20 */ .test = READ,  .data = 11, .size = 0, },
+	{ /* 17 */ .test = READ,  .data =  8, .size = 3, .retcode = true, },
+	{ /* 18 */ .test = READ,  .data =  9, .size = 2, .retcode = true, },
+	{ /* 19 */ .test = READ,  .data = 10, .size = 1, .retcode = true, },
+	{ /* 20 */ .test = READ,  .data = 11, .size = 0, .retcode = true, },
+	{ /* 21 */ .test = READ,  .data =  0, .size = 0, .retcode = false, },
 };
 
 static const char *test2str(int item) {
@@ -88,7 +89,11 @@ static const char *test2str(int item) {
 }
 
 int main() {
-	for (int item = 0; item < (sizeof(items) / sizeof(TestData)); item++) {
+	bool runAllTests = false;
+	bool debug = false;
+	bool allTestsOK = true;
+	
+	for (int item = 0; (allTestsOK || runAllTests) && item < (sizeof(items) / sizeof(TestData)); item++) {
 		uint8_t result = 0;
 		bool retcode = false;
 		
@@ -103,32 +108,31 @@ int main() {
 		}
 		
 		uint8_t size = fifoBytesUsed(&buffer);
-		printf("After item %2d: .test = %s  .rIndex = %hhd  .wIndex = %hhd  size = %hhd\n", item, test2str(item), buffer.rIndex, buffer.wIndex, size);
+		bool itemOK = true;
 		
-		switch (items[item].test) {
-		case READ:
-			if (!retcode) {
-				printf("FAILED: item %d, expected 1 byte in buffer, but was empty\n", item);
-				exit(0);
-			} else if (result != items[item].data) {
-				printf("FAILED: item %d, expected data = %d, actual %d\n", item, items[item].data, result);
-				exit(0);
-			}
-			break;
-		
-		case WRITE:
-			if (retcode != items[item].retcode) {
-				printf("FAILED: item %d, expected retcode = %d, actual %d\n", item, items[item].retcode, retcode);
-				exit(0);
-			}
-			break;
+		if (debug) {
+			printf("After item %2d: .test = %s  .rIndex = %hhd  .wIndex = %hhd  size = %hhd\n", item, test2str(item), buffer.rIndex, buffer.wIndex, size);
 		}
 		
-		if (size != items[item].size) {
+		if (retcode != items[item].retcode) {
+			printf("FAILED: item %d, expected retcode = %d, actual %d\n", item, items[item].retcode, retcode);
+			itemOK = false;
+		}
+		
+		if (itemOK && size != items[item].size) {
 			printf("FAILED: item %d, expected size = %hhd, actual %hhd\n", item, items[item].size, size);
-			exit(0);
+			itemOK = false;
 		}
+		
+		if (itemOK && items[item].test == READ && result != items[item].data) {
+			printf("FAILED: item %d, expected data = %d, actual %d\n", item, items[item].data, result);
+			itemOK = false;
+		}
+		
+		allTestsOK = allTestsOK && itemOK;
 	}
 	
-	printf("PASSED\n");
+	if (allTestsOK) {
+		printf("PASSED\n");
+	}
 }

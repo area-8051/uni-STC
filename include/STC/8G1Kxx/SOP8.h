@@ -6,6 +6,7 @@
 #define MCU_PINS 8
 #define MCU_HAS_MDU
 #define NB_TIMERS 2
+#define TIMER_HAS_T1
 
 #include <uni-STC/stcmcu.h>
 

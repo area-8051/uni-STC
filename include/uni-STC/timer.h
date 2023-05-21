@@ -31,7 +31,11 @@
 #if MCU_FAMILY == 12
 	#define TIMER_HAS_BRT
 #else
-	#define TIMER_HAS_T2
+	#if NB_TIMERS > 2 || !defined(TIMER_HAS_T1)
+		// The rule is that MCU with 2 timers have T0 and T1, EXCEPT
+		// 8-pin STC8G1K08 and STC8G1K08A, which have T0 and *T1*.
+		#define TIMER_HAS_T2
+	#endif
 #endif // MCU_FAMILY == 12
 
 #if MCU_FAMILY == 8

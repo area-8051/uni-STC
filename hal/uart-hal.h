@@ -184,15 +184,15 @@ bool uartSendCharacter(Uart uart, uint8_t c, BlockingOperation blocking);
 
 bool uartSendBlock(Uart uart, const uint8_t *data, uint8_t size, BlockingOperation blocking);
 
-INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1);
+INTERRUPT(uart1_isr, UART1_INTERRUPT);
 
 #if HAL_UARTS >= 2
-	INTERRUPT_USING(__uart2_isr, UART2_INTERRUPT, 1);
+	INTERRUPT(uart2_isr, UART2_INTERRUPT);
 #endif // HAL_UARTS >= 2
 
 #if HAL_UARTS >= 3
-	INTERRUPT_USING(__uart3_isr, UART3_INTERRUPT, 1);
-	INTERRUPT_USING(__uart4_isr, UART4_INTERRUPT, 1);
+	INTERRUPT(uart3_isr, UART3_INTERRUPT);
+	INTERRUPT(uart4_isr, UART4_INTERRUPT);
 #endif // HAL_UARTS >= 3
 
 #endif // _UART_HAL_H

@@ -22,6 +22,7 @@
 	#define CRITICAL
 	#define REENTRANT
 	#define USING(registerBank)
+	#define INTERRUPT(name, vector) void name()
 	#define INTERRUPT_USING(name, vector, regnum) void name()
 	// GCC & CLANG never inline functions unless optimisation is requested, 
 	// which is not the case by default, so we need to insist a little bit.

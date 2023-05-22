@@ -606,7 +606,7 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	}
 }
 
-static uint8_t __getPort(GpioPort port) REENTRANT {
+static uint8_t __getPort(GpioPort port) {
 	uint8_t value = 0;
 	
 	switch (port) {
@@ -669,11 +669,11 @@ static uint8_t __getPort(GpioPort port) REENTRANT {
 	return value;
 }
 
-uint8_t gpioRead(GpioConfig *gpioConfig) REENTRANT {
+uint8_t gpioRead(GpioConfig *gpioConfig) {
 	return (__getPort(gpioConfig->port) & gpioConfig->__setMask) >> gpioConfig->pin;
 }
 
-void gpioWrite(GpioConfig *gpioConfig, uint8_t value) REENTRANT {
+void gpioWrite(GpioConfig *gpioConfig, uint8_t value) {
 	if (gpioConfig->count == 1) {
 		// In case the caller wants to set a single bit and expects
 		// any non-zero value will be treated as a logical one (which

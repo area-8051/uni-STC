@@ -146,7 +146,7 @@ uint16_t adcBlockingRead(ADC_Channel channel);
  * There's no predefined interrupt service routine, you have to supply 
  * one with the following prototype:
  * 
- * INTERRUPT_USING(__adc_isr, ADC_INTERRUPT, 1);
+ * INTERRUPT(adc_isr, ADC_INTERRUPT);
  */
 void adcStartConversion(ADC_Channel channel);
 
@@ -159,7 +159,10 @@ uint16_t adcReadResult();
 	 * Note 1: only applicable to STC8G, STC8H and STC8A8K64D4.
 	 * 
 	 * Note 2: interrupts MUST be enabled when calling adcInitialise()
-	 * to use this mode. And of course, an ISR must be provided.
+	 * to use this mode. And of course, an ISR must be provided, with
+	 * the following prototype:
+	 * 
+	 * INTERRUPT(comparator_isr, CMP_INTERRUPT);
 	 */
 	void adcPwmTriggered(ADC_Channel channel);
 #endif // M_ADC_EPWMT

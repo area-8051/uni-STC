@@ -72,7 +72,7 @@ static int8_t pcaGlowingIncrement = 1;
  */
 // Suppress warning "unreferenced function argument"
 #pragma disable_warning 85
-void pcaOnInterrupt(PCA_Channel channel, uint16_t HAL_PCA_SEGMENT pulseLength) USING(1) {
+void pcaOnInterrupt(PCA_Channel channel, uint16_t HAL_PCA_SEGMENT pulseLength) {
 }
 
 void pcaUpdateGlowingDutyCycle() {
@@ -142,10 +142,10 @@ void pwmUpdateGlowingDutyCycle() {
 #pragma save
 // Suppress warning "unreferenced function argument"
 #pragma disable_warning 85
-void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) USING(1) {
+void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) {
 }
 
-void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, uint8_t countDown) USING(1) {
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, uint8_t countDown) {
 }
 #pragma restore
 

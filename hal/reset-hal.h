@@ -101,7 +101,7 @@ typedef enum {
 
 /**
  * When using LVD_Action_Interrupt, you have to provide an ISR with the
- * following prototype: INTERRUPT_USING(__lvd_isr, LVD_INTERRUPT, 1);
+ * following prototype: INTERRUPT(__lvd_isr, LVD_INTERRUPT);
  */
 void enableLowVoltageDetector(LVD_Threshold threshold, LVD_Action action);
 #endif // MCU_FAMILY == 8

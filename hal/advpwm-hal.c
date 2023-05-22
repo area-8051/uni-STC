@@ -972,7 +972,7 @@ void pwmInitialiseCapture(
 	enableChannelInterrupt(channel);
 }
 
-INTERRUPT_USING(pwmA_isr, PWMA_INTERRUPT, 1) {
+INTERRUPT(pwmA_isr, PWMA_INTERRUPT) {
 	uint8_t channel = 255;
 	uint8_t event = 255;
 	
@@ -1067,7 +1067,7 @@ INTERRUPT_USING(pwmA_isr, PWMA_INTERRUPT, 1) {
 }
 
 #if HAL_PWM_CHANNELS > 4
-INTERRUPT_USING(pwmB_isr, PWMB_INTERRUPT, 1) {
+INTERRUPT(pwmB_isr, PWMB_INTERRUPT) {
 	uint8_t channel = 255;
 	uint8_t event = 255;
 	

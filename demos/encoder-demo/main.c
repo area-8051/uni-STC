@@ -37,10 +37,10 @@ static volatile __bit ready = 0;
 #pragma save
 // Suppress warning "unreferenced function argument"
 #pragma disable_warning 85
-void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) USING(1) {
+void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) {
 }
 
-void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, uint8_t countDown) USING(1) {
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, uint8_t countDown) {
 	if (channel == PWM_Channel4) {
 		countDir = countDown;
 		ready = 1;

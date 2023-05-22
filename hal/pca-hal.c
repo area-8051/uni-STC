@@ -160,14 +160,18 @@ static void pcaConfigureChannel(PCA_Channel channel, GpioPinMode pinMode) {
 
 void pcaConfigureOutput(PCA_Channel channel, GpioPinMode pinMode) {
 	if (pinMode == GPIO_HIGH_IMPEDANCE_MODE) {
-		pinMode = GPIO_PUSH_PULL_MODE;
+		pinMode = GPIO_BIDIRECTIONAL_MODE;
 	}
 	
 	pcaConfigureChannel(channel, pinMode);
 }
 
-void pcaConfigureInput(PCA_Channel channel) {
-	pcaConfigureChannel(channel, GPIO_HIGH_IMPEDANCE_MODE);
+void pcaConfigureInput(PCA_Channel channel, GpioPinMode pinMode) {
+	if (pinMode == GPIO_PUSH_PULL_MODE || pinMode == GPIO_OPEN_DRAIN_MODE) {
+		pinMode = GPIO_BIDIRECTIONAL_MODE;
+	}
+	
+	pcaConfigureChannel(channel, pinMode);
 }
 
 #if MCU_FAMILY == 12
@@ -445,7 +449,7 @@ void pcaStartTimer(PCA_Channel channel, OutputEnable pulseOutput, uint16_t timer
 	}
 }
 
-INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1) {
+INTERRUPT(pca_isr, PCA_INTERRUPT) {
 	uint16_t ccap = 0;
 	uint8_t channel = HAL_PCA_CHANNELS;
 	

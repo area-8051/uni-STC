@@ -93,8 +93,8 @@ INLINE void fifoClear(FifoState *buffer) {
 	buffer->status = 0;
 }
 
-bool fifoWrite(FifoState *fifo, const void *data, uint8_t count) REENTRANT;
-bool fifoRead(FifoState *fifo, void *data, uint8_t count) REENTRANT;
+bool fifoWrite(FifoState *fifo, const void *data, uint8_t count);
+bool fifoRead(FifoState *fifo, void *data, uint8_t count);
 
 INLINE bool fifoIsEmpty(FifoState *fifo) {
 	return fifoLength(fifo) == 0;

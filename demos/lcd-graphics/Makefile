@@ -57,8 +57,6 @@
 
 # Target MCU settings --------------------------------------------------
 
-# Note: using a system clock around 24MHz works with all MCU
-# having an internal RC oscillator.
 MCU_FREQ_KHZ := 40000
 
 STACK_SIZE := 96

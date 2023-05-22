@@ -41,10 +41,12 @@ void lcdInitialiseInterface(LCDInterface *interface) {
 	interface->__controllerLinkConfigured = 0;
 	lcdLinkInitialise(interface);
 	
+#ifdef __SDCC
 	if (interface->resetOutput.count) {
 		gpioConfigure(&interface->resetOutput);
 		gpioWrite(&interface->resetOutput, 0);
 	}
+#endif // __SDCC
 }
 
 void lcdLinkConfigurationBegins(LCDInterface *interface) {

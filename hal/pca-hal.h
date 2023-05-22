@@ -114,7 +114,7 @@ typedef enum {
  *   1   | P4.2 | P4.3 | P4.1
  */
 
-INTERRUPT_USING(__pca_isr, PCA_INTERRUPT, 1);
+INTERRUPT(pca_isr, PCA_INTERRUPT);
 
 /**
  * Configures and starts the master counter of the PCA.
@@ -132,7 +132,7 @@ void pcaStartCounter(PCA_ClockSource clockSource, CounterControl counterMode, In
  * MUST be called (once is enough) before any pcaStartXxx() function.
  */
 void pcaConfigureOutput(PCA_Channel channel, GpioPinMode pinMode);
-void pcaConfigureInput(PCA_Channel channel);
+void pcaConfigureInput(PCA_Channel channel, GpioPinMode pinMode);
 
 /**
  * Configures a PCA channel to measure the width of a pulse.
@@ -178,6 +178,6 @@ void pcaStopChannel(PCA_Channel channel);
  * **IMPORTANT** We're inside an ISR, so just keep track of the values 
  * but DON'T do any processing there!
  */
-void pcaOnInterrupt(PCA_Channel channel, uint16_t HAL_PCA_SEGMENT pulseLength) USING(1);
+void pcaOnInterrupt(PCA_Channel channel, uint16_t HAL_PCA_SEGMENT pulseLength);
 
 #endif // _PCA_HAL_H

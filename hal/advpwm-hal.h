@@ -387,7 +387,7 @@ typedef enum {
  * @param counter is the counter which generated the interrupt.
  * @param event is the type of interrupt.
  */
-void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) USING(1);
+void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event);
 
 /**
  * Invoked whenever a channel interrupt occurs.
@@ -401,12 +401,12 @@ void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) USIN
  * For Encoder channels, both counterValue and countDown are valid.
  * For Capture channels, counterValue is valid and countDown is irrelevant.
  */
-void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, uint8_t countDown) USING(1);
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, uint8_t countDown);
 
-INTERRUPT_USING(pwmA_isr, PWMA_INTERRUPT, 1);
+INTERRUPT(pwmA_isr, PWMA_INTERRUPT);
 
 #if HAL_PWM_CHANNELS > 4
-	INTERRUPT_USING(pwmB_isr, PWMB_INTERRUPT, 1);
+	INTERRUPT(pwmB_isr, PWMB_INTERRUPT);
 #endif
 
 #endif // _ENHPWM_HAL_H

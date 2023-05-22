@@ -101,7 +101,7 @@ CONSOLE_PORT := /dev/ttyUSB0
 ISP_PORT := /dev/ttyUSB0
 
 # Default is -a, override here if you have specific needs.
-# STCGAL_OPTIONS := -A rts -a
+STCGAL_OPTIONS := -A rts -a
 
 # Boilerplate rules ----------------------------------------------------
 include $(MAKE_DIR)/1-mcu-settings.mk

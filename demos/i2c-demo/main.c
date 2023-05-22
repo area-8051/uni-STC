@@ -56,7 +56,8 @@ LCDI2CLinkConfig lcdLinkConfig = {
 /*
  * LCD device definition.
  */
-LCD_TEXT_ONLY_DEVICE(lcdDevice, &lcdLinkConfig, 2, 16)
+LCD_DEVICE_INTERFACE_NO_RESET(lcdDevice, &lcdLinkConfig)
+LCD_DEVICE_TEXT_ONLY(lcdDevice, 2, 16)
 
 void main() {
 	INIT_EXTENDED_SFR()

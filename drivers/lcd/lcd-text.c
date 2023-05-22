@@ -182,7 +182,11 @@ void lcdTxtMenuInitialise(
 				}
 				
 				switch (menuData->displayMode) {
-				// case LCD_PositionnedMenu: row and col are already set, nothing to do.
+#ifndef __SDCC
+				case LCD_PositionnedMenu:
+					// row and col are already set, nothing to do.
+					break;
+#endif // !__SDCC
 				
 				case LCD_ListMenu:
 					menuData->menuOptions[i].row = optionRow;
@@ -285,7 +289,10 @@ void lcdTxtMenuOnChangeSelection(LCDMenuData *menuData, LCDNewSelection newSelec
 		} while (!menuData->menuOptions[menuData->selectedOption].isEnabled);
 		break;
 	
-	// case LCD_RefreshOption: nothing to do.
+#ifndef __SDCC
+	case LCD_RefreshOption:
+		break;
+#endif // !__SDCC
 	}
 	
 	if (menuData->displayMode != LCD_SingleLineMenu && newSelection != LCD_RefreshOption) {

@@ -248,7 +248,7 @@ void spiReceive(uint8_t *buffer, size_t bufferSize, bool *readyFlag) {
 	spiSend(buffer, bufferSize, readyFlag);
 }
 
-INTERRUPT_USING(__spi_isr, SPI_INTERRUPT, 1) {
+INTERRUPT(spi_isr, SPI_INTERRUPT) {
 	SPSTAT |= M_SPIF | M_WCOL;
 	uint8_t data;
 	

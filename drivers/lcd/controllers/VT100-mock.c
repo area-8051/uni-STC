@@ -128,7 +128,7 @@ void lcdClearTextDisplay(LCDDevice *device)  {
 		
 		
 		for (int i = 0; i < device->textWidth; i++) {
-			printf("\x1b[%hhd;%hhdf-", device->textHeight + 1, i + 1, i);
+			printf("\x1b[%hhd;%hhdf-", device->textHeight + 1, i + 1);
 			printf("\x1b[%hhd;%hhdf%d", device->textHeight + 2, i + 1, i / 10);
 			printf("\x1b[%hhd;%hhdf%d", device->textHeight + 3, i + 1, i % 10);
 		}
@@ -185,9 +185,11 @@ void lcdSetTextDisplayPosition(LCDDevice *device, uint8_t row, uint8_t column)  
 // Functionalities below are not available on this controller.
 // ---------------------------------------------------------------------
 
-#pragma save
-// Suppress warning "unreferenced function argument"
-#pragma disable_warning 85
+#ifdef __SDCC
+	#pragma save
+	// Suppress warning "unreferenced function argument"
+	#pragma disable_warning 85
+#endif // __SDCC
 
 void lcdSetEntryMode(LCDDevice *device, bool textDirection, bool shiftDisplay)  {
 }
@@ -228,4 +230,6 @@ void lcdInverseDisplay(LCDDevice *device, bool on) {
 void lcdAllPixelsOn(LCDDevice *device, bool on) {
 }
 
-#pragma restore
+#ifdef __SDCC
+	#pragma restore
+#endif // __SDCC

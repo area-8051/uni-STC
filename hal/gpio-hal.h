@@ -174,7 +174,7 @@ void gpioConfigure(GpioConfig *config);
  * so that bit 0 of the result corresponds to .pin in GpioConfig.
  * Bits outside of the scope defined by GpioConfig are masked off.
  */
-uint8_t gpioRead(GpioConfig *config) REENTRANT;
+uint8_t gpioRead(GpioConfig *config);
 
 /**
  * Sets a GPIO pin, or series of consecutive pins.
@@ -183,7 +183,7 @@ uint8_t gpioRead(GpioConfig *config) REENTRANT;
  * bit 0 corresponds to .pin in GpioConfig.
  * Bits outside of the scope defined by GpioConfig are masked off.
  */
-void gpioWrite(GpioConfig *config, uint8_t value) REENTRANT;
+void gpioWrite(GpioConfig *config, uint8_t value);
 
 INLINE void gpioToggle(GpioConfig *config) {
 	gpioWrite(config, ~gpioRead(config));

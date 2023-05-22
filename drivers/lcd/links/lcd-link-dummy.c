@@ -36,9 +36,11 @@
  * Dummy communication link.
  */
 
-// Suppress warning "unreferenced function argument"
-#pragma save
-#pragma disable_warning 85
+#ifdef __SDCC
+	// Suppress warning "unreferenced function argument"
+	#pragma save
+	#pragma disable_warning 85
+#endif // __SDCC
 
 void lcdLinkInitialise(LCDInterface *interface) {
 }
@@ -58,4 +60,6 @@ uint8_t lcdLinkDataIn(LCDInterface *interface, LCDDataType dataType) {
 	return 0;
 }
 
-#pragma restore
+#ifdef __SDCC
+	#pragma restore
+#endif // __SDCC

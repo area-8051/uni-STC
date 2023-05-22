@@ -116,12 +116,12 @@ typedef enum {
 	 * The following event handlers MUST be implemented,
 	 * even when not used.
 	 */
-	void i2cOnCommandReceived(uint8_t slaveAddress, I2C_Command command) USING(1);
-	void i2cOnDataReceived(uint8_t byte) USING(1);
-	void i2cOnDataSent(I2C_AckNak ack) USING(1);
-	void i2cOnStop() USING(1);
+	void i2cOnCommandReceived(uint8_t slaveAddress, I2C_Command command);
+	void i2cOnDataReceived(uint8_t byte);
+	void i2cOnDataSent(I2C_AckNak ack);
+	void i2cOnStop();
 
-	INTERRUPT_USING(__i2c_isr, I2C_INTERRUPT, 1);
+	INTERRUPT(i2c_isr, I2C_INTERRUPT);
 #else
 	// == MASTER mode ==================================================
 	

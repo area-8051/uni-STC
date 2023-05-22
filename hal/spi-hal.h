@@ -174,6 +174,6 @@ void spiConfigure(SpiMode spiMode, SpiBitOrder bitOrder, SpiPolarity polarity, S
 void spiSend(uint8_t *buffer, size_t bufferSize, bool *readyFlag);
 void spiReceive(uint8_t *buffer, size_t bufferSize, bool *readyFlag);
 
-INTERRUPT_USING(__spi_isr, SPI_INTERRUPT, 1);
+INTERRUPT(spi_isr, SPI_INTERRUPT);
 
 #endif // _SPI_HAL_H

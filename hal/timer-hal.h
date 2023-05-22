@@ -77,7 +77,7 @@ uint16_t stopTimer(Timer timer);
 /*
  * The prototype of timer <n>'s ISR is:
  * 
- * INTERRUPT_USING(__timer<n>_isr, TIMER<n>_INTERRUPT, 1);
+ * INTERRUPT(timer<n>_isr, TIMER<n>_INTERRUPT);
  * 
  * Remember that when ISR are defined in a separate source file,
  * they MUST also be declared in the source file defining main()

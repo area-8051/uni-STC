@@ -9,7 +9,8 @@
 /*
  * LCD device definition.
  */
-LCD_TEXT_ONLY_DEVICE(lcdDevice, NULL, 4, 20)
+LCD_DEVICE_INTERFACE_NO_RESET(lcdDevice, NULL)
+LCD_DEVICE_TEXT_ONLY(lcdDevice, 4, 20)
 
 // If we didn't have to run on an MCS-51, we would use an array
 // of structs containing pointers to functions instead of these

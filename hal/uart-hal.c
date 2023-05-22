@@ -190,31 +190,48 @@ bool uartTransmitBufferHasBytesFree(Uart uart, uint8_t bytes) {
 	return fifoBytesFree(uartTransmitBuffer(uart)) >= bytes;
 }
 
-#ifndef M_S1_S
-// Suppress warning "unreferenced function argument"
-// when using STC12 with HAL_UARTS set to 1.
-#pragma disable_warning 85
+#if !defined(M_S1_S) || !defined(TIMER_HAS_T1) || !defined(TIMER_HAS_T2)
+	/*
+	 * Suppress warning "unreferenced function argument" when:
+	 * 
+	 *   - using STC12 with HAL_UARTS set to 1 (M_S1_S not defined),
+	 * 
+	 *   - selection of the UART's corresponding timer is not possible
+	 *     (TIMER_HAS_T1 and/or TIMER_HAS_T2 not defined).
+	 */
+	#pragma save
+	#pragma disable_warning 85
+	#define WARNING_85
 #endif // M_S1_S
 TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudRateTimer, UartMode mode, uint8_t pinSwitch) {
 	TimerStatus rc = TIMER_FREQUENCY_OK;
-	
+#ifdef TIMER_HAS_T2
+	Timer timer = TIMER2;
+#else
+	// Only the 8-pin STC8G1K* have T1 but not T2.
+	Timer timer = TIMER1;
+#endif // TIMER_HAS_T2
+
 	// UART1 is somewhat peculiar: when mode != UART_8N1, baudRate is
 	// expected to be of type Uart1_9BitMode_Clock and is derived from
 	// sysclk instead of a timer.
 	if (uart != UART1 || mode == UART_8N1) {
-		Timer timer;
-		
-#ifdef TIMER_HAS_T1
-		timer = (baudRateTimer == UART_USE_TIMER2)
-			? TIMER2
-			: ((Timer) uart);
+// All the #ifdef with TIMER_HAS_T1 and TIMER_HAS_T2 are intended to
+// prevent generating code the chosen MCU doesn't support, so as to
+// save the developer headaches that can be avoided by design.
+#ifdef TIMER_HAS_T2
+	#ifdef TIMER_HAS_T1
+		if (baudRateTimer == UART_USE_OWN_TIMER) {
 			// There's a reason why UART numbers start at 1
 			// while timer numbers start at 0!  :)
-#else
-		// If the target MCU doesn't have timer 1, the only possible
-		// baud rate generator is timer 2.
-		timer = TIMER2;
-#endif // TIMER_HAS_T1
+			timer =  (Timer) uart;
+		}
+	// #else: If the target MCU doesn't have timer 1, the only possible
+	// baud rate generator is timer 2, which is the default.
+	#endif // TIMER_HAS_T1
+// #else: If the target MCU doesn't have timer 2, it has timer 1, which
+// is the default and the only possible choice.
+#endif // TIMER_HAS_T2
 		
 		// Note: on the STC12, TIMER2 is the BRT timer.
 		// The timer HAL makes this transparent for the developer.
@@ -256,11 +273,13 @@ TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudR
 			// Configure UART clock source
 			switch (operationMode) {
 			case 1:
-				if (baudRateTimer == UART_USE_TIMER2) {
+#if defined(M_S1ST2) && defined(TIMER_HAS_T1) && defined(TIMER_HAS_T2)
+				if (timer == TIMER2) {
 					AUXR |= M_S1ST2;
 				} else {
 					AUXR &= ~M_S1ST2;
 				}
+#endif // M_S1ST2
 				break;
 			
 			case 2:
@@ -364,7 +383,12 @@ TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudR
 	return rc;
 }
 
-INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
+#ifdef WARNING_85
+	#pragma restore
+	#undef WARNING_85
+#endif // WARNING_85
+
+INTERRUPT(uart1_isr, UART1_INTERRUPT) {
 	uint8_t c;
 	
 	if (S1CON & M_TI) {
@@ -385,7 +409,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 }
 
 #if HAL_UARTS >= 2
-	INTERRUPT_USING(__uart2_isr, UART2_INTERRUPT, 1) {
+	INTERRUPT(uart2_isr, UART2_INTERRUPT) {
 		uint8_t c;
 		
 		if (S2CON & M_TI) {
@@ -407,7 +431,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 #endif // HAL_UARTS >= 2
 
 #if HAL_UARTS >= 3
-	INTERRUPT_USING(__uart3_isr, UART3_INTERRUPT, 1) {
+	INTERRUPT(uart3_isr, UART3_INTERRUPT) {
 		uint8_t c;
 		
 		if (S3CON & M_TI) {
@@ -427,7 +451,7 @@ INTERRUPT_USING(__uart1_isr, UART1_INTERRUPT, 1) {
 		}
 	}
 
-	INTERRUPT_USING(__uart4_isr, UART4_INTERRUPT, 1) {
+	INTERRUPT(uart4_isr, UART4_INTERRUPT) {
 		uint8_t c;
 		
 		if (S4CON & M_TI) {
@@ -468,7 +492,7 @@ bool uartGetBlock(Uart uart, uint8_t *data, uint8_t size, BlockingOperation bloc
 	if (blocking == BLOCKING) {
 		while (!fifoRead(buffer, data, size));
 	} else {
-		fifoRead(buffer, data, size);
+		rc = fifoRead(buffer, data, size);
 	}
 	
 	return rc;

@@ -83,11 +83,11 @@
  * 
  * Its prototype must be either, for the STC8G2K:
  * 
- *     INTERRUPT_USING(enhpwm_isr, PWM2_INTERRUPT, 1);
+ *     INTERRUPT(enhpwm_isr, PWM2_INTERRUPT);
  * 
  * or, for all other MCU:
  * 
- *     INTERRUPT_USING(enhpwm_isr, PWM0_INTERRUPT, 1);
+ *     INTERRUPT(enhpwm_isr, PWM0_INTERRUPT);
  */
 
 #include <hal-defs.h>
@@ -246,7 +246,7 @@ void pwmUnlockChannel(PWM_Channel channel);
  * Examples:
  * 
 
-INTERRUPT_USING(pwm_isr, PWM_INTERRUPT, 1) {
+INTERRUPT(pwm_isr, PWM_INTERRUPT) {
 	if (PWM_COUNTER_IF_SFR & PWM_COUNTER_IF_MASK) {
 		PWM_COUNTER_IF_SFR &= ~PWM_COUNTER_IF_MASK;
 		// do something
@@ -262,7 +262,7 @@ INTERRUPT_USING(pwm_isr, PWM_INTERRUPT, 1) {
 	PWM_CHANNEL_IF_SFR_DISABLE
 }
 
-INTERRUPT_USING(pwmfd_isr, PWMFD_INTERRUPT, 1) {
+INTERRUPT(pwmfd_isr, PWMFD_INTERRUPT) {
 	PWMFD_SFR_ENABLE
 	
 	if (PWMFD_SFR & M_FDIF) {

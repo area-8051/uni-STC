@@ -31,7 +31,7 @@
 # need to compensate for this. We also need to create subdirectories
 # under $(OBJDIR) as needed because SDCC can't do it.
 
-$(OBJDIR) $(OBJDIR_TREE):
+$(OBJDIR_TREE):
 	@mkdir -p $@
 
 $(DEP_FILE): $(OBJDIR)

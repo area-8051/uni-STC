@@ -26,12 +26,12 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
 
-$(OBJDIR_TREE):
-	@mkdir -p $@
+$(OBJDIR):
+	@mkdir -p $(OBJDIR_TREE)
 
 $(DEP_FILE): $(OBJDIR)
 	$(CC) $(CFLAGS) -MM -MF - $(SRCS) > $(DEP_FILE)
-	@sed -i "s/^\(.*\.o:.*\)/$(BUILD_ROOT)\/$(BUILD_DIR)\/\1/g" $(DEP_FILE)
+	@$(SED_CMD) "s/^\(.*\.o:.*\)/$(BUILD_ROOT)\/$(BUILD_DIR)\/\1/g" $(DEP_FILE)
 
 $(FW_FILE): $(DRIVER_OBJS) $(HAL_OBJS) $(LOCAL_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^

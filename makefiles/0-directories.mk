@@ -31,3 +31,13 @@ UNISTC_DIR := $(UNISTC_ROOT_DIR)include
 HAL_DIR := $(UNISTC_ROOT_DIR)hal
 DRIVER_DIR := $(UNISTC_ROOT_DIR)drivers
 MAKE_DIR := $(UNISTC_ROOT_DIR)makefiles
+
+SED_VERSION != if [ -n "$(sed --version | grep -F 'GNU sed')" ]; then echo -n 'GNU'; else echo -n 'BSD'; fi
+
+ifeq ($(SED_VERSION),GNU)
+	SED_CMD := sed -i
+endif
+
+ifeq ($(SED_VERSION),BSD)
+	SED_CMD := sed -i ''
+endif

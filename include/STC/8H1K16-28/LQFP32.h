@@ -1,5 +1,5 @@
-#ifndef _STC8H1Kxx_LQFP32_H
-#define _STC8H1Kxx_LQFP32_H
+#ifndef _STC8H1K16_28_LQFP32_H
+#define _STC8H1K16_28_LQFP32_H
 
 #define MCU_FAMILY 8
 #define MCU_SERIES 'H'
@@ -16,4 +16,4 @@
 
 #include <uni-STC/stcmcu.h>
 
-#endif // _STC8H1Kxx_LQFP32_H
+#endif // _STC8H1K16_28_LQFP32_H

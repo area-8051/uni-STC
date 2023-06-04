@@ -192,7 +192,7 @@ typedef enum {
  *   2   | P6.0  | P6.1  | P6.2  | P6.3  | P6.4  | P6.5  | P6.6  | P6.7  | P0.0 | P0.1 | P0.2 | P0.3 |
  *   3   |   -   |   -   |   -   |   -   |   -   |   -   | P3.4  | P3.3  | P7.4 | P7.5 | P7.6 | P7.7 |
  *
- * #: P5.4 when P1.2 is not available.
+ * #: P5.4 when P1.2 is not available (except STC8H1K08/17-36I-SOP16).
  * 
  * Value |PWMET1 |PWMET2 |
  * ------+-------+-------+

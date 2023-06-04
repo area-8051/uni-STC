@@ -58,7 +58,7 @@
 	#endif
 	
 	#ifdef BUILD_FOR_STC8H1K08_TSSOP20
-		#include <STC/8H1Kxx/TSSOP20.h>
+		#include <STC/8H1K08-17/TSSOP20.h>
 		#define SMALL_FLASH
 	#endif
 	
@@ -68,7 +68,7 @@
 	#endif
 	
 	#ifdef BUILD_FOR_STC8H1K28_LQFP32
-		#include <STC/8H1Kxx/LQFP32.h>
+		#include <STC/8H1K16-28/LQFP32.h>
 	#endif
 	
 	#ifdef BUILD_FOR_STC8H3K64S2_TSSOP20

@@ -235,16 +235,8 @@ void pcaStartCapture(PCA_Channel channel, PCA_EdgeTrigger trigger, PCA_CaptureMo
 		
 #if HAL_PCA_CHANNELS > 3
 	case PCA_CHANNEL3:
-	#ifdef PCA_CHANNEL3_XSFR
-		ENABLE_EXTENDED_SFR();
-	#endif
-		
 		CCAPM3 = ccapMode;
 		CCAP3 = 0;
-		
-	#ifdef PCA_CHANNEL3_XSFR
-		DISABLE_EXTENDED_SFR();
-	#endif
 		break;
 #endif // HAL_PCA_CHANNELS > 3
 	}
@@ -273,13 +265,7 @@ void pcaStopChannel(PCA_Channel channel) {
 		
 #if HAL_PCA_CHANNELS > 3
 	case PCA_CHANNEL3:
-	#ifdef PCA_CHANNEL3_XSFR
-		ENABLE_EXTENDED_SFR();
-	#endif
 		CCAPM3 = 0;
-	#ifdef PCA_CHANNEL3_XSFR
-		DISABLE_EXTENDED_SFR();
-	#endif
 		break;
 #endif // HAL_PCA_CHANNELS > 3
 	}
@@ -363,10 +349,6 @@ static void __pcaConfigurePWM(bool initialise, PCA_Channel channel, PCA_PWM_Bits
 	
 #if HAL_PCA_CHANNELS > 3
 	case PCA_CHANNEL3:
-	#ifdef PCA_CHANNEL3_XSFR
-		ENABLE_EXTENDED_SFR();
-	#endif
-		
 		PCA_PWM3 = pcaPwm;
 		
 		if (initialise) {
@@ -375,10 +357,6 @@ static void __pcaConfigurePWM(bool initialise, PCA_Channel channel, PCA_PWM_Bits
 		}
 		
 		CCAP3H = ccap;
-		
-	#ifdef PCA_CHANNEL3_XSFR
-		DISABLE_EXTENDED_SFR();
-	#endif
 		break;
 #endif // HAL_PCA_CHANNELS > 3
 	}
@@ -434,16 +412,8 @@ void pcaStartTimer(PCA_Channel channel, OutputEnable pulseOutput, uint16_t timer
 		
 #if HAL_PCA_CHANNELS > 3
 	case PCA_CHANNEL3:
-	#ifdef PCA_CHANNEL3_XSFR
-		ENABLE_EXTENDED_SFR();
-	#endif
-		
 		CCAPM3 = ccapMode;
 		CCAP3 = timerPeriod;
-		
-	#ifdef PCA_CHANNEL3_XSFR
-		DISABLE_EXTENDED_SFR();
-	#endif
 		break;
 #endif // HAL_PCA_CHANNELS > 3
 	}
@@ -545,10 +515,6 @@ INTERRUPT(pca_isr, PCA_INTERRUPT) {
 		CCF3 = 0;
 		channel = PCA_CHANNEL3;
 		
-	#ifdef PCA_CHANNEL3_XSFR
-		ENABLE_EXTENDED_SFR();
-	#endif
-		
 		switch (__pca_channelConfig[channel].mode) {
 		case PCA_CAPTURE:
 			ccap = CCAP3;
@@ -565,10 +531,6 @@ INTERRUPT(pca_isr, PCA_INTERRUPT) {
 			CCAP3 = __pca_channelData[channel].timer.value;
 			break;
 		}
-		
-	#ifdef PCA_CHANNEL3_XSFR
-		DISABLE_EXTENDED_SFR();
-	#endif
 	}
 #endif // HAL_PCA_CHANNELS > 3
 	

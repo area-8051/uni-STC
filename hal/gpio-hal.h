@@ -91,6 +91,21 @@ typedef enum {
 	ENABLE_GPIO_PIN_WAKE_UP = 1,
 } GpioWakeUp;
 
+#ifdef GPIO_HAS_SR_DR_IE
+	// More developer-friendly than dealing with SR and DR separately.
+	typedef enum {
+		// SR = 0 DR = 0
+		GPIO_SPEED_FASTEST = 0,
+		// SR = 0 DR = 1
+		GPIO_SPEED_FAST = 1,
+		// SR = 1 DR = 0
+		GPIO_SPEED_SLOW = 2,
+		// SR = 1 DR = 1
+		GPIO_SPEED_SLOWEST = 3,
+	} GpioSpeed;
+#endif // GPIO_HAS_SR_DR_IE
+
+
 /**
  * Configuration details of a GPIO pin, or series of consecutive pins.
  * 
@@ -109,8 +124,7 @@ typedef struct {
 #endif // GPIO_HAS_PU_NCS
 
 #ifdef GPIO_HAS_SR_DR_IE
-	GpioCurrentDrive currentDrive;	/*!< Control output drive capacity. */
-	GpioSlewRate slewRate;	/*!< Control output slew rate. A low slew rate reduces RF emissions and power draw. */
+	GpioSpeed speed;	/*!< Used to derive DR (output drive capacity) and SR (slew rate). */
 	GpioDigitalInput digitalInput;	/*!< Enable line(s) as digital input(s). Reduces power draw when pin is either not used, or used by another peripheral (e.g. ADC). */
 #endif // GPIO_HAS_SR_DR_IE
 
@@ -137,8 +151,7 @@ typedef struct {
 
 #ifdef GPIO_HAS_SR_DR_IE
 	#define DEFAULTS_SR_DR_IE \
-		.currentDrive = GPIO_STANDARD_DRIVE, \
-		.slewRate = GPIO_LOW_SLEW_RATE, \
+		.speed = GPIO_SPEED_SLOWEST, \
 		.digitalInput = ENABLE_GPIO_DIGITAL_INPUT,
 #else
 	#define DEFAULTS_SR_DR_IE

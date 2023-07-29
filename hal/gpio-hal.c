@@ -89,7 +89,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT0:
 		pm1 = P0M1;
 		pm0 = P0M0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		pncs = P0NCS;
@@ -109,8 +108,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		pinte = P0INTE;
 		pwkue = P0WKUE;
 #endif // GPIO_HAS_INT_WK
-	
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P0
 
@@ -120,8 +117,7 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT1:
 		pm1 = P1M1;
 		pm0 = P1M0;
-		ENABLE_EXTENDED_SFR();
-	
+
 #ifdef GPIO_HAS_PU_NCS
 		pncs = P1NCS;
 		ppu = P1PU;
@@ -140,8 +136,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		pinte = P1INTE;
 		pwkue = P1WKUE;
 #endif // GPIO_HAS_INT_WK
-	
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P1
 
@@ -151,7 +145,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT2:
 		pm1 = P2M1;
 		pm0 = P2M0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		pncs = P2NCS;
@@ -171,8 +164,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		pinte = P2INTE;
 		pwkue = P2WKUE;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P2
 
@@ -181,7 +172,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT3:
 		pm1 = P3M1;
 		pm0 = P3M0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		pncs = P3NCS;
@@ -201,8 +191,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		pinte = P3INTE;
 		pwkue = P3WKUE;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 
 // -- P4 ----------------------------------
@@ -211,7 +199,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT4:
 		pm1 = P4M1;
 		pm0 = P4M0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		pncs = P4NCS;
@@ -231,8 +218,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		pinte = P4INTE;
 		pwkue = P4WKUE;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P4
 
@@ -242,7 +227,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT5:
 		pm1 = P5M1;
 		pm0 = P5M0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		pncs = P5NCS;
@@ -262,8 +246,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		pinte = P5INTE;
 		pwkue = P5WKUE;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P5
 
@@ -273,7 +255,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT6:
 		pm1 = P6M1;
 		pm0 = P6M0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		pncs = P6NCS;
@@ -293,8 +274,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		pinte = P6INTE;
 		pwkue = P6WKUE;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P6
 
@@ -304,7 +283,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT7:
 		pm1 = P7M1;
 		pm0 = P7M0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		pncs = P7NCS;
@@ -324,8 +302,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		pinte = P7INTE;
 		pwkue = P7WKUE;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P7
 	}
@@ -340,8 +316,8 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		
 #ifdef GPIO_HAS_SR_DR_IE
 	if (__isOutput(gpioConfig)) {
-		pdr = __gpio_setBits(pdr, gpioConfig->currentDrive, gpioConfig);
-		psr = __gpio_setBits(psr, gpioConfig->slewRate, gpioConfig);
+		pdr = __gpio_setBits(pdr, gpioConfig->speed & 1, gpioConfig);
+		psr = __gpio_setBits(psr, gpioConfig->speed & 2, gpioConfig);
 	}
 	
 	if (__isInput(gpioConfig)) {
@@ -364,7 +340,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT0:
 		P0M1 = pm1;
 		P0M0 = pm0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		P0NCS = pncs;
@@ -384,8 +359,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		P0INTE = pinte;
 		P0WKUE = pwkue;
 #endif // GPIO_HAS_INT_WK
-	
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P0
 
@@ -395,7 +368,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT1:
 		P1M1 = pm1;
 		P1M0 = pm0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		P1NCS = pncs;
@@ -415,8 +387,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		P1INTE = pinte;
 		P1WKUE = pwkue;
 #endif // GPIO_HAS_INT_WK
-	
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P1
 
@@ -426,7 +396,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT2:
 		P2M1 = pm1;
 		P2M0 = pm0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		P2NCS = pncs;
@@ -446,8 +415,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		P2INTE = pinte;
 		P2WKUE = pwkue;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P2
 
@@ -456,7 +423,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT3:
 		P3M1 = pm1;
 		P3M0 = pm0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		P3NCS = pncs;
@@ -476,8 +442,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		P3INTE = pinte;
 		P3WKUE = pwkue;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 
 // -- P4 ----------------------------------
@@ -486,7 +450,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT4:
 		P4M1 = pm1;
 		P4M0 = pm0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		P4NCS = pncs;
@@ -506,8 +469,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		P4INTE = pinte;
 		P4WKUE = pwkue;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P4
 
@@ -517,7 +478,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT5:
 		P5M1 = pm1;
 		P5M0 = pm0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		P5NCS = pncs;
@@ -537,8 +497,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		P5INTE = pinte;
 		P5WKUE = pwkue;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P5
 
@@ -548,7 +506,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT6:
 		P6M1 = pm1;
 		P6M0 = pm0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		P6NCS = pncs;
@@ -568,8 +525,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		P6INTE = pinte;
 		P6WKUE = pwkue;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P6
 
@@ -579,7 +534,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 	case GPIO_PORT7:
 		P7M1 = pm1;
 		P7M0 = pm0;
-		ENABLE_EXTENDED_SFR();
 	
 #ifdef GPIO_HAS_PU_NCS
 		P7NCS = pncs;
@@ -599,8 +553,6 @@ void gpioConfigure(GpioConfig *gpioConfig) {
 		P7INTE = pinte;
 		P7WKUE = pwkue;
 #endif // GPIO_HAS_INT_WK
-		
-		DISABLE_EXTENDED_SFR();
 		break;
 #endif // GPIO_HAS_P7
 	}

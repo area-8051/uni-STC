@@ -88,9 +88,7 @@ void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts)
 		#define cssetup 0
 		#define cshold 1
 		#define smpduty 15
-		ENABLE_EXTENDED_SFR();
 		ADCTIM = (cssetup << P_CSSETUP) | (cshold << P_CSHOLD) | (smpduty << P_SMPDUTY);
-		DISABLE_EXTENDED_SFR();
 		
 		#define CYCLES_PER_CONV ((cssetup + 1) + (cshold + 1) + (smpduty + 1) + ADC_BITS)
 	#elif MCU_FAMILY == 8
@@ -258,11 +256,9 @@ void compInitialise(
 		| (digitalFilter & M_LCDTY);
 	
 	#ifdef COMPARATOR_4P2N
-		ENABLE_EXTENDED_SFR();
 		CMPEXCFG = (inputHysteresis << P_CHYS)
 			| (negativeInput << P_CMPNS)
 			| positiveInput;
-		DISABLE_EXTENDED_SFR();
 	#endif // COMPARATOR_4P2N
 	
 	uint8_t cmpcr1 = M_CMPEN

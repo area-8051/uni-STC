@@ -78,38 +78,24 @@ typedef struct {
 /**
  * Returns the number of bytes in use.
  */
-INLINE uint8_t fifoLength(FifoState *buffer) {
-	return (buffer->wIndex >= buffer->rIndex)
-		? (buffer->wIndex - buffer->rIndex)
-		: (buffer->size - buffer->rIndex + buffer->wIndex + 1);
-}
+uint8_t fifoLength(FifoState *buffer);
 
 /**
  * Empties the fifo.
  */
-INLINE void fifoClear(FifoState *buffer) {
-	buffer->rIndex = 0;
-	buffer->wIndex = 0;
-	buffer->status = 0;
-}
+void fifoClear(FifoState *buffer);
 
 bool fifoWrite(FifoState *fifo, const void *data, uint8_t count);
 bool fifoRead(FifoState *fifo, void *data, uint8_t count);
 
+bool fifoIsFull(FifoState *fifo);
+uint8_t fifoBytesUsed(FifoState *fifo);
+uint8_t fifoBytesFree(FifoState *fifo);
+
+#define fifoBytesUsed(fifo) fifoLength(fifo)
+
 INLINE bool fifoIsEmpty(FifoState *fifo) {
 	return fifoLength(fifo) == 0;
-}
-
-INLINE bool fifoIsFull(FifoState *fifo) {
-	return fifoLength(fifo) == fifo->size;
-}
-
-INLINE uint8_t fifoBytesUsed(FifoState *fifo) {
-	return fifoLength(fifo);
-}
-
-INLINE uint8_t fifoBytesFree(FifoState *fifo) {
-	return fifo->size - fifoLength(fifo);
 }
 
 #endif // _FIFO_BUFFER_H

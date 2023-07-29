@@ -474,13 +474,7 @@ INTERRUPT(uart1_isr, UART1_INTERRUPT) {
 
 uint8_t uartGetCharacter(Uart uart, BlockingOperation blocking) {
 	uint8_t result = 0;
-	FifoState *buffer = uartReceiveBuffer(uart);
-	
-	if (blocking == BLOCKING) {
-		while (!fifoRead(buffer, &result, 1));
-	} else {
-		fifoRead(buffer, &result, 1);
-	}
+	uartGetBlock(uart, &result, 1, blocking);
 	
 	return result;
 }
@@ -527,20 +521,7 @@ static void __uartStartSending(Uart uart, FifoState *buffer) {
 }
 
 bool uartSendCharacter(Uart uart, uint8_t c, BlockingOperation blocking) {
-	FifoState *buffer = uartTransmitBuffer(uart);
-	bool rc = true;
-	
-	if (blocking == BLOCKING) {
-		while (!fifoWrite(buffer, &c, 1));
-	} else {
-		rc = fifoWrite(buffer, &c, 1);
-	}
-	
-	if (rc && buffer->status == STATUS_CLEAR) {
-		__uartStartSending(uart, buffer);
-	}
-	
-	return rc;
+	return uartSendBlock(uart, &c, 1, blocking);
 }
 
 bool uartSendBlock(Uart uart, const uint8_t *data, uint8_t size, BlockingOperation blocking) {

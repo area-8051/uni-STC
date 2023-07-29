@@ -93,7 +93,27 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 			}
 			
 			sysclkDivisor /= prescaler;
-			setTimerPrescaler(timer, prescaler);
+			
+			// sysclk is divided by (TMxPS + 1)
+			prescaler--;
+			
+			switch (timer) {
+	#ifdef TIMER_HAS_T2
+			case TIMER2:
+				TM2PS = prescaler;
+				break;
+	#endif
+
+	#ifdef TIMER_HAS_T3_T4
+			case TIMER3:
+				TM3PS = prescaler;
+				break;
+			
+			case TIMER4:
+				TM4PS = prescaler;
+				break;
+	#endif // TIMER_HAS_T3_T4
+			}
 			break;
 		}
 #else
@@ -313,7 +333,7 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 	return rc;
 }
 
-
+#ifdef HAL_TIMER_API_STOP_TIMER
 uint16_t stopTimer(Timer timer) {
 	uint16_t counterValue = 0;
 	
@@ -363,31 +383,4 @@ uint16_t stopTimer(Timer timer) {
 	
 	return counterValue;
 }
-
-
-#ifdef TIMER_HAS_PRESCALERS
-
-	void setTimerPrescaler(Timer timer, uint8_t divisor) {
-		// sysclk is divided by (TMxPS + 1)
-		divisor--;
-		
-		switch (timer) {
-	#ifdef TIMER_HAS_T2
-		case TIMER2:
-			TM2PS = divisor;
-			break;
-	#endif
-
-	#ifdef TIMER_HAS_T3_T4
-		case TIMER3:
-			TM3PS = divisor;
-			break;
-		
-		case TIMER4:
-			TM4PS = divisor;
-			break;
-	#endif // TIMER_HAS_T3_T4
-		}
-	}
-
-#endif // TIMER_HAS_PRESCALERS
+#endif // HAL_TIMER_API_STOP_TIMER

@@ -36,6 +36,26 @@
  * FIFO circular buffer implementation.
  */
 
+uint8_t fifoLength(FifoState *buffer) {
+	return (buffer->wIndex >= buffer->rIndex)
+		? (buffer->wIndex - buffer->rIndex)
+		: (buffer->size - buffer->rIndex + buffer->wIndex + 1);
+}
+
+void fifoClear(FifoState *buffer) {
+	buffer->rIndex = 0;
+	buffer->wIndex = 0;
+	buffer->status = 0;
+}
+
+bool fifoIsFull(FifoState *fifo) {
+	return fifoLength(fifo) == fifo->size;
+}
+
+uint8_t fifoBytesFree(FifoState *fifo) {
+	return fifo->size - fifoLength(fifo);
+}
+
 bool fifoWrite(FifoState *buffer, const void *data, uint8_t count) {
 	bool rc = (buffer->size - fifoLength(buffer)) >= count;
 	

@@ -111,7 +111,6 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 	void i2cInitialiseSlave(uint8_t pinSwitch, uint8_t slaveIdX2) {
 		__i2c_configurePins(pinSwitch);
 		__i2c_startReceived = false;
-		ENABLE_EXTENDED_SFR();
 		// Set slave address (or "promiscuous" mode, i.e. bit 0 = 1)
 		I2CSLADR = slaveIdX2;
 		// Clear interrupt flags and SLACKO
@@ -120,30 +119,22 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 		I2CSLCR = M_ESTOI | M_ETXI | M_ERXI | M_ESTAI;
 		// Enable I2C in SLAVE mode
 		I2CCFG = M_ENI2C;
-		DISABLE_EXTENDED_SFR();
 	}
 	
 	void i2cSendData(uint8_t byte) {
-		ENABLE_EXTENDED_SFR()
 		I2CTXD = byte;
-		DISABLE_EXTENDED_SFR();
 	}
 	
 	void i2cSendAck(I2C_AckNak value) {
-		ENABLE_EXTENDED_SFR()
-		
 		if (value) {
 			I2CSLST |= M_SLACKO;
 		} else {
 			I2CSLST &= ~M_SLACKO;
 		}
-		
-		DISABLE_EXTENDED_SFR();
 	}
 
 	INTERRUPT(i2c_isr, I2C_INTERRUPT) {
 		uint8_t p_sw2 = P_SW2;
-		ENABLE_EXTENDED_SFR();
 		uint8_t flags = I2CSLST;
 		
 		if (flags & M_STOIF) {
@@ -201,14 +192,12 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 			msSpeed = 63;
 		}
 		
-		ENABLE_EXTENDED_SFR();
 		// Initialise command register
 		I2CMSCR = I2C_standby;
 		// Clear flags
 		I2CMSST = 0;
 		// Enable I2C in MASTER mode
 		I2CCFG = M_ENI2C | M_MSSL | msSpeed;
-		DISABLE_EXTENDED_SFR();
 	}
 	
 	static void __waitForCompletion() {
@@ -218,22 +207,16 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 	}
 
 	void i2cStart() {
-		ENABLE_EXTENDED_SFR()
 		I2CMSCR = I2C_start;
 		__waitForCompletion();
-		DISABLE_EXTENDED_SFR();
 	}
 	
 	void i2cStop() {
-		ENABLE_EXTENDED_SFR()
 		I2CMSCR = I2C_stop;
 		__waitForCompletion();
-		DISABLE_EXTENDED_SFR();
 	}
 	
 	void i2cSendAck(I2C_AckNak value) {
-		ENABLE_EXTENDED_SFR()
-		
 		if (value) {
 			I2CMSST |= M_MSACKO;
 		} else {
@@ -242,65 +225,52 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 		
 		I2CMSCR = I2C_sendAck;
 		__waitForCompletion();
-		DISABLE_EXTENDED_SFR();
 	}
 	
 	void i2cSendData(uint8_t byte) {
-		ENABLE_EXTENDED_SFR()
 		I2CTXD = byte;
 		I2CMSCR = I2C_sendData;
 		__waitForCompletion();
-		DISABLE_EXTENDED_SFR();
 	}
 	
 	I2C_AckNak i2cReceiveAck() {
-		ENABLE_EXTENDED_SFR()
 		I2CMSCR = I2C_receiveAck;
 		__waitForCompletion();
 		I2C_AckNak result = (I2C_AckNak) ((I2CMSST & M_MSACKI) >> P_MSACKI);
-		DISABLE_EXTENDED_SFR();
 		
 		return result;
 	}
 	
 	uint8_t i2cReceiveData() {
-		ENABLE_EXTENDED_SFR()
 		I2CMSCR = I2C_receiveData;
 		__waitForCompletion();
 		uint8_t result = I2CRXD;
-		DISABLE_EXTENDED_SFR();
 		
 		return result;
 	}
 	
 	I2C_AckNak i2cStartCommand(uint8_t slaveAddress, I2C_Command command) {
-		ENABLE_EXTENDED_SFR()
 		I2CTXD = (slaveAddress << 1) | command;
 		I2CMSCR = I2C_start_sendData_receiveAck;
 		__waitForCompletion();
 		I2C_AckNak result = (I2C_AckNak) ((I2CMSST & M_MSACKI) >> P_MSACKI);
-		DISABLE_EXTENDED_SFR();
 		
 		return result;
 	}
 	
 	I2C_AckNak i2cSendByte(uint8_t byte) {
-		ENABLE_EXTENDED_SFR()
 		I2CTXD = byte;
 		I2CMSCR = I2C_sendData_receiveAck;
 		__waitForCompletion();
 		I2C_AckNak result = (I2C_AckNak) ((I2CMSST & M_MSACKI) >> P_MSACKI);
-		DISABLE_EXTENDED_SFR();
 		
 		return result;
 	}
 	
 	uint8_t i2cReadByteSendAck(I2C_AckNak value) {
-		ENABLE_EXTENDED_SFR()
 		I2CMSCR = value ? I2C_receiveData_sendAck1 : I2C_receiveData_sendAck0;
 		__waitForCompletion();
 		uint8_t result = I2CRXD;
-		DISABLE_EXTENDED_SFR();
 		
 		return result;
 	}

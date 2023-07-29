@@ -89,38 +89,31 @@ void pwmStartCounter(PWM_ClockSource clockSource, uint16_t divisor, InterruptEna
 	#else // STC8G2K
 		PWMSET |= M_ENPWM2;
 	#endif // MCU_SERIES == 'A'
-#endif // MCU_HAS_ENHANCED_PWM == 'G'
-	ENABLE_EXTENDED_SFR();
-#if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
+
 	#if MCU_SERIES == 'A' // STC8A8KxxD4
 		PWM0CKS = clockSource;
 		PWM0CL = divisor;
 		PWM0CH = divisor >> 8;
 		PWM0IF = 0;
-		DISABLE_EXTENDED_SFR();
 		PWMCFG01 = (PWMCFG01 & 0xf0) | (overflowInterrupt ? M_EPWM0CBI : 0) | M_PWM0CEN;
 	#else // STC8G2K
 		PWM2CKS = clockSource;
 		PWM2CL = divisor;
 		PWM2CH = divisor >> 8;
 		PWM2IF = 0;
-		DISABLE_EXTENDED_SFR();
 		PWMCFG23 = (PWMCFG23 & 0xf0) | (overflowInterrupt ? M_EPWM2CBI : 0) | M_PWM2CEN;
 	#endif // MCU_SERIES == 'A'
 #else // STC8A8KxxS4A12 and STC15W4K
 	PWM0CKS = clockSource;
 	PWM0CL = divisor;
 	PWM0CH = divisor >> 8;
-	DISABLE_EXTENDED_SFR();
 	PWM0IF = 0;
 	PWMCR = M_ENPWM | (overflowInterrupt ? M_ECBI : 0);
 #endif // MCU_HAS_ENHANCED_PWM == 'G'
 }
 
 void pwmConfigureFaultDetection(PWM_FaultTrigger faultTrigger, PWM_FaultResponse faultResponse, InterruptEnable faultInterrupt) {
-	PWMFD_SFR_ENABLE
 	PWMFD_SFR = faultTrigger | faultResponse | ((faultInterrupt == ENABLE_INTERRUPT) ? 0x08 : 0);
-	PWMFD_SFR_DISABLE
 }
 
 void pwmStopCounter() {
@@ -135,9 +128,7 @@ void pwmStopCounter() {
 #else // STC8A8KxxS4A12 and STC15W4K
 	PWMCR = 0;
 #endif // MCU_HAS_ENHANCED_PWM == 'G'
-	PWMFD_SFR_ENABLE
 	PWMFD_SFR = 0;
-	PWMFD_SFR_DISABLE
 }
 
 static void __pwmSetFlipPoints(PWM_Channel channel, uint16_t flipPoint1, uint16_t flipPoint2) {
@@ -315,7 +306,6 @@ void pwmStartChannel(PWM_Channel channel, OutputLevel initialLevel, PWM_Interrup
 		channelCR |= (initialLevel << P_INI) & M_INI;
 	#endif // MCU_HAS_ENHANCED_PWM != '5'
 	
-	ENABLE_EXTENDED_SFR();
 	__pwmSetFlipPoints(channel, flipPoint1, flipPoint2);
 	
 #if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
@@ -376,8 +366,6 @@ void pwmStartChannel(PWM_Channel channel, OutputLevel initialLevel, PWM_Interrup
 			break;
 		}
 	#endif // MCU_SERIES == 'A'
-	
-	DISABLE_EXTENDED_SFR();
 #else
 	// STC8A8KxxS4A12 and STC15W4K*
 	switch (channel) {
@@ -409,8 +397,6 @@ void pwmStartChannel(PWM_Channel channel, OutputLevel initialLevel, PWM_Interrup
 	#endif // PWM_CHANNELS > 6
 	}
 	
-	DISABLE_EXTENDED_SFR();
-	
 	#if MCU_HAS_ENHANCED_PWM == '5'
 		// STC15W4K*
 		PWMCFG |= initialLevel << channel;
@@ -420,8 +406,6 @@ void pwmStartChannel(PWM_Channel channel, OutputLevel initialLevel, PWM_Interrup
 }
 
 void pwmStopChannel(PWM_Channel channel) {
-	ENABLE_EXTENDED_SFR();
-	
 #if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
 	#if MCU_SERIES == 'A'
 		// STC8A8KxxD4
@@ -480,8 +464,6 @@ void pwmStopChannel(PWM_Channel channel) {
 			break;
 		}
 	#endif // MCU_SERIES == 'A'
-	
-	DISABLE_EXTENDED_SFR();
 #else
 	// STC8A8KxxS4A12 and STC15W4K
 	switch (channel) {
@@ -513,8 +495,6 @@ void pwmStopChannel(PWM_Channel channel) {
 	#endif // PWM_CHANNELS > 6
 	}
 	
-	DISABLE_EXTENDED_SFR();
-	
 	#if MCU_HAS_ENHANCED_PWM == '5'
 		// STC15W4K*
 		PWMCR &= ~(1 << channel);
@@ -523,9 +503,7 @@ void pwmStopChannel(PWM_Channel channel) {
 }
 
 void pwmSetFlipPoints(PWM_Channel channel, uint16_t flipPoint1, uint16_t flipPoint2) {
-	ENABLE_EXTENDED_SFR();
 	__pwmSetFlipPoints(channel, flipPoint1, flipPoint2);
-	DISABLE_EXTENDED_SFR();
 }
 
 void pwmLockChannel(PWM_Channel channel, OutputLevel outputLevel) {
@@ -542,7 +520,6 @@ void pwmLockChannel(PWM_Channel channel, OutputLevel outputLevel) {
 	);
 #else
 	uint8_t lock = outputLevel ? M_HLDH : M_HLDL;
-	ENABLE_EXTENDED_SFR();
 	
 	#if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
 		#if MCU_SERIES == 'A'
@@ -631,8 +608,6 @@ void pwmLockChannel(PWM_Channel channel, OutputLevel outputLevel) {
 			break;
 		}
 	#endif // MCU_HAS_ENHANCED_PWM == 'G'
-	
-	DISABLE_EXTENDED_SFR();
 #endif // MCU_HAS_ENHANCED_PWM == '5'
 }
 
@@ -641,8 +616,6 @@ void pwmLockChannel(PWM_Channel channel, OutputLevel outputLevel) {
 #pragma disable_warning 85
 void pwmUnlockChannel(PWM_Channel channel) {
 #if MCU_HAS_ENHANCED_PWM != '5'
-	ENABLE_EXTENDED_SFR();
-	
 	#if MCU_HAS_ENHANCED_PWM == 'G' // STC8G2K and STC8A8KxxD4
 		#if MCU_SERIES == 'A'
 		// STC8A8KxxD4
@@ -730,8 +703,6 @@ void pwmUnlockChannel(PWM_Channel channel) {
 			break;
 		}
 	#endif // MCU_HAS_ENHANCED_PWM == 'G'
-	
-	DISABLE_EXTENDED_SFR();
 #endif // MCU_HAS_ENHANCED_PWM != '5'
 }
 #pragma restore

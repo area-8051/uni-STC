@@ -49,6 +49,17 @@
  * 
  * **IMPORTANT:** You MUST define both pwmOnCounterInterrupt() and
  * pwmOnChannelInterrupt(), even if you don't use them.
+ * 
+ * **IMPORTANT:** Some functionalities need to be individually enabled
+ * via the following macros when needed:
+ * 
+ * HAL_PWM_API_DISABLE             pwmDisableCounter
+ * HAL_PWM_API_FAULT_DETECTION     pwmConfigureFaultDetection
+ * HAL_PWM_API_EXTERNAL_TRIGGER    pwmConfigureExternalTrigger
+ * HAL_PWM_API_DEAD_TIME           pwmConfigureDeadTime
+ * HAL_PWM_API_STOP                pwmStopPWM
+ * HAL_PWM_API_LOCK                pwmLockPWM
+ * HAL_PWM_API_QUADRATURE_ENCODER  pwmInitialiseQuadratureEncoder
  */
 
 #include <hal-defs.h>
@@ -127,6 +138,17 @@ typedef enum {
 	PWM_SINGLE_PULSE = 1,
 } PWM_CounterRunMode;
 
+/**
+ * When mode == PWM_EXTERNAL_CLOCK,
+ *     counterFreq => prescaler value
+ *     signalFreq  => reload value
+ * When mode == PWM_EVENT_COUNTER1 || PWM_EVENT_COUNTER2 || PWM_QUADRATURE_ENCODER,
+ *     no prescaler
+ *     signalFreq => reload value
+ * Other modes,
+ *     MCU_FREQ / counterFreq => prescaler value
+ *     counterFreq / signalFreq  => reload value
+ */
 uint16_t pwmConfigureCounter(
 	PWM_Counter counter, 
 	uint32_t counterFreq, 
@@ -143,7 +165,9 @@ uint16_t pwmConfigureCounter(
 
 void pwmEnableCounter(PWM_Counter counter);
 
+#ifdef HAL_PWM_API_DISABLE
 void pwmDisableCounter(PWM_Counter counter);
+#endif // HAL_PWM_API_DISABLE
 
 typedef enum {
 	PWM_Channel0 = 0,
@@ -237,6 +261,11 @@ void pwmConfigureOutput(
 	PWM_OutputEnable outputEnable
 );
 
+typedef enum {
+	PWM_CAPTURE_ON_RISING_EDGE = 0,
+	PWM_CAPTURE_ON_FALLING_EDGE,
+} PWM_CaptureEdge;
+
 /**
  * PWM_CAPTURE_SAME_PIN is the pin corresponding to the channel.
  * PWM_CAPTURE_OTHER_PIN is the other pin in the same pair.
@@ -251,20 +280,16 @@ typedef enum {
 	PWM_CAPTURE_TRC,
 } PWM_CaptureSource;
 
-/**
- * Configures the input pin of a capture channel.
- * Must be called after pwmStartCapture().
- */
-void pwmConfigureInput(
-	PWM_Channel channel, 
-	uint8_t pinSwitch, 
-	PWM_Polarity polarity,
-	PWM_CaptureSource captureSource,
-	PWM_Filter filter
-);
+typedef enum {
+	// Calculates time elapsed between consecutive events on same pin.
+	PWM_REFERENCE_SAME_PIN = 0,
+	// Calculates time elapsed between event on same pin - event on other pin.
+	PWM_REFERENCE_OTHER_PIN,
+} PWM_CaptureReference;
 
 // ---------------------------------------------------------------------
 
+#ifdef HAL_PWM_API_FAULT_DETECTION
 /**
  * Configures PWM fault detection, aka. "brake".
  */
@@ -293,35 +318,40 @@ void pwmConfigureFaultDetection(
 	PWM_FaultResume faultResume, 
 	InterruptEnable enableInterrupt
 );
+#endif // HAL_PWM_API_FAULT_DETECTION
 
-typedef enum {
-	PWM_DISABLE_EXTERNAL_CLOCK = 0,
-	PWM_ENABLE_EXTERNAL_CLOCK,
-} PWM_ExternalClock;
+#ifdef HAL_PWM_API_EXTERNAL_TRIGGER
+	typedef enum {
+		PWM_DISABLE_EXTERNAL_CLOCK = 0,
+		PWM_ENABLE_EXTERNAL_CLOCK,
+	} PWM_ExternalClock;
 
-typedef enum {
-	PWM_TRIGGER_ON_FALLING_EDGE = 0,
-	PWM_TRIGGER_ON_RISING_EDGE,
-} PWM_TriggerEdge;
+	typedef enum {
+		PWM_TRIGGER_ON_FALLING_EDGE = 0,
+		PWM_TRIGGER_ON_RISING_EDGE,
+	} PWM_TriggerEdge;
 
-typedef enum {
-	PWM_TRIGGER_PRESCALER_DIV_1 = 0,
-	PWM_TRIGGER_PRESCALER_DIV_2,
-	PWM_TRIGGER_PRESCALER_DIV_4,
-	PWM_TRIGGER_PRESCALER_DIV_8,
-} PWM_TriggerPrescaler;
+	typedef enum {
+		PWM_TRIGGER_PRESCALER_DIV_1 = 0,
+		PWM_TRIGGER_PRESCALER_DIV_2,
+		PWM_TRIGGER_PRESCALER_DIV_4,
+		PWM_TRIGGER_PRESCALER_DIV_8,
+	} PWM_TriggerPrescaler;
 
-void pwmConfigureExternalTrigger(
-	PWM_Counter counter, 
-	uint8_t pinSwitch, 
-	PWM_TriggerEdge triggerEdge,
-	PWM_ExternalClock externalClock,
-	PWM_TriggerPrescaler prescaler,
-	PWM_Filter filter,
-	InterruptEnable enableInterrupt
-);
+	void pwmConfigureExternalTrigger(
+		PWM_Counter counter, 
+		uint8_t pinSwitch, 
+		PWM_TriggerEdge triggerEdge,
+		PWM_ExternalClock externalClock,
+		PWM_TriggerPrescaler prescaler,
+		PWM_Filter filter,
+		InterruptEnable enableInterrupt
+	);
+#endif // HAL_PWM_API_EXTERNAL_TRIGGER
 
+#ifdef HAL_PWM_API_DEAD_TIME
 void pwmConfigureDeadTime(PWM_Counter counter, uint16_t clockPulses);
+#endif // HAL_PWM_API_DEAD_TIME
 
 void pwmEnableMainOutput(PWM_Counter counter);
 
@@ -337,12 +367,6 @@ void pwmInitialisePWM(
 );
 
 /**
- * Resets the configuration of a PWM channel.
- * pwmInitialisePWM() must be called again to restart the channel.
- */
-void pwmStopPWM(PWM_Channel channel);
-
-/**
  * Changes the duty cycle of a PWM channel.
  * All other configuration parameters remain unchanged.
  * 
@@ -350,28 +374,46 @@ void pwmStopPWM(PWM_Channel channel);
  */
 void pwmSetDutyCycle(PWM_Channel channel, uint16_t ticks);
 
-/**
- * Permanently forces a PWM output in the specified logical level.
- * You will need to call pwmInitialisePWM() to unlock it.
- */
-void pwmLockPWM(PWM_Channel channel, OutputLevel outputLevel);
+#ifdef HAL_PWM_API_STOP
+	/**
+	 * Resets the configuration of a PWM channel.
+	 * pwmInitialisePWM() must be called again to restart the channel.
+	 */
+	void pwmStopPWM(PWM_Channel channel);
+#endif // HAL_PWM_API_STOP
 
+#ifdef HAL_PWM_API_LOCK
+	/**
+	 * Permanently forces a PWM output in the specified logical level.
+	 * You will need to call pwmInitialisePWM() to unlock it.
+	 */
+	void pwmLockPWM(PWM_Channel channel, OutputLevel outputLevel);
+#endif // HAL_PWM_API_LOCK
+
+/**
+ * Calls pwmConfigureInput() internally.
+ */
 void pwmInitialiseCapture(
 	PWM_Channel channel, 
 	uint8_t pinSwitch, 
-	PWM_Polarity polarity, 
-	PWM_Filter filter
+	PWM_CaptureEdge captureEdge, 
+	PWM_CaptureSource captureSource,
+	PWM_Filter filter,
+	PWM_CaptureReference reference
 );
 
+#ifdef HAL_PWM_API_QUADRATURE_ENCODER
 /**
  * Configures the counter, the channel pair and enables the counter.
  */
 void pwmInitialiseQuadratureEncoder(
 	PWM_Channel firstChannel, 
 	uint8_t pinSwitch, 
-	PWM_Polarity polarity, 
+	PWM_CaptureEdge captureEdge, 
 	PWM_Filter filter
 );
+#endif // HAL_PWM_API_QUADRATURE_ENCODER
+
 
 typedef enum {
 	PWM_INTERRUPT_FAULT,
@@ -395,13 +437,14 @@ void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event);
  * 
  * @param channel is the channel which generated the interrupt.
  * @param counterValue is the content of the channel's CCR register.
- * @param countDown is 0 if the counter counts up, != 0 if it counts down.
+ * @param isCountingDown is false if the counter counts up, true if it counts down.
  * 
- * For PWM channels, counterValue and countDown are 0.
- * For Encoder channels, both counterValue and countDown are valid.
- * For Capture channels, counterValue is valid and countDown is irrelevant.
+ * For PWM channels, counterValue and isCountingDown are 0.
+ * For Encoder channels, both counterValue and isCountingDown are valid.
+ * For Capture channels, counterValue is the time elapsed between
+ * 2 consecutive events and isCountingDown is irrelevant.
  */
-void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, uint8_t countDown);
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, bool isCountingDown);
 
 INTERRUPT(pwmA_isr, PWMA_INTERRUPT);
 

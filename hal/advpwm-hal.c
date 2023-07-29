@@ -38,16 +38,38 @@
  */
 
 typedef enum {
-	UNUSED_CHANNEL,
-	PWM_CHANNEL,
-	ENCODER_CHANNEL,
-	CAPTURE_CHANNEL,
+	USAGE_UNUSED,
+	USAGE_PWM,
+	USAGE_ENCODER,
+	USAGE_CAPTURE,
 } PWM_ChannelUsage;
 
-static PWM_ChannelUsage channelUsage[] = {
-	UNUSED_CHANNEL, UNUSED_CHANNEL, UNUSED_CHANNEL, UNUSED_CHANNEL, 
-	UNUSED_CHANNEL, UNUSED_CHANNEL, UNUSED_CHANNEL, UNUSED_CHANNEL, 
+#ifndef PWM_SEGMENT
+	#if HAL_PWM_CHANNELS > 4
+		#define PWM_SEGMENT /* Use default segment */
+	#else
+		// When HAL_PWM_CHANNELS is reduced, we're looking for flash
+		// usage reduction, and for this, we may be tempted to use the 
+		// medium model. It's hence a good idea to use __idata for our 
+		// array so as to save __pdata for the application's variables.
+		#define PWM_SEGMENT __idata
+	#endif // HAL_UARTS > 1
+#endif
+
+static PWM_ChannelUsage PWM_SEGMENT channelUsage[] = {
+	USAGE_UNUSED, 
+#if HAL_PWM_CHANNELS > 1
+	USAGE_UNUSED, 
+#endif
+#if HAL_PWM_CHANNELS > 2
+	USAGE_UNUSED, USAGE_UNUSED, 
+#endif
+#if HAL_PWM_CHANNELS > 4
+	USAGE_UNUSED, USAGE_UNUSED, USAGE_UNUSED, USAGE_UNUSED, 
+#endif
 };
+
+static uint16_t PWM_SEGMENT channelLastCount[HAL_PWM_CHANNELS];
 
 #define PIN_CONFIG_MAX 3
 #define UNSUPPORTED_PIN_SWITCH 0xff
@@ -313,8 +335,6 @@ void pwmConfigureOutput(
 	OutputLevel idleLevel,
 	PWM_OutputEnable outputEnable
 ) {
-	ENABLE_EXTENDED_SFR()
-	
 	PWMA_CCER1 |= (0 << P_CC1P) | (0 << P_CC1NP) | (1 << P_CC1E) | (1 << P_CC1NE);
 	
 	if (pinMode == GPIO_HIGH_IMPEDANCE_MODE) {
@@ -344,59 +364,6 @@ void pwmConfigureOutput(
 	if (ok) {
 		applyPinSwitch(channel, pinSwitch);
 	}
-	
-	DISABLE_EXTENDED_SFR()
-}
-
-void pwmConfigureInput(
-	PWM_Channel channel, 
-	uint8_t pinSwitch, 
-	PWM_Polarity polarity,
-	PWM_CaptureSource captureSource,
-	PWM_Filter filter
-) {
-	ENABLE_EXTENDED_SFR()
-	
-	applyPinSwitch(channel, pinSwitch);
-	configurePin(getChannelPin(channel, pinSwitch, 0), GPIO_HIGH_IMPEDANCE_MODE);
-	uint8_t ccmr = (filter << 4) | captureSource;
-	
-	switch (channel) {
-	case PWM_Channel0:
-		PWMA_CCMR1 = ccmr;
-		break;
-#if HAL_PWM_CHANNELS > 1
-	case PWM_Channel1:
-		PWMA_CCMR2 = ccmr;
-		break;
-#endif
-#if HAL_PWM_CHANNELS > 2
-	case PWM_Channel2:
-		PWMA_CCMR3 = ccmr;
-		break;
-	case PWM_Channel3:
-		PWMA_CCMR4 = ccmr;
-		break;
-#endif
-#if HAL_PWM_CHANNELS > 4
-	case PWM_Channel4:
-		PWMB_CCMR1 = ccmr;
-		break;
-	case PWM_Channel5:
-		PWMB_CCMR2 = ccmr;
-		break;
-	case PWM_Channel6:
-		PWMB_CCMR3 = ccmr;
-		break;
-	case PWM_Channel7:
-		PWMB_CCMR4 = ccmr;
-		break;
-#endif
-	}
-	
-	enableChannel(channel, 0, polarity);
-	
-	DISABLE_EXTENDED_SFR()
 }
 
 /**
@@ -429,8 +396,6 @@ uint16_t pwmConfigureCounter(
 	PWM_UpdateEventEnable updateEventEnable,
 	InterruptEnable comInterrupt
 ) {
-	ENABLE_EXTENDED_SFR()
-	
 	uint16_t prescaler = 0;
 	uint16_t reloadValue = 0;
 	
@@ -517,14 +482,10 @@ uint16_t pwmConfigureCounter(
 #endif
 	}
 	
-	DISABLE_EXTENDED_SFR()
-	
 	return reloadValue + 1;
 }
 
 void pwmEnableMainOutput(PWM_Counter counter) {
-	ENABLE_EXTENDED_SFR()
-	
 	switch (counter) {
 	case PWM_COUNTER_A:
 		PWMA_BKR |= M_MOE;
@@ -536,13 +497,9 @@ void pwmEnableMainOutput(PWM_Counter counter) {
 		break;
 #endif
 	}
-	
-	DISABLE_EXTENDED_SFR()
 }
 
 void pwmEnableCounter(PWM_Counter counter) {
-	ENABLE_EXTENDED_SFR()
-	
 	switch (counter) {
 	case PWM_COUNTER_A:
 		PWMA_CR1 |= M_CEN;
@@ -554,13 +511,10 @@ void pwmEnableCounter(PWM_Counter counter) {
 		break;
 #endif
 	}
-	
-	DISABLE_EXTENDED_SFR()
 }
 
+#ifdef HAL_PWM_API_ENABLE_DISABLE
 void pwmDisableCounter(PWM_Counter counter) {
-	ENABLE_EXTENDED_SFR();
-	
 	switch (counter) {
 	case PWM_COUNTER_A:
 		PWMA_CR1 &= ~M_CEN;
@@ -572,18 +526,16 @@ void pwmDisableCounter(PWM_Counter counter) {
 		break;
 #endif
 	}
-	
-	DISABLE_EXTENDED_SFR();
 }
+#endif // HAL_PWM_API_ENABLE_DISABLE
 
+#ifdef HAL_PWM_API_DEAD_TIME
 /**
  * @param clockPulses is the duration of the dead time expressed in 
  * number of clock pulses on the input of the prescaler, i.e. sysclk
  * unless you use an external PWM clock.
  */
 void pwmConfigureDeadTime(PWM_Counter counter, uint16_t clockPulses) {
-	ENABLE_EXTENDED_SFR()
-	
 	uint8_t dtr = 255;
 	
 	if (clockPulses < 128) {
@@ -607,9 +559,8 @@ void pwmConfigureDeadTime(PWM_Counter counter, uint16_t clockPulses) {
 		break;
 #endif
 	}
-	
-	DISABLE_EXTENDED_SFR()
 }
+#endif // HAL_PWM_API_DEAD_TIME
 
 static void enableChannelInterrupt(PWM_Channel channel) {
 #if HAL_PWM_CHANNELS > 4
@@ -630,8 +581,6 @@ void pwmInitialisePWM(
 	PWM_RegisterUpdate registerUpdateMode,
 	uint16_t ticks
 ) {
-	ENABLE_EXTENDED_SFR()
-	
 	// Channel must be closed before writing to CCMRx
 	closeChannel(channel);
 	
@@ -681,18 +630,15 @@ void pwmInitialisePWM(
 #endif
 	}
 	
-	channelUsage[channel] = PWM_CHANNEL;
+	channelUsage[channel] = USAGE_PWM;
 	
 	if (enableInterrupt == ENABLE_INTERRUPT) {
 		enableChannelInterrupt(channel);
 	}
-	
-	DISABLE_EXTENDED_SFR()
 }
 
+#ifdef HAL_PWM_API_STOP
 void pwmStopPWM(PWM_Channel channel) {
-	ENABLE_EXTENDED_SFR()
-	
 	// OC_M == 0 freezes PWM output.
 	switch (channel) {
 	case PWM_Channel0:
@@ -726,14 +672,12 @@ void pwmStopPWM(PWM_Channel channel) {
 		break;
 #endif
 	}
-	
-	DISABLE_EXTENDED_SFR()
 }
+#endif // HAL_PWM_API_STOP
 
+#ifdef HAL_PWM_API_LOCK
 void pwmLockPWM(PWM_Channel channel, OutputLevel outputLevel) {
 	uint8_t ccmr = (outputLevel == OUTPUT_HIGH) ? (5 << P_OC_M) : (4 << P_OC_M);
-	
-	ENABLE_EXTENDED_SFR()
 	
 	switch (channel) {
 	case PWM_Channel0:
@@ -767,15 +711,12 @@ void pwmLockPWM(PWM_Channel channel, OutputLevel outputLevel) {
 		break;
 #endif
 	}
-	
-	DISABLE_EXTENDED_SFR()
 }
+#endif // HAL_PWM_API_LOCK
 
 void pwmSetDutyCycle(PWM_Channel channel, uint16_t ticks) {
 	uint8_t ticksH = ticks >> 8;
 	uint8_t ticksL = ticks;
-	
-	ENABLE_EXTENDED_SFR()
 	
 	switch (channel) {
 	case PWM_Channel0:
@@ -817,10 +758,9 @@ void pwmSetDutyCycle(PWM_Channel channel, uint16_t ticks) {
 		break;
 #endif
 	}
-	
-	DISABLE_EXTENDED_SFR()
 }
 
+#ifdef HAL_PWM_API_FAULT_DETECTION
 void pwmConfigureFaultDetection(
 	PWM_Counter counter, 
 	PWM_FaultTrigger faultTrigger, 
@@ -838,8 +778,6 @@ void pwmConfigureFaultDetection(
 		| (faultPolarity << P_BKP)
 		| M_BKE
 		| (faultResponse << P_OSSI);
-	
-	ENABLE_EXTENDED_SFR()
 	
 #if HAL_PWM_CHANNELS > 4
 	switch (counter) {
@@ -863,10 +801,10 @@ void pwmConfigureFaultDetection(
 		break;
 	}
 #endif
-	
-	DISABLE_EXTENDED_SFR()
 }
+#endif // HAL_PWM_API_FAULT_DETECTION
 
+#ifdef HAL_PWM_API_EXTERNAL_TRIGGER
 void pwmConfigureExternalTrigger(
 	PWM_Counter counter, 
 	uint8_t pinSwitch, 
@@ -890,8 +828,6 @@ void pwmConfigureExternalTrigger(
 			| (prescaler << P_ETPS)
 			| (filter << P_ETF);
 		
-		ENABLE_EXTENDED_SFR()
-		
 #if HAL_PWM_CHANNELS > 4
 		switch (counter) {
 		case PWM_COUNTER_A:
@@ -914,15 +850,62 @@ void pwmConfigureExternalTrigger(
 			break;
 		}
 #endif
-		
-		DISABLE_EXTENDED_SFR()
 	}
 }
+#endif // HAL_PWM_API_EXTERNAL_TRIGGER
 
+static void configureInput(
+	PWM_Channel channel, 
+	uint8_t pinSwitch, 
+	PWM_CaptureEdge captureEdge,
+	PWM_CaptureSource captureSource,
+	PWM_Filter filter
+) {
+	applyPinSwitch(channel, pinSwitch);
+	configurePin(getChannelPin(channel, pinSwitch, 0), GPIO_BIDIRECTIONAL_MODE);
+	uint8_t ccmr = (filter << 4) | captureSource;
+	
+	switch (channel) {
+	case PWM_Channel0:
+		PWMA_CCMR1 = ccmr;
+		break;
+#if HAL_PWM_CHANNELS > 1
+	case PWM_Channel1:
+		PWMA_CCMR2 = ccmr;
+		break;
+#endif
+#if HAL_PWM_CHANNELS > 2
+	case PWM_Channel2:
+		PWMA_CCMR3 = ccmr;
+		break;
+	case PWM_Channel3:
+		PWMA_CCMR4 = ccmr;
+		break;
+#endif
+#if HAL_PWM_CHANNELS > 4
+	case PWM_Channel4:
+		PWMB_CCMR1 = ccmr;
+		break;
+	case PWM_Channel5:
+		PWMB_CCMR2 = ccmr;
+		break;
+	case PWM_Channel6:
+		PWMB_CCMR3 = ccmr;
+		break;
+	case PWM_Channel7:
+		PWMB_CCMR4 = ccmr;
+		break;
+#endif
+	}
+	
+	enableChannel(channel, 0, captureEdge);
+}
+
+#ifdef HAL_PWM_API_QUADRATURE_ENCODER
 void pwmInitialiseQuadratureEncoder(
 	PWM_Channel firstChannel, 
 	uint8_t pinSwitch, 
-	PWM_Polarity polarity, 
+	PWM_CaptureEdge captureEdge, 
 	PWM_Filter filter
 ) {
 #if HAL_PWM_CHANNELS > 4
@@ -960,53 +943,55 @@ void pwmInitialiseQuadratureEncoder(
 		DISABLE_INTERRUPT
 	);
 
-	pwmConfigureInput(
+	configureInput(
 		firstChannel, 
 		pinSwitch,
-		polarity,
+		captureEdge,
 		PWM_CAPTURE_SAME_PIN,
 		filter
 	);
 
-	pwmConfigureInput(
+	configureInput(
 		secondChannel, 
 		pinSwitch,
-		polarity,
+		captureEdge,
 		PWM_CAPTURE_SAME_PIN,
 		filter
 	);
 	
-	channelUsage[firstChannel] = PWM_CHANNEL;
-	channelUsage[secondChannel] = PWM_CHANNEL;
+	channelUsage[firstChannel] = USAGE_ENCODER;
+	channelUsage[secondChannel] = USAGE_ENCODER;
 	
 	enableChannelInterrupt(firstChannel);
 	
 	pwmEnableCounter(counter);
 }
+#endif // HAL_PWM_API_QUADRATURE_ENCODER
 
 void pwmInitialiseCapture(
 	PWM_Channel channel, 
 	uint8_t pinSwitch, 
-	PWM_Polarity polarity, 
-	PWM_Filter filter
+	PWM_CaptureEdge captureEdge, 
+	PWM_CaptureSource captureSource,
+	PWM_Filter filter,
+	PWM_CaptureReference reference
 ) {
-	pwmConfigureInput(
+	configureInput(
 		channel, 
 		pinSwitch,
-		polarity,
-		PWM_CAPTURE_SAME_PIN,
+		captureEdge,
+		captureSource,
 		filter
 	);
 
-	channelUsage[channel] = CAPTURE_CHANNEL;
+	channelUsage[channel] = USAGE_CAPTURE | (reference << 4);
+	channelLastCount[channel] = 0;
 	enableChannelInterrupt(channel);
 }
 
 INTERRUPT(pwmA_isr, PWMA_INTERRUPT) {
 	uint8_t channel = 255;
 	uint8_t event = 255;
-	
-	ENABLE_EXTENDED_SFR()
 	
 	if (PWMA_SR1 & M_CC1IF) {
 		PWMA_SR1 &= ~M_CC1IF;
@@ -1056,7 +1041,9 @@ INTERRUPT(pwmA_isr, PWMA_INTERRUPT) {
 	}
 	
 	if (channel != 255) {
-		if (channelUsage[channel] == PWM_CHANNEL) {
+		PWM_ChannelUsage usage = channelUsage[channel];
+		
+		if (usage == USAGE_PWM) {
 			pwmOnChannelInterrupt(channel, 0, 0);
 		} else {
 			uint16_t counterValue = 0;
@@ -1084,24 +1071,47 @@ INTERRUPT(pwmA_isr, PWMA_INTERRUPT) {
 #endif
 			}
 			
-			uint8_t countDown = PWMA_CR1 & M_DIR;
-			pwmOnChannelInterrupt(channel, counterValue, countDown);
+#if HAL_PWM_CHANNELS == 1
+			uint16_t lastCount = channelLastCount[channel];
+#else
+			uint16_t lastCount = 0;
+			
+			if ((usage >> 4) == PWM_REFERENCE_SAME_PIN) {
+				lastCount = channelLastCount[channel];
+			} else {
+				switch (channel) {
+				case PWM_Channel0:
+					lastCount = channelLastCount[PWM_Channel1];
+					break;
+				case PWM_Channel1:
+					lastCount = channelLastCount[PWM_Channel0];
+					break;
+#if HAL_PWM_CHANNELS > 2
+				case PWM_Channel2:
+					lastCount = channelLastCount[PWM_Channel3];
+					break;
+				case PWM_Channel3:
+					lastCount = channelLastCount[PWM_Channel2];
+					break;
+#endif // HAL_PWM_CHANNELS > 2
+				}
+			}
+#endif // HAL_PWM_CHANNELS == 1
+			
+			channelLastCount[channel] = counterValue;
+			pwmOnChannelInterrupt(channel, counterValue - lastCount, PWMA_CR1 & M_DIR);
 		}
 	}
 	
 	if (event != 255) {
 		pwmOnCounterInterrupt(PWM_COUNTER_A, event);
 	}
-	
-	DISABLE_EXTENDED_SFR()
 }
 
 #if HAL_PWM_CHANNELS > 4
 INTERRUPT(pwmB_isr, PWMB_INTERRUPT) {
 	uint8_t channel = 255;
 	uint8_t event = 255;
-	
-	ENABLE_EXTENDED_SFR()
 	
 	if (PWMB_SR1 & M_CC5IF) {
 		PWMB_SR1 &= ~M_CC5IF;
@@ -1147,7 +1157,9 @@ INTERRUPT(pwmB_isr, PWMB_INTERRUPT) {
 	}
 	
 	if (channel != 255) {
-		if (channelUsage[channel] == PWM_CHANNEL) {
+		PWM_ChannelUsage usage = channelUsage[channel];
+		
+		if (usage == USAGE_PWM) {
 			pwmOnChannelInterrupt(channel, 0, 0);
 		} else {
 			uint16_t counterValue = 0;
@@ -1171,15 +1183,34 @@ INTERRUPT(pwmB_isr, PWMB_INTERRUPT) {
 				break;
 			}
 			
-			uint8_t countDown = PWMB_CR1 & M_DIR;
-			pwmOnChannelInterrupt(channel, counterValue, countDown);
+			uint16_t lastCount = 0;
+			
+			if ((usage >> 4) == PWM_REFERENCE_SAME_PIN) {
+				lastCount = channelLastCount[channel];
+			} else {
+				switch (channel) {
+				case PWM_Channel4:
+					lastCount = channelLastCount[PWM_Channel5];
+					break;
+				case PWM_Channel5:
+					lastCount = channelLastCount[PWM_Channel4];
+					break;
+				case PWM_Channel6:
+					lastCount = channelLastCount[PWM_Channel7];
+					break;
+				case PWM_Channel7:
+					lastCount = channelLastCount[PWM_Channel6];
+					break;
+				}
+			}
+			
+			channelLastCount[channel] = counterValue;
+			pwmOnChannelInterrupt(channel, counterValue - lastCount, PWMB_CR1 & M_DIR);
 		}
 	}
 	
 	if (event != 255) {
 		pwmOnCounterInterrupt(PWM_COUNTER_B, event);
 	}
-	
-	DISABLE_EXTENDED_SFR()
 }
 #endif

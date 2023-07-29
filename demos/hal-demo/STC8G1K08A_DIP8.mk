@@ -93,6 +93,7 @@ SRCS := \
 	$(HAL_DIR)/serial-console.c \
 	$(HAL_DIR)/timer-hal.c \
 	$(HAL_DIR)/uart-hal.c \
+	glow-pca.c \
 	main.c
 
 CONSOLE_BAUDRATE := 57600

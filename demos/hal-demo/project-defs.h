@@ -128,9 +128,9 @@
 // -------------+-----------------
 // All          | P3.3
 
-#define BLINKING_PIN GPIO_PIN3
+#define BLINK_PIN GPIO_PIN3
 // Delay in milliseconds.
-#define BLINKING_HALF_PERIOD 250
+#define BLINK_HALF_PERIOD 250
 
 #ifdef MCU_HAS_PCA
 	// 3. The MCU will glow an LED connected to a PCA CCP pin.
@@ -145,15 +145,15 @@
 	// STC12C5AxxS2 | P1.3
 
 	// Let's use 8-bit PWM mode, all MCU have it
-	#define PCA_GLOWING_PWM_BITS 8
+	#define PCA_GLOW_PWM_BITS 8
 
 	// All MCU have this pin configuration
-	#define PCA_GLOWING_PIN_CONFIG 0
+	#define PCA_GLOW_PIN_CONFIG 0
 
 	// All MCU have CCP0
-	#define PCA_GLOWING_CHANNEL PCA_CHANNEL0
-	#define PCA_GLOWING_PWM_FREQ 100UL
-	#define PCA_GLOWING_COUNTER_FREQ ((1 << PCA_GLOWING_PWM_BITS) * PCA_GLOWING_PWM_FREQ)
+	#define PCA_GLOW_CHANNEL PCA_CHANNEL0
+	#define PCA_GLOW_PWM_FREQ 100UL
+	#define PCA_GLOW_COUNTER_FREQ ((1 << PCA_GLOW_PWM_BITS) * PCA_GLOW_PWM_FREQ)
 #endif // MCU_HAS_PCA
 
 #ifdef MCU_HAS_ENHANCED_PWM
@@ -166,9 +166,9 @@
 	// STC8G2KxxSx  | P2.0
 	// STC15W4KxxS4 | P3.7
 
-	#define PWM_GLOWING_CHANNEL PWM_Channel0
+	#define PWM_GLOW_CHANNEL PWM_Channel0
 	// All MCU have this pin configuration
-	#define PWM_GLOWING_PIN_CONFIG 0
+	#define PWM_GLOW_PIN_CONFIG 0
 #endif // MCU_HAS_ENHANCED_PWM
 
 #ifdef MCU_HAS_ADVANCED_PWM
@@ -179,11 +179,11 @@
 	// -------------+-----------------
 	// All STC8H    | P1.0
 
-	#define PWM_GLOWING_SIGNAL_FREQ 100UL
-	#define PWM_GLOWING_COUNTER PWM_COUNTER_A
-	#define PWM_GLOWING_CHANNEL PWM_Channel0
+	#define PWM_GLOW_SIGNAL_FREQ 100UL
+	#define PWM_GLOW_COUNTER PWM_COUNTER_A
+	#define PWM_GLOW_CHANNEL PWM_Channel0
 	// All MCU have this pin configuration
-	#define PWM_GLOWING_PIN_CONFIG 0
+	#define PWM_GLOW_PIN_CONFIG 0
 #endif // MCU_HAS_ADVANCED_PWM
 
 #ifdef SMALL_FLASH

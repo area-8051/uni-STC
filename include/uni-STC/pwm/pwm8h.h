@@ -387,9 +387,9 @@ SFRX(PWMA_CNTRH, 0xFECE);
 // SFR PWMA_CNTRL: PWMA counter low byte
 SFRX(PWMA_CNTRL, 0xFECF);
 
-// SFR PWMA_PSCRH: PWMA prescale high byte
+// SFR PWMA_PSCRH: PWMA prescaler high byte
 SFRX(PWMA_PSCRH, 0xFED0);
-// SFR PWMA_PSCRL: PWMA prescale low byte
+// SFR PWMA_PSCRL: PWMA prescaler low byte
 SFRX(PWMA_PSCRL, 0xFED1);
 
 // SFR PWMA_ARRH: PWMA auto-reload register high byte
@@ -617,9 +617,9 @@ SFRX(PWMB_CNTRH, 0xFEEE);
 // SFR PWMB_CNTRL: PWMB counter low byte
 SFRX(PWMB_CNTRL, 0xFEEF);
 
-// SFR PWMB_PSCRH: PWMB prescale high byte
+// SFR PWMB_PSCRH: PWMB prescaler high byte
 SFRX(PWMB_PSCRH, 0xFEF0);
-// SFR PWMB_PSCRL: PWMB prescale low byte
+// SFR PWMB_PSCRL: PWMB prescaler low byte
 SFRX(PWMB_PSCRL, 0xFEF1);
 
 // SFR PWMB_ARRH: PWMB auto-reload register high byte

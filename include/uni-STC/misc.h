@@ -258,33 +258,20 @@ SFR(BUS_SPEED, 0xA1);
 #endif // MCU_HAS_WAKE_UP_TIMER
 
 /**
- * On MCU having extended SFR, switching the corresponding bit in P_SW2
- * can be costly. By default, we enable extended SFR at the very 
- * beginning of main() and never disable them. If for some reason, you
- * want to enable extended SFR only when needed, you can define the 
- * ENABLE_XSFR_SWITCHING macro before including stcmcu.h.
+ * We enable extended SFR at the very beginning of main() and never 
+ * disable them.
  * 
- * IMPORTANT - IMPORTANT - IMPORTANT - IMPORTANT - IMPORTANT - IMPORTANT
- * 
- * In all circumstances, you ***MUST*** place the INIT_EXTENDED_SFR()
+ * In order to do this, you ***MUST*** place the INIT_EXTENDED_SFR()
  * immediately after the opening curly brace of main().
  * 
  * Note: doing so even with an MCU which doesn't have extended SFR will
  * make porting your code more straightforward if you ever need to.
  */
 
-#if defined(MCU_HAS_EAXSFR) && !defined(ENABLE_XSFR_SWITCHING)
+#if defined(MCU_HAS_EAXSFR)
 	#define INIT_EXTENDED_SFR()  P_SW2 |= M_EAXSFR;
 #else
 	#define INIT_EXTENDED_SFR() 
-#endif
-
-#if defined(MCU_HAS_EAXSFR) && defined(ENABLE_XSFR_SWITCHING)
-	#define ENABLE_EXTENDED_SFR()  P_SW2 |= M_EAXSFR;
-	#define DISABLE_EXTENDED_SFR() P_SW2 &= ~M_EAXSFR;
-#else
-	#define ENABLE_EXTENDED_SFR() 
-	#define DISABLE_EXTENDED_SFR() 
 #endif
 
 #endif // _UNISTC_MISC_H

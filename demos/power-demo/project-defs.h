@@ -31,7 +31,7 @@
 #define _PROJECT_DEFS_H
 
 #ifdef __SDCC
-	#include <STC/8H1Kxx/TSSOP20.h>
+	#include <STC/8H1K08-17/TSSOP20.h>
 #else
 	#include <uni-STC/uni-STC.h>
 #endif // __SDCC

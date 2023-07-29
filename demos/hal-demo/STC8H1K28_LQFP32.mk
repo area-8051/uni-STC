@@ -68,7 +68,7 @@ MEMORY_SIZES := \
 	--xram-loc 0 \
 	--xram-size 1024 \
 	--stack-size $(STACK_SIZE) \
-	--code-size 28672
+	--code-size 28160
 
 MEMORY_MODEL := --model-large
 

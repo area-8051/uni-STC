@@ -51,7 +51,7 @@
  * pwmOnChannelInterrupt(), even if you don't use them.
  * 
  * **IMPORTANT:** Some functionalities need to be individually enabled
- * via the following macros when needed:
+ * via the following macros when needed (#define in project-defs.h):
  * 
  * HAL_PWM_API_DISABLE             pwmDisableCounter
  * HAL_PWM_API_FAULT_DETECTION     pwmConfigureFaultDetection
@@ -202,8 +202,8 @@ typedef enum {
 } PWM_Filter;
 
 typedef enum {
-	PWM_ACTIVE_LOW = 0,
-	PWM_ACTIVE_HIGH,
+	PWM_ACTIVE_HIGH = 0,
+	PWM_ACTIVE_LOW,
 } PWM_Polarity;
 
 /**
@@ -440,7 +440,7 @@ void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event);
  * @param isCountingDown is false if the counter counts up, true if it counts down.
  * 
  * For PWM channels, counterValue and isCountingDown are 0.
- * For Encoder channels, both counterValue and isCountingDown are valid.
+ * For Encoder channels, counterValue is 0 and isCountingDown is valid.
  * For Capture channels, counterValue is the time elapsed between
  * 2 consecutive events and isCountingDown is irrelevant.
  */

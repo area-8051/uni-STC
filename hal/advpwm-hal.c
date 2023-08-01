@@ -180,11 +180,11 @@ static void applyPinSwitch(PWM_Channel channel, uint8_t pinSwitch) {
 #if HAL_PWM_CHANNELS > 4
 	if (channel < PWM_Channel4) {
 #endif
-		PWMA_PS = (PWMA_PS & (3 << channel)) | (pinSwitch << channel);
+		PWMA_PS = (PWMA_PS & ~(3 << channel)) | (pinSwitch << channel);
 #if HAL_PWM_CHANNELS > 4
 	} else {
 		channel -= 8;
-		PWMB_PS = (PWMB_PS & (3 << channel)) | (pinSwitch << channel);
+		PWMB_PS = (PWMB_PS & ~(3 << channel)) | (pinSwitch << channel);
 	}
 #endif
 }
@@ -202,74 +202,43 @@ static void enableOutput(PWM_Channel channel, uint8_t offset) {
 }
 
 static void enableChannel(PWM_Channel channel, uint8_t offset, PWM_Polarity polarity) {
+	bool reg2 = false;
+	uint8_t bitVal = (polarity << 1) | 1;
+	
 #if HAL_PWM_CHANNELS > 4
 	if (channel < PWM_Channel4) {
 #endif
-		switch (channel) {
-		case PWM_Channel0:
-			PWMA_CCER1 |= offset ? M_CC1NE : M_CC1E;
-			
-			if (polarity == PWM_ACTIVE_LOW) {
-				PWMA_CCER1 |= offset ? M_CC1NP : M_CC1P;
-			}
-			break;
-#if HAL_PWM_CHANNELS > 1
-		case PWM_Channel1:
-			PWMA_CCER1 |= offset ? M_CC2NE : M_CC2E;
-			
-			if (polarity == PWM_ACTIVE_LOW) {
-				PWMA_CCER1 |= offset ? M_CC2NP : M_CC2P;
-			}
-			break;
-#endif
-#if HAL_PWM_CHANNELS > 2
-		case PWM_Channel2:
-			PWMA_CCER2 |= offset ? M_CC3NE : M_CC3E;
-			
-			if (polarity == PWM_ACTIVE_LOW) {
-				PWMA_CCER2 |= offset ? M_CC3NP : M_CC3P;
-			}
-			break;
-		case PWM_Channel3:
-			PWMA_CCER2 |= offset ? M_CC4NE : M_CC4E;
-			
-			if (polarity == PWM_ACTIVE_LOW) {
-				PWMA_CCER2 |= offset ? M_CC4NP : M_CC4P;
-			}
-			break;
-#endif
+		uint8_t bitPos = (channel + offset) << 1;
+		
+		if (bitPos > 7) {
+			bitPos -= 8;
+			reg2 = true;
+		}
+		
+		uint8_t bitMask = ~(3 << bitPos);
+		bitVal <<= bitPos;
+		
+		if (reg2) {
+			PWMA_CCER2 = (PWMA_CCER2 & bitMask) | bitVal;
+		} else {
+			PWMA_CCER1 = (PWMA_CCER1 & bitMask) | bitVal;
 		}
 #if HAL_PWM_CHANNELS > 4
 	} else {
-		switch (channel) {
-		case PWM_Channel4:
-			PWMB_CCER1 |= M_CC5E;
-			
-			if (polarity == PWM_ACTIVE_LOW) {
-				PWMB_CCER1 |= M_CC5P;
-			}
-			break;
-		case PWM_Channel5:
-			PWMB_CCER1 |= M_CC6E;
-			
-			if (polarity == PWM_ACTIVE_LOW) {
-				PWMB_CCER1 |= M_CC6P;
-			}
-			break;
-		case PWM_Channel6:
-			PWMB_CCER2 |= M_CC7E;
-			
-			if (polarity == PWM_ACTIVE_LOW) {
-				PWMB_CCER2 |= M_CC7P;
-			}
-			break;
-		case PWM_Channel7:
-			PWMB_CCER2 |= M_CC8E;
-			
-			if (polarity == PWM_ACTIVE_LOW) {
-				PWMB_CCER2 |= M_CC8P;
-			}
-			break;
+		uint8_t bitPos = (channel - PWM_Channel4) << 1;
+		
+		if (bitPos > 7) {
+			bitPos -= 8;
+			reg2 = true;
+		}
+		
+		uint8_t bitMask = ~(3 << bitPos);
+		bitVal <<= bitPos;
+		
+		if (reg2) {
+			PWMB_CCER2 = (PWMB_CCER2 & bitMask) | bitVal;
+		} else {
+			PWMB_CCER1 = (PWMB_CCER1 & bitMask) | bitVal;
 		}
 	}
 #endif
@@ -630,7 +599,7 @@ void pwmInitialisePWM(
 #endif
 	}
 	
-	channelUsage[channel] = USAGE_PWM;
+	channelUsage[channel >> 1] = USAGE_PWM;
 	
 	if (enableInterrupt == ENABLE_INTERRUPT) {
 		enableChannelInterrupt(channel);
@@ -771,7 +740,7 @@ void pwmConfigureFaultDetection(
 ) {
 	uint8_t pinSwitch = (faultTrigger == PWM_FAULT_COMPARATOR) ? 1 : 0;
 	uint8_t pin = __faultPinConfigurations[pinSwitch][counter];
-	configurePin(pin, GPIO_HIGH_IMPEDANCE_MODE);
+	configurePin(pin, GPIO_BIDIRECTIONAL_MODE);
 	uint8_t bkr = 
 		M_MOE
 		| (faultResume << P_AOE)
@@ -821,7 +790,7 @@ void pwmConfigureExternalTrigger(
 	uint8_t pin = __triggerPinConfigurations[pinSwitch][counter];
 	
 	if (pin != UNSUPPORTED_PIN_SWITCH) {
-		configurePin(pin, GPIO_HIGH_IMPEDANCE_MODE);
+		configurePin(pin, GPIO_BIDIRECTIONAL_MODE);
 		uint8_t etr = 
 			(triggerEdge << P_ETP)
 			| (externalClock << P_ECE)
@@ -913,7 +882,7 @@ void pwmInitialiseQuadratureEncoder(
 #else
 	PWM_Counter counter = PWM_COUNTER_A;
 #endif
-	PWM_Channel secondChannel = firstChannel + 1;
+	PWM_Channel secondChannel = firstChannel + 2;
 	
 	switch (firstChannel) {
 	case PWM_Channel1:
@@ -925,7 +894,7 @@ void pwmInitialiseQuadratureEncoder(
 	case PWM_Channel7:
 #endif
 		// Both channels must belong to the same pair.
-		secondChannel = firstChannel - 1;
+		secondChannel = firstChannel - 2;
 		break;
 	}
 	
@@ -959,9 +928,10 @@ void pwmInitialiseQuadratureEncoder(
 		filter
 	);
 	
-	channelUsage[firstChannel] = USAGE_ENCODER;
-	channelUsage[secondChannel] = USAGE_ENCODER;
+	channelUsage[firstChannel >> 1] = USAGE_ENCODER;
+	channelUsage[secondChannel >> 1] = USAGE_ENCODER;
 	
+	// We only want interrupts on the first channel.
 	enableChannelInterrupt(firstChannel);
 	
 	pwmEnableCounter(counter);
@@ -984,8 +954,9 @@ void pwmInitialiseCapture(
 		filter
 	);
 
-	channelUsage[channel] = USAGE_CAPTURE | (reference << 4);
-	channelLastCount[channel] = 0;
+	uint8_t channelIndex = channel >> 1;
+	channelUsage[channelIndex] = USAGE_CAPTURE | (reference << 4);
+	channelLastCount[channelIndex] = 0;
 	enableChannelInterrupt(channel);
 }
 
@@ -1001,19 +972,21 @@ INTERRUPT(pwmA_isr, PWMA_INTERRUPT) {
 #if HAL_PWM_CHANNELS > 1
 	if (PWMA_SR1 & M_CC2IF) {
 		PWMA_SR1 &= ~M_CC2IF;
-		channel = PWM_Channel1;
+		// When several interrupt flags are set, the lowest channel takes precedence.
+		// This can happen in encoder mode.
+		channel = (channel == 255) ? PWM_Channel1 : channel;
 	}
 #endif
 	
 #if HAL_PWM_CHANNELS > 2
 	if (PWMA_SR1 & M_CC3IF) {
 		PWMA_SR1 &= ~M_CC3IF;
-		channel = PWM_Channel2;
+		channel = (channel == 255) ? PWM_Channel2 : channel;
 	}
 	
 	if (PWMA_SR1 & M_CC4IF) {
 		PWMA_SR1 &= ~M_CC4IF;
-		channel = PWM_Channel3;
+		channel = (channel == 255) ? PWM_Channel3 : channel;
 	}
 #endif
 	
@@ -1041,65 +1014,78 @@ INTERRUPT(pwmA_isr, PWMA_INTERRUPT) {
 	}
 	
 	if (channel != 255) {
-		PWM_ChannelUsage usage = channelUsage[channel];
+		uint8_t channelIndex = channel >> 1;
+		PWM_ChannelUsage usage = channelUsage[channelIndex];
 		
-		if (usage == USAGE_PWM) {
-			pwmOnChannelInterrupt(channel, 0, 0);
-		} else {
-			uint16_t counterValue = 0;
-			
-			switch (channel) {
-			case PWM_Channel0:
-				counterValue = PWMA_CCR1H << 8;
-				counterValue |= PWMA_CCR1L;
-				break;
-#if HAL_PWM_CHANNELS > 1
-			case PWM_Channel1:
-				counterValue = PWMA_CCR2H << 8;
-				counterValue |= PWMA_CCR2L;
-				break;
-#endif
-#if HAL_PWM_CHANNELS > 2
-			case PWM_Channel2:
-				counterValue = PWMA_CCR3H << 8;
-				counterValue |= PWMA_CCR3L;
-				break;
-			case PWM_Channel3:
-				counterValue = PWMA_CCR4H << 8;
-				counterValue |= PWMA_CCR4L;
-				break;
-#endif
-			}
-			
-#if HAL_PWM_CHANNELS == 1
-			uint16_t lastCount = channelLastCount[channel];
-#else
-			uint16_t lastCount = 0;
-			
-			if ((usage >> 4) == PWM_REFERENCE_SAME_PIN) {
-				lastCount = channelLastCount[channel];
-			} else {
+		switch (usage) {
+		case USAGE_PWM:
+			pwmOnChannelInterrupt(channel, 0, false);
+			break;
+		
+		case USAGE_UNUSED:
+			break;
+		
+		case USAGE_ENCODER:
+			pwmOnChannelInterrupt(channel, 0, PWMA_CR1 & M_DIR);
+			break;
+		
+		default: { // Capture
+				uint16_t counterValue = 0;
+				
 				switch (channel) {
 				case PWM_Channel0:
-					lastCount = channelLastCount[PWM_Channel1];
+					counterValue = PWMA_CCR1H << 8;
+					counterValue |= PWMA_CCR1L;
 					break;
+#if HAL_PWM_CHANNELS > 1
 				case PWM_Channel1:
-					lastCount = channelLastCount[PWM_Channel0];
+					counterValue = PWMA_CCR2H << 8;
+					counterValue |= PWMA_CCR2L;
 					break;
+#endif
 #if HAL_PWM_CHANNELS > 2
 				case PWM_Channel2:
-					lastCount = channelLastCount[PWM_Channel3];
+					counterValue = PWMA_CCR3H << 8;
+					counterValue |= PWMA_CCR3L;
 					break;
 				case PWM_Channel3:
-					lastCount = channelLastCount[PWM_Channel2];
+					counterValue = PWMA_CCR4H << 8;
+					counterValue |= PWMA_CCR4L;
 					break;
-#endif // HAL_PWM_CHANNELS > 2
+#endif
 				}
-			}
+				
+#if HAL_PWM_CHANNELS == 1
+				uint16_t lastCount = channelLastCount[channelIndex];
+#else
+				uint16_t lastCount = 0;
+				
+				if ((usage >> 4) == PWM_REFERENCE_SAME_PIN) {
+					lastCount = channelLastCount[channelIndex];
+				} else {
+					switch (channel) {
+					case PWM_Channel0:
+						lastCount = channelLastCount[PWM_Channel1 >> 1];
+						break;
+					case PWM_Channel1:
+						lastCount = channelLastCount[PWM_Channel0 >> 1];
+						break;
+#if HAL_PWM_CHANNELS > 2
+					case PWM_Channel2:
+						lastCount = channelLastCount[PWM_Channel3 >> 1];
+						break;
+					case PWM_Channel3:
+						lastCount = channelLastCount[PWM_Channel2 >> 1];
+						break;
+#endif // HAL_PWM_CHANNELS > 2
+					}
+				}
 #endif // HAL_PWM_CHANNELS == 1
-			
-			channelLastCount[channel] = counterValue;
-			pwmOnChannelInterrupt(channel, counterValue - lastCount, PWMA_CR1 & M_DIR);
+				
+				channelLastCount[channelIndex] = counterValue;
+				pwmOnChannelInterrupt(channel, counterValue - lastCount, false);
+			}
+			break;
 		}
 	}
 	
@@ -1120,17 +1106,19 @@ INTERRUPT(pwmB_isr, PWMB_INTERRUPT) {
 	
 	if (PWMB_SR1 & M_CC6IF) {
 		PWMB_SR1 &= ~M_CC6IF;
-		channel = PWM_Channel5;
+		// When several interrupt flags are set, the lowest channel takes precedence.
+		// This can happen in encoder mode.
+		channel = (channel == 255) ? PWM_Channel5 : channel;
 	}
 	
 	if (PWMB_SR1 & M_CC7IF) {
 		PWMB_SR1 &= ~M_CC7IF;
-		channel = PWM_Channel6;
+		channel = (channel == 255) ? PWM_Channel6 : channel;
 	}
 	
 	if (PWMB_SR1 & M_CC8IF) {
 		PWMB_SR1 &= ~M_CC8IF;
-		channel = PWM_Channel7;
+		channel = (channel == 255) ? PWM_Channel7 : channel;
 	}
 	
 	if (PWMB_SR1 & M_TIF) {
@@ -1157,55 +1145,68 @@ INTERRUPT(pwmB_isr, PWMB_INTERRUPT) {
 	}
 	
 	if (channel != 255) {
-		PWM_ChannelUsage usage = channelUsage[channel];
+		uint8_t channelIndex = channel >> 1;
+		PWM_ChannelUsage usage = channelUsage[channelIndex];
 		
-		if (usage == USAGE_PWM) {
-			pwmOnChannelInterrupt(channel, 0, 0);
-		} else {
-			uint16_t counterValue = 0;
-			
-			switch (channel) {
-			case PWM_Channel4:
-				counterValue = PWMB_CCR1H << 8;
-				counterValue |= PWMB_CCR1L;
-				break;
-			case PWM_Channel5:
-				counterValue = PWMB_CCR2H << 8;
-				counterValue |= PWMB_CCR2L;
-				break;
-			case PWM_Channel6:
-				counterValue = PWMB_CCR3H << 8;
-				counterValue |= PWMB_CCR3L;
-				break;
-			case PWM_Channel7:
-				counterValue = PWMB_CCR4H << 8;
-				counterValue |= PWMB_CCR4L;
-				break;
-			}
-			
-			uint16_t lastCount = 0;
-			
-			if ((usage >> 4) == PWM_REFERENCE_SAME_PIN) {
-				lastCount = channelLastCount[channel];
-			} else {
+		switch (usage) {
+		case USAGE_PWM:
+			pwmOnChannelInterrupt(channel, 0, false);
+			break;
+		
+		case USAGE_UNUSED:
+			break;
+		
+		case USAGE_ENCODER:
+			pwmOnChannelInterrupt(channel, 0, PWMB_CR1 & M_DIR);
+			break;
+		
+		default: { // Capture
+				uint16_t counterValue = 0;
+				
 				switch (channel) {
 				case PWM_Channel4:
-					lastCount = channelLastCount[PWM_Channel5];
+					counterValue = PWMB_CCR1H << 8;
+					counterValue |= PWMB_CCR1L;
 					break;
 				case PWM_Channel5:
-					lastCount = channelLastCount[PWM_Channel4];
+					counterValue = PWMB_CCR2H << 8;
+					counterValue |= PWMB_CCR2L;
 					break;
 				case PWM_Channel6:
-					lastCount = channelLastCount[PWM_Channel7];
+					counterValue = PWMB_CCR3H << 8;
+					counterValue |= PWMB_CCR3L;
 					break;
 				case PWM_Channel7:
-					lastCount = channelLastCount[PWM_Channel6];
+					counterValue = PWMB_CCR4H << 8;
+					counterValue |= PWMB_CCR4L;
 					break;
 				}
+				
+				uint16_t lastCount = 0;
+				
+				if ((usage >> 4) == PWM_REFERENCE_SAME_PIN) {
+					lastCount = channelLastCount[channelIndex];
+				} else {
+					switch (channel) {
+					case PWM_Channel4:
+						lastCount = channelLastCount[PWM_Channel5 >> 1];
+						break;
+					case PWM_Channel5:
+						lastCount = channelLastCount[PWM_Channel4 >> 1];
+						break;
+					case PWM_Channel6:
+						lastCount = channelLastCount[PWM_Channel7 >> 1];
+						break;
+					case PWM_Channel7:
+						lastCount = channelLastCount[PWM_Channel6 >> 1];
+						break;
+					}
+				}
+				
+				channelLastCount[channelIndex] = counterValue;
+				pwmOnChannelInterrupt(channel, counterValue - lastCount, false);
 			}
-			
-			channelLastCount[channel] = counterValue;
-			pwmOnChannelInterrupt(channel, counterValue - lastCount, PWMB_CR1 & M_DIR);
+			break;
 		}
 	}
 	

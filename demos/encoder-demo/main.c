@@ -28,11 +28,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "project-defs.h"
+#include <delay.h>
 #include <advpwm-hal.h>
 #include <gpio-hal.h>
 
-static volatile __bit countDir; // 0 = count up, 1 = count down
+#include <uart-hal.h>
+#include <serial-console.h>
+#include <stdio.h>
+
+static volatile __bit countDir = 0; // 0 = count up, 1 = count down
+static __bit previousDir = 0;
 static volatile __bit ready = 0;
+
+#define FIRST_ENCODER_CHANNEL PWM_Channel6
 
 #pragma save
 // Suppress warning "unreferenced function argument"
@@ -40,19 +48,28 @@ static volatile __bit ready = 0;
 void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) {
 }
 
-void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, uint8_t countDown) {
-	if (channel == PWM_Channel4) {
-		countDir = countDown;
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, bool isCountingDown) {
+	// The if statement is not needed in our case because pwmOnChannelInterrupt()
+	// will be called only on the interrupt of PWM_Channel6. However, it would be
+	// necessary if we also used PWM_Channel0..3 for other purposes.
+	if (channel == FIRST_ENCODER_CHANNEL) {
+		countDir = isCountingDown;
 		ready = 1;
 	}
 }
 #pragma restore
 
-GpioConfig redLED = GPIO_PIN_CONFIG(GPIO_PORT0, GPIO_PIN0, GPIO_OPEN_DRAIN_MODE);
-GpioConfig greenLED = GPIO_PIN_CONFIG(GPIO_PORT0, GPIO_PIN1, GPIO_OPEN_DRAIN_MODE);
+GpioConfig redLED = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN6, GPIO_OPEN_DRAIN_MODE);
+GpioConfig greenLED = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN7, GPIO_OPEN_DRAIN_MODE);
 
 void main() {
 	INIT_EXTENDED_SFR()
+	
+	serialConsoleInitialise(
+		UART1, 
+		115200UL, 
+		0
+	);
 	
 	// Configure GPIO --------------------------------------------------
 	
@@ -62,24 +79,46 @@ void main() {
 	gpioConfigure(&greenLED);
 	gpioWrite(&greenLED, 1);
 	
-	// Configure encoder -----------------------------------------------
+	// Test LEDs -------------------------------------------------------
 	
-	// Use PWM5 and PWM6 on P2.0 and P2.1
-	pwmInitialiseQuadratureEncoder(
-		PWM_Channel4, 
-		0, // pin switch, 
-		PWM_ACTIVE_LOW, 
-		PWM_FILTER_4_CLOCKS
-	);
+	for (uint8_t i = 2; i; i--) {
+		gpioToggle(&redLED);
+		delay1ms(250);
+		gpioToggle(&redLED);
+		gpioToggle(&greenLED);
+		delay1ms(250);
+		gpioToggle(&greenLED);
+	}
 
 	// Enable interrupts -----------------------------------------------
 	EA = 1;
+	
+	// Configure encoder -----------------------------------------------
+	
+	// Use PWM7 and PWM8 on P3.3 and P3.4
+	pwmInitialiseQuadratureEncoder(
+		FIRST_ENCODER_CHANNEL, 
+		1, // pin switch, 
+		PWM_CAPTURE_ON_RISING_EDGE, 
+		PWM_FILTER_4_CLOCKS
+	);
 	
 	// Main loop -------------------------------------------------------
 	
 	while (1) {
 		if (ready) {
 			ready = 0;
+			
+			// Turn off previous LED whenever direction changes.
+			if (countDir != previousDir) {
+				previousDir = countDir;
+				
+				if (countDir) {
+					gpioWrite(&greenLED, 1);
+				} else {
+					gpioWrite(&redLED, 1);
+				}
+			}
 			
 			if (countDir) {
 				gpioToggle(&redLED);

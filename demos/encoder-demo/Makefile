@@ -57,15 +57,17 @@
 
 # Target MCU settings --------------------------------------------------
 
-MCU_FREQ_KHZ := 45000
+# STC8H1K28-36I-LQFP32
+
+MCU_FREQ_KHZ := 24000
 
 STACK_SIZE := 128
 
 MEMORY_SIZES := \
 	--xram-loc 0 \
-	--xram-size 8192 \
+	--xram-size 1024 \
 	--stack-size $(STACK_SIZE) \
-	--code-size 65536
+	--code-size 28160
 
 HAS_DUAL_DPTR := y
 
@@ -81,7 +83,7 @@ CONSOLE_BAUDRATE := 57600
 CONSOLE_PORT := /dev/ttyUSB0
 
 ISP_PORT := /dev/ttyUSB0
-#STCGAL_OPTIONS := -A rts -a
+STCGAL_OPTIONS := -A rts -a
 
 PROJECT_NAME := encoder-demo
 
@@ -90,8 +92,13 @@ PROJECT_NAME := encoder-demo
 #PROJECT_FLAGS := --nogcse
 
 SRCS := \
+	$(HAL_DIR)/delay.c \
 	$(HAL_DIR)/gpio-hal.c \
 	$(HAL_DIR)/advpwm-hal.c \
+	$(HAL_DIR)/fifo-buffer.c \
+	$(HAL_DIR)/serial-console.c \
+	$(HAL_DIR)/timer-hal.c \
+	$(HAL_DIR)/uart-hal.c \
 	main.c
 
 # Boilerplate rules ----------------------------------------------------

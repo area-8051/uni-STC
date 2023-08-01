@@ -31,9 +31,12 @@
 #define _PROJECT_DEFS_H
 
 #ifdef __SDCC
-	#include <STC/8H8KxxU/PDIP40.h>
+	#include <STC/8H1K16-28/LQFP32.h>
 #else
 	#include <uni-STC/uni-STC.h>
 #endif // __SDCC
+
+#define BASIC_GPIO_HAL
+#define HAL_PWM_API_QUADRATURE_ENCODER
 
 #endif // _PROJECT_DEFS_H

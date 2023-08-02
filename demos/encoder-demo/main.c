@@ -48,12 +48,14 @@ static volatile __bit ready = 0;
 void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) {
 }
 
-void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, bool isCountingDown) {
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue) {
 	// The if statement is not needed in our case because pwmOnChannelInterrupt()
 	// will be called only on the interrupt of PWM_Channel6. However, it would be
 	// necessary if we also used PWM_Channel0..3 for other purposes.
 	if (channel == FIRST_ENCODER_CHANNEL) {
-		countDir = isCountingDown;
+		// In quadrature encoder mode, counterValue is 0 when counting up,
+		// and non-zero when counting down.
+		countDir = counterValue;
 		ready = 1;
 	}
 }

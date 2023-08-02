@@ -67,5 +67,5 @@ void pwmGlowInitialise() {
 void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) {
 }
 
-void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, bool countDown) {
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue) {
 }

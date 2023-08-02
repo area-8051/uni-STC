@@ -102,6 +102,9 @@ void main() {
 		PWM_BUFFERED_UPDATE,
 		PWM_CONTINUOUS,
 		PWM_EDGE_ALIGNED_UP,
+		// IMPORTANT: the following 2 parameters are needed to record
+		// the number of counter overflows, used to calculate elapsed
+		// times in the PWM ISR.
 		PWM_ENABLE_WRAP_UE_ONLY,
 		ENABLE_INTERRUPT
 	);

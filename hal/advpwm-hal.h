@@ -64,6 +64,14 @@
 
 #include <hal-defs.h>
 
+#ifndef PWM_GROUPS
+	#define PWM_GROUPS 2
+#endif
+
+#ifndef PWM_CHANNELS
+	#define PWM_CHANNELS 4
+#endif
+
 #ifndef HAL_PWM_CHANNELS
 	#define HAL_PWM_CHANNELS 8
 #endif
@@ -437,14 +445,14 @@ void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event);
  * 
  * @param channel is the channel which generated the interrupt.
  * @param counterValue is the content of the channel's CCR register.
- * @param isCountingDown is false if the counter counts up, true if it counts down.
  * 
- * For PWM channels, counterValue and isCountingDown are 0.
- * For Encoder channels, counterValue is 0 and isCountingDown is valid.
- * For Capture channels, counterValue is the time elapsed between
- * 2 consecutive events and isCountingDown is irrelevant.
+ * - For PWM channels, counterValue is 0.
+ * - For Encoder channels, counterValue is 0 when counting up, non-zero 
+ * when counting down.
+ * - For Capture channels, counterValue is the time elapsed between
+ * two consecutive events.
  */
-void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue, bool isCountingDown);
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue);
 
 INTERRUPT(pwmA_isr, PWMA_INTERRUPT);
 

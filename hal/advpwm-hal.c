@@ -69,7 +69,17 @@ static PWM_ChannelUsage PWM_SEGMENT channelUsage[] = {
 #endif
 };
 
-static uint16_t PWM_SEGMENT channelLastCount[HAL_PWM_CHANNELS];
+static uint16_t PWM_SEGMENT counterOverflow[] = { 0, 0 };
+
+typedef union {
+	struct {
+		uint16_t counter;
+		uint16_t overflow;
+	} time;
+	uint32_t value;
+} PWM_ChannelData;
+
+static PWM_ChannelData PWM_SEGMENT channelLastCount[HAL_PWM_CHANNELS];
 
 #define PIN_CONFIG_MAX 3
 #define UNSUPPORTED_PIN_SWITCH 0xff
@@ -956,7 +966,7 @@ void pwmInitialiseCapture(
 
 	uint8_t channelIndex = channel >> 1;
 	channelUsage[channelIndex] = USAGE_CAPTURE | (reference << 4);
-	channelLastCount[channelIndex] = 0;
+	channelLastCount[channelIndex].value = 0UL;
 	enableChannelInterrupt(channel);
 }
 
@@ -1003,6 +1013,7 @@ INTERRUPT(pwmA_isr, PWMA_INTERRUPT) {
 	if (PWMA_SR1 & M_UIF) {
 		PWMA_SR1 &= ~M_UIF;
 		event = PWM_INTERRUPT_UPDATE;
+		counterOverflow[PWM_COUNTER_A]++;
 	}
 	
 	if (PWMA_SR1 & M_BIF) {
@@ -1019,14 +1030,14 @@ INTERRUPT(pwmA_isr, PWMA_INTERRUPT) {
 		
 		switch (usage) {
 		case USAGE_PWM:
-			pwmOnChannelInterrupt(channel, 0, false);
+			pwmOnChannelInterrupt(channel, 0);
 			break;
 		
 		case USAGE_UNUSED:
 			break;
 		
 		case USAGE_ENCODER:
-			pwmOnChannelInterrupt(channel, 0, PWMA_CR1 & M_DIR);
+			pwmOnChannelInterrupt(channel, PWMA_CR1 & M_DIR);
 			break;
 		
 		default: { // Capture
@@ -1055,35 +1066,38 @@ INTERRUPT(pwmA_isr, PWMA_INTERRUPT) {
 #endif
 				}
 				
-#if HAL_PWM_CHANNELS == 1
-				uint16_t lastCount = channelLastCount[channelIndex];
-#else
-				uint16_t lastCount = 0;
+				uint8_t refIndex = channelIndex;
 				
-				if ((usage >> 4) == PWM_REFERENCE_SAME_PIN) {
-					lastCount = channelLastCount[channelIndex];
-				} else {
+#if HAL_PWM_CHANNELS > 1
+				if ((usage >> 4) == PWM_REFERENCE_OTHER_PIN) {
 					switch (channel) {
 					case PWM_Channel0:
-						lastCount = channelLastCount[PWM_Channel1 >> 1];
+						refIndex = PWM_Channel1;
 						break;
 					case PWM_Channel1:
-						lastCount = channelLastCount[PWM_Channel0 >> 1];
+						refIndex = PWM_Channel0;
 						break;
 #if HAL_PWM_CHANNELS > 2
 					case PWM_Channel2:
-						lastCount = channelLastCount[PWM_Channel3 >> 1];
+						refIndex = PWM_Channel3;
 						break;
 					case PWM_Channel3:
-						lastCount = channelLastCount[PWM_Channel2 >> 1];
+						refIndex = PWM_Channel2;
 						break;
 #endif // HAL_PWM_CHANNELS > 2
 					}
+					
+					refIndex >>= 1;
 				}
-#endif // HAL_PWM_CHANNELS == 1
+#endif // HAL_PWM_CHANNELS > 1
 				
-				channelLastCount[channelIndex] = counterValue;
-				pwmOnChannelInterrupt(channel, counterValue - lastCount, false);
+				PWM_ChannelData channelNewCount, elapsed;
+				channelNewCount.time.overflow = counterOverflow[PWM_COUNTER_A];
+				channelNewCount.time.counter = counterValue;
+				elapsed.value = channelNewCount.value - channelLastCount[refIndex].value;
+				
+				channelLastCount[channelIndex].value = channelNewCount.value;
+				pwmOnChannelInterrupt(channel, elapsed.time.overflow);
 			}
 			break;
 		}
@@ -1134,6 +1148,7 @@ INTERRUPT(pwmB_isr, PWMB_INTERRUPT) {
 	if (PWMB_SR1 & M_UIF) {
 		PWMB_SR1 &= ~M_UIF;
 		event = PWM_INTERRUPT_UPDATE;
+		counterOverflow[PWM_COUNTER_B]++;
 	}
 	
 	if (PWMB_SR1 & M_BIF) {
@@ -1150,14 +1165,14 @@ INTERRUPT(pwmB_isr, PWMB_INTERRUPT) {
 		
 		switch (usage) {
 		case USAGE_PWM:
-			pwmOnChannelInterrupt(channel, 0, false);
+			pwmOnChannelInterrupt(channel, 0);
 			break;
 		
 		case USAGE_UNUSED:
 			break;
 		
 		case USAGE_ENCODER:
-			pwmOnChannelInterrupt(channel, 0, PWMB_CR1 & M_DIR);
+			pwmOnChannelInterrupt(channel, PWMB_CR1 & M_DIR);
 			break;
 		
 		default: { // Capture
@@ -1182,29 +1197,34 @@ INTERRUPT(pwmB_isr, PWMB_INTERRUPT) {
 					break;
 				}
 				
-				uint16_t lastCount = 0;
+				uint8_t refIndex = channelIndex;
 				
-				if ((usage >> 4) == PWM_REFERENCE_SAME_PIN) {
-					lastCount = channelLastCount[channelIndex];
-				} else {
+				if ((usage >> 4) == PWM_REFERENCE_OTHER_PIN) {
 					switch (channel) {
 					case PWM_Channel4:
-						lastCount = channelLastCount[PWM_Channel5 >> 1];
+						refIndex = PWM_Channel5;
 						break;
 					case PWM_Channel5:
-						lastCount = channelLastCount[PWM_Channel4 >> 1];
+						refIndex = PWM_Channel4;
 						break;
 					case PWM_Channel6:
-						lastCount = channelLastCount[PWM_Channel7 >> 1];
+						refIndex = PWM_Channel7;
 						break;
 					case PWM_Channel7:
-						lastCount = channelLastCount[PWM_Channel6 >> 1];
+						refIndex = PWM_Channel6;
 						break;
 					}
+					
+					refIndex >>= 1;
 				}
 				
-				channelLastCount[channelIndex] = counterValue;
-				pwmOnChannelInterrupt(channel, counterValue - lastCount, false);
+				PWM_ChannelData channelNewCount, elapsed;
+				channelNewCount.time.overflow = counterOverflow[PWM_COUNTER_B];
+				channelNewCount.time.counter = counterValue;
+				elapsed.value = channelNewCount.value - channelLastCount[refIndex].value;
+				
+				channelLastCount[channelIndex].value = channelNewCount.value;
+				pwmOnChannelInterrupt(channel, elapsed.time.overflow);
 			}
 			break;
 		}

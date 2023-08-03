@@ -44,19 +44,7 @@ typedef enum {
 	USAGE_CAPTURE,
 } PWM_ChannelUsage;
 
-#ifndef PWM_SEGMENT
-	#if HAL_PWM_CHANNELS > 4
-		#define PWM_SEGMENT /* Use default segment */
-	#else
-		// When HAL_PWM_CHANNELS is reduced, we're looking for flash
-		// usage reduction, and for this, we may be tempted to use the 
-		// medium model. It's hence a good idea to use __idata for our 
-		// array so as to save __pdata for the application's variables.
-		#define PWM_SEGMENT __idata
-	#endif // HAL_UARTS > 1
-#endif
-
-static PWM_ChannelUsage PWM_SEGMENT channelUsage[] = {
+static PWM_ChannelUsage HAL_PWM_SEGMENT channelUsage[] = {
 	USAGE_UNUSED, 
 #if HAL_PWM_CHANNELS > 1
 	USAGE_UNUSED, 
@@ -69,7 +57,7 @@ static PWM_ChannelUsage PWM_SEGMENT channelUsage[] = {
 #endif
 };
 
-static uint16_t PWM_SEGMENT counterOverflow[] = { 0, 0 };
+static uint16_t HAL_PWM_SEGMENT counterOverflow[] = { 0, 0 };
 
 typedef union {
 	struct {
@@ -79,7 +67,7 @@ typedef union {
 	uint32_t value;
 } PWM_ChannelData;
 
-static PWM_ChannelData PWM_SEGMENT channelLastCount[HAL_PWM_CHANNELS];
+static PWM_ChannelData HAL_PWM_SEGMENT channelLastCount[HAL_PWM_CHANNELS];
 
 #define PIN_CONFIG_MAX 3
 #define UNSUPPORTED_PIN_SWITCH 0xff

@@ -64,8 +64,8 @@ void pwmGlowInitialise() {
 #pragma save
 // Suppress warning "unreferenced function argument"
 #pragma disable_warning 85
-void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event) {
+void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt HAL_PWM_SEGMENT event) {
 }
 
-void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue) {
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t HAL_PWM_SEGMENT counterValue) {
 }

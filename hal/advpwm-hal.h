@@ -81,6 +81,20 @@
 	#define HAL_PWM_CHANNELS 8
 #endif
 
+// HAL_PWM_SEGMENT defines where the variables used by the PWM ISR
+// will be allocated.
+#ifndef HAL_PWM_SEGMENT
+	#if HAL_PWM_CHANNELS > 4
+		#define HAL_PWM_SEGMENT /* Use default segment */
+	#else
+		// When HAL_PWM_CHANNELS is reduced, we're looking for flash
+		// usage reduction, and for this, we may be tempted to use the 
+		// medium model. It's hence a good idea to use __idata for our 
+		// array so as to save __pdata for the application's variables.
+		#define HAL_PWM_SEGMENT __idata
+	#endif // HAL_PWM_CHANNELS > 4
+#endif
+
 typedef enum {
 	PWM_COUNTER_A = 0,
 #if HAL_PWM_CHANNELS > 4
@@ -437,7 +451,7 @@ typedef enum {
  * @param counter is the counter which generated the interrupt.
  * @param event is the type of interrupt.
  */
-void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event);
+void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt HAL_PWM_SEGMENT event);
 
 /**
  * Invoked whenever a channel interrupt occurs.
@@ -452,7 +466,7 @@ void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt event);
  * - For Capture channels, counterValue is the time elapsed between
  * two consecutive events.
  */
-void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t counterValue);
+void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t HAL_PWM_SEGMENT counterValue);
 
 INTERRUPT(pwmA_isr, PWMA_INTERRUPT);
 

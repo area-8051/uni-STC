@@ -40,17 +40,17 @@ static volatile __bit countDir = 0; // 0 = count up, 1 = count down
 static __bit previousDir = 0;
 static volatile __bit ready = 0;
 
-/*
 // For PWM_COUNTER_A, we use PWM1P and PWM2P on P1.0 and P1.2 (pin switch = 0).
 #define ENCODER_COUNTER PWM_COUNTER_A
-#define ENCODER_SWITCH 0
+#define ENCODER_SWITCH  0
 #define ENCODER_CHANNEL PWM_Channel0
-*/
 
+/*
 // For PWM_COUNTER_B, we use PWM5 and PWM6 on P1.7 and P5.4 (pin switch = 1).
 #define ENCODER_COUNTER PWM_COUNTER_B
-#define ENCODER_SWITCH 1
+#define ENCODER_SWITCH  1
 #define ENCODER_CHANNEL PWM_Channel4
+*/
 
 #pragma save
 // Suppress warning "unreferenced function argument"
@@ -65,7 +65,8 @@ void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t HAL_PWM_SEGMENT counter
 	// the other counter for other purposes.
 	if (channel == ENCODER_CHANNEL) {
 		// In quadrature encoder mode, counterValue is 0 when
-		// counting up, and non-zero when counting down.
+		// counting up (encoder rotates clockwise), and non-zero
+		// when counting down (encoder rotates counter-clockwise).
 		countDir = counterValue;
 		ready = 1;
 	}

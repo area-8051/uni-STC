@@ -956,21 +956,19 @@ INTERRUPT(pwmA_isr, PWMA_INTERRUPT) {
 #if HAL_PWM_CHANNELS > 1
 	if (PWMA_SR1 & M_CC2IF) {
 		PWMA_SR1 &= ~M_CC2IF;
-		// When several interrupt flags are set, the lowest channel takes precedence.
-		// This can happen in encoder mode.
-		channel = (channel == 255) ? PWM_Channel1 : channel;
+		channel = PWM_Channel1;
 	}
 #endif
 	
 #if HAL_PWM_CHANNELS > 2
 	if (PWMA_SR1 & M_CC3IF) {
 		PWMA_SR1 &= ~M_CC3IF;
-		channel = (channel == 255) ? PWM_Channel2 : channel;
+		channel = PWM_Channel2;
 	}
 	
 	if (PWMA_SR1 & M_CC4IF) {
 		PWMA_SR1 &= ~M_CC4IF;
-		channel = (channel == 255) ? PWM_Channel3 : channel;
+		channel = PWM_Channel3;
 	}
 #endif
 	
@@ -1094,19 +1092,17 @@ INTERRUPT(pwmB_isr, PWMB_INTERRUPT) {
 	
 	if (PWMB_SR1 & M_CC6IF) {
 		PWMB_SR1 &= ~M_CC6IF;
-		// When several interrupt flags are set, the lowest channel takes precedence.
-		// This can happen in encoder mode.
-		channel = (channel == 255) ? PWM_Channel5 : channel;
+		channel = PWM_Channel5;
 	}
 	
 	if (PWMB_SR1 & M_CC7IF) {
 		PWMB_SR1 &= ~M_CC7IF;
-		channel = (channel == 255) ? PWM_Channel6 : channel;
+		channel = PWM_Channel6;
 	}
 	
 	if (PWMB_SR1 & M_CC8IF) {
 		PWMB_SR1 &= ~M_CC8IF;
-		channel = (channel == 255) ? PWM_Channel7 : channel;
+		channel = PWM_Channel7;
 	}
 	
 	if (PWMB_SR1 & M_TIF) {

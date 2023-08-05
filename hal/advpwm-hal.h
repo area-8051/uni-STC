@@ -425,11 +425,16 @@ void pwmInitialiseCapture(
 );
 
 #ifdef HAL_PWM_API_QUADRATURE_ENCODER
+	#if HAL_PWM_CHANNELS < 2
+		#error "Quadrature encoder requires 2 channels"
+	#endif
 /**
  * Configures the counter, the channel pair and enables the counter.
+ * For PWM_COUNTER_A, the encoder channels are PWM_Channel0 and PWM_Channel1.
+ * For PWM_COUNTER_B, the encoder channels are PWM_Channel4 and PWM_Channel5.
  */
 void pwmInitialiseQuadratureEncoder(
-	PWM_Channel firstChannel, 
+	PWM_Counter counter, 
 	uint8_t pinSwitch, 
 	PWM_CaptureEdge captureEdge, 
 	PWM_Filter filter

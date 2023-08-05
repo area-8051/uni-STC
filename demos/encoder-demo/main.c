@@ -40,7 +40,17 @@ static volatile __bit countDir = 0; // 0 = count up, 1 = count down
 static __bit previousDir = 0;
 static volatile __bit ready = 0;
 
-#define FIRST_ENCODER_CHANNEL PWM_Channel6
+/*
+// For PWM_COUNTER_A, we use PWM1P and PWM2P on P1.0 and P1.2 (pin switch = 0).
+#define ENCODER_COUNTER PWM_COUNTER_A
+#define ENCODER_SWITCH 0
+#define ENCODER_CHANNEL PWM_Channel0
+*/
+
+// For PWM_COUNTER_B, we use PWM5 and PWM6 on P1.7 and P5.4 (pin switch = 1).
+#define ENCODER_COUNTER PWM_COUNTER_B
+#define ENCODER_SWITCH 1
+#define ENCODER_CHANNEL PWM_Channel4
 
 #pragma save
 // Suppress warning "unreferenced function argument"
@@ -49,20 +59,21 @@ void pwmOnCounterInterrupt(PWM_Counter counter, PWM_CounterInterrupt HAL_PWM_SEG
 }
 
 void pwmOnChannelInterrupt(PWM_Channel channel, uint16_t HAL_PWM_SEGMENT counterValue) {
-	// The if statement is not needed in our case because pwmOnChannelInterrupt()
-	// will be called only on the interrupt of PWM_Channel6. However, it would be
-	// necessary if we also used PWM_Channel0..3 for other purposes.
-	if (channel == FIRST_ENCODER_CHANNEL) {
-		// In quadrature encoder mode, counterValue is 0 when counting up,
-		// and non-zero when counting down.
+	// The if statement is not really needed in our case because
+	// pwmOnChannelInterrupt() will be called only on the encoder
+	// interrupt. However, it would be necessary if we also used 
+	// the other counter for other purposes.
+	if (channel == ENCODER_CHANNEL) {
+		// In quadrature encoder mode, counterValue is 0 when
+		// counting up, and non-zero when counting down.
 		countDir = counterValue;
 		ready = 1;
 	}
 }
 #pragma restore
 
-GpioConfig redLED = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN6, GPIO_OPEN_DRAIN_MODE);
-GpioConfig greenLED = GPIO_PIN_CONFIG(GPIO_PORT1, GPIO_PIN7, GPIO_OPEN_DRAIN_MODE);
+GpioConfig redLED = GPIO_PIN_CONFIG(GPIO_PORT3, GPIO_PIN6, GPIO_OPEN_DRAIN_MODE);
+GpioConfig greenLED = GPIO_PIN_CONFIG(GPIO_PORT3, GPIO_PIN7, GPIO_OPEN_DRAIN_MODE);
 
 void main() {
 	INIT_EXTENDED_SFR()
@@ -97,10 +108,9 @@ void main() {
 	
 	// Configure encoder -----------------------------------------------
 	
-	// Use PWM7 and PWM8 on P3.3 and P3.4
 	pwmInitialiseQuadratureEncoder(
-		FIRST_ENCODER_CHANNEL, 
-		1, // pin switch, 
+		ENCODER_COUNTER, 
+		ENCODER_SWITCH,
 		PWM_CAPTURE_ON_RISING_EDGE, 
 		PWM_FILTER_4_CLOCKS
 	);

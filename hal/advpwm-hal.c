@@ -870,31 +870,17 @@ static void configureInput(
 
 #ifdef HAL_PWM_API_QUADRATURE_ENCODER
 void pwmInitialiseQuadratureEncoder(
-	PWM_Channel firstChannel, 
+	PWM_Counter counter, 
 	uint8_t pinSwitch, 
 	PWM_CaptureEdge captureEdge, 
 	PWM_Filter filter
 ) {
 #if HAL_PWM_CHANNELS > 4
-	PWM_Counter counter = (firstChannel >= PWM_Channel4) ? PWM_COUNTER_B : PWM_COUNTER_A;
+	PWM_Channel firstChannel = (counter == PWM_COUNTER_A) ? PWM_Channel0 : PWM_Channel4;
 #else
-	PWM_Counter counter = PWM_COUNTER_A;
+	PWM_Channel firstChannel = PWM_Channel0;
 #endif
 	PWM_Channel secondChannel = firstChannel + 2;
-	
-	switch (firstChannel) {
-	case PWM_Channel1:
-#if HAL_PWM_CHANNELS > 2
-	case PWM_Channel3:
-#endif
-#if HAL_PWM_CHANNELS > 4
-	case PWM_Channel5:
-	case PWM_Channel7:
-#endif
-		// Both channels must belong to the same pair.
-		secondChannel = firstChannel - 2;
-		break;
-	}
 	
 	pwmConfigureCounter(
 		counter, 

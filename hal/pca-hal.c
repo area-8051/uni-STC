@@ -192,7 +192,7 @@ void pcaStartCounter(PCA_ClockSource clockSource, CounterControl counterMode, In
 	__pca_pinSwitch = pinSwitch;
 	P_SW1 = (P_SW1 & ~M_CCP_S) | ((pinSwitch << P_CCP_S) & M_CCP_S);
 	
-	for (uint8_t channel = 0; channel < PCA_CHANNELS; channel++) {
+	for (uint8_t channel = 0; channel < HAL_PCA_CHANNELS; channel++) {
 		__pca_channelConfig[channel].mode = PCA_UNUSED;
 	}
 	

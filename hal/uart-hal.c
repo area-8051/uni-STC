@@ -291,6 +291,7 @@ TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudR
 				}
 				break;
 			
+	#if MCU_FAMILY != 90
 			case 3:
 				// Remember baudRate is of type Uart1_9BitMode_Clock.
 				if (baudRate & 1) {
@@ -299,6 +300,7 @@ TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudR
 					AUXR &= ~M_UART_M0x6;
 				}
 				break;
+	#endif
 			}
 			
 #ifdef M_S1_S
@@ -310,7 +312,7 @@ TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudR
 			S1CON = scon | ((operationMode & 1) ? M_SM1 : 0);
 			
 			// Enable serial port interrupt
-			IE1 |= M_ES1;
+			IE1 |= M_S1IE;
 			break;
 		
 #if HAL_UARTS >= 2
@@ -334,7 +336,7 @@ TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudR
 	#endif // MCU_FAMILY == 12
 			
 			// Enable serial port interrupt
-			IE2 |= M_ES2;
+			IE2 |= M_S2IE;
 			break;
 #endif // HAL_UARTS >= 2
 
@@ -354,7 +356,7 @@ TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudR
 			S3CON = scon;
 			
 			// Enable serial port interrupt
-			IE2 |= M_ES3;
+			IE2 |= M_S3IE;
 			break;
 
 		case UART4:
@@ -372,7 +374,7 @@ TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudR
 			S4CON = scon;
 			
 			// Enable serial port interrupt
-			IE2 |= M_ES4;
+			IE2 |= M_S4IE;
 			break;
 #endif // HAL_UARTS >= 3
 		}
@@ -391,8 +393,8 @@ TimerStatus uartInitialise(Uart uart, uint32_t baudRate, UartBaudRateTimer baudR
 INTERRUPT(uart1_isr, UART1_INTERRUPT) {
 	uint8_t c;
 	
-	if (S1CON & M_TI) {
-		S1CON &= ~M_TI;
+	if (S1CON & M_UART_TXIF) {
+		S1CON &= ~M_UART_TXIF;
 		
 		if (fifoRead(&UART1_transmitBuffer, &c, 1)) {
 			S1BUF = c;
@@ -401,8 +403,8 @@ INTERRUPT(uart1_isr, UART1_INTERRUPT) {
 		}
 	}
 
-	if (S1CON & M_RI) {
-		S1CON &= ~M_RI;
+	if (S1CON & M_UART_RXIF) {
+		S1CON &= ~M_UART_RXIF;
 		c = S1BUF;
 		fifoWrite(&UART1_receiveBuffer, &c, 1);
 	}
@@ -412,8 +414,8 @@ INTERRUPT(uart1_isr, UART1_INTERRUPT) {
 	INTERRUPT(uart2_isr, UART2_INTERRUPT) {
 		uint8_t c;
 		
-		if (S2CON & M_TI) {
-			S2CON &= ~M_TI;
+		if (S2CON & M_UART_TXIF) {
+			S2CON &= ~M_UART_TXIF;
 			
 			if (fifoRead(&UART2_transmitBuffer, &c, 1)) {
 				S2BUF = c;
@@ -422,8 +424,8 @@ INTERRUPT(uart1_isr, UART1_INTERRUPT) {
 			}
 		}
 
-		if (S2CON & M_RI) {
-			S2CON &= ~M_RI;
+		if (S2CON & M_UART_RXIF) {
+			S2CON &= ~M_UART_RXIF;
 			c = S2BUF;
 			fifoWrite(&UART2_receiveBuffer, &c, 1);
 		}
@@ -434,8 +436,8 @@ INTERRUPT(uart1_isr, UART1_INTERRUPT) {
 	INTERRUPT(uart3_isr, UART3_INTERRUPT) {
 		uint8_t c;
 		
-		if (S3CON & M_TI) {
-			S3CON &= ~M_TI;
+		if (S3CON & M_UART_TXIF) {
+			S3CON &= ~M_UART_TXIF;
 			
 			if (fifoRead(&UART3_transmitBuffer, &c, 1)) {
 				S3BUF = c;
@@ -444,8 +446,8 @@ INTERRUPT(uart1_isr, UART1_INTERRUPT) {
 			}
 		}
 
-		if (S3CON & M_RI) {
-			S3CON &= ~M_RI;
+		if (S3CON & M_UART_RXIF) {
+			S3CON &= ~M_UART_RXIF;
 			c = S3BUF;
 			fifoWrite(&UART3_receiveBuffer, &c, 1);
 		}
@@ -454,8 +456,8 @@ INTERRUPT(uart1_isr, UART1_INTERRUPT) {
 	INTERRUPT(uart4_isr, UART4_INTERRUPT) {
 		uint8_t c;
 		
-		if (S4CON & M_TI) {
-			S4CON &= ~M_TI;
+		if (S4CON & M_UART_TXIF) {
+			S4CON &= ~M_UART_TXIF;
 			
 			if (fifoRead(&UART4_transmitBuffer, &c, 1)) {
 				S4BUF = c;
@@ -464,8 +466,8 @@ INTERRUPT(uart1_isr, UART1_INTERRUPT) {
 			}
 		}
 
-		if (S4CON & M_RI) {
-			S4CON &= ~M_RI;
+		if (S4CON & M_UART_RXIF) {
+			S4CON &= ~M_UART_RXIF;
 			c = S4BUF;
 			fifoWrite(&UART4_receiveBuffer, &c, 1);
 		}

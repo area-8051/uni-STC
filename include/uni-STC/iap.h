@@ -17,26 +17,49 @@
 	#endif
 #endif // MCU_FAMILY == 8
 
-// SFR IAP_DATA: ISP/IAP flash data register
-SFR(IAP_DATA, 0xC2);
+#if MCU_FAMILY == 90
+	// SFR IAP_DATA: ISP/IAP flash data register
+	SFR(IAP_DATA, 0xE2);
 
-// SFR IAP_ADDRH: ISP/IAP flash address high
-SFR(IAP_ADDRH, 0xC3);
-// SFR IAP_ADDRL: ISP/IAP flash address low
-SFR(IAP_ADDRL, 0xC4);
+	// SFR IAP_ADDRH: ISP/IAP flash address high
+	SFR(IAP_ADDRH, 0xE3);
+	// SFR IAP_ADDRL: ISP/IAP flash address low
+	SFR(IAP_ADDRL, 0xE4);
 
-// IAP_ADDR as an int
-SFR16E(IAP_ADDR, 0xC3C4);
+	// IAP_ADDR as an int
+	SFR16E(IAP_ADDR, 0xE3E4);
 
-// SFR IAP_CMD: ISP/IAP flash command register
-SFR(IAP_CMD, 0xC5);
-#define M_CMD 0x03
+	// SFR IAP_CMD: ISP/IAP flash command register
+	SFR(IAP_CMD, 0xE5);
+	#define M_CMD 0x07
 
-// SFR IAP_TRIG: ISP/IAP flash trigger register
-SFR(IAP_TRIG, 0xC6);
+	// SFR IAP_TRIG: ISP/IAP flash trigger register
+	SFR(IAP_TRIG, 0xE6);
 
-// SFR IAP_CONTR: ISP/IAP flash control register
-SFR(IAP_CONTR, 0xC7);
+	// SFR IAP_CONTR: ISP/IAP flash control register
+	SFR(IAP_CONTR, 0xE7);
+#else
+	// SFR IAP_DATA: ISP/IAP flash data register
+	SFR(IAP_DATA, 0xC2);
+
+	// SFR IAP_ADDRH: ISP/IAP flash address high
+	SFR(IAP_ADDRH, 0xC3);
+	// SFR IAP_ADDRL: ISP/IAP flash address low
+	SFR(IAP_ADDRL, 0xC4);
+
+	// IAP_ADDR as an int
+	SFR16E(IAP_ADDR, 0xC3C4);
+
+	// SFR IAP_CMD: ISP/IAP flash command register
+	SFR(IAP_CMD, 0xC5);
+	#define M_CMD 0x03
+
+	// SFR IAP_TRIG: ISP/IAP flash trigger register
+	SFR(IAP_TRIG, 0xC6);
+
+	// SFR IAP_CONTR: ISP/IAP flash control register
+	SFR(IAP_CONTR, 0xC7);
+#endif // MCU_FAMILY == 90
 
 #define M_CMD_FAIL 0x10
 #define P_CMD_FAIL 4

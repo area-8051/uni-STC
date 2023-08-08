@@ -20,7 +20,7 @@ SFR16(DP, 0x82);
 #endif // MCU_FAMILY == 8
 
 #ifdef MCU_HAS_DUAL_DPTR
-	#if MCU_FAMILY == 12 || MCU_FAMILY == 15
+	#if MCU_FAMILY == 90 || MCU_FAMILY == 12 || MCU_FAMILY == 15
 		// SFR DPS: alias of P_SW1
 		// To support dual-DPTR, SDCC requires a DPS SFR to be defined,
 		// hence the alias.

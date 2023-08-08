@@ -14,6 +14,10 @@
  */
 
 #ifndef NB_UARTS
+	#if MCU_FAMILY == 90
+		#define NB_UARTS 1
+	#endif // MCU_FAMILY == 90
+
 	#if MCU_FAMILY == 12
 		#define NB_UARTS 2
 	#endif // MCU_FAMILY == 12
@@ -40,11 +44,12 @@ SFR(SADEN, 0xB9);
 SFR(S1CON, 0x98);
 SBIT(S1SM0_FE, 0x98, 7);
 
-#define M_RI 0x1
-#define P_RI 0
+// I2C also has RXIF and TXIF
+#define M_UART_RXIF 0x1
+#define P_UART_RXIF 0
 
-#define M_TI 0x2
-#define P_TI 1
+#define M_UART_TXIF 0x2
+#define P_UART_TXIF 1
 
 #define M_RB8 0x4
 #define P_RB8 2
@@ -86,9 +91,11 @@ SBIT(S1SM0_FE, 0x98, 7);
 // SFR S1BUF: UART1 data register
 SFR(S1BUF, 0x99);
 
-// Bit mask for use with AUXR
-#define M_UART_M0x6 0x20
-#define P_UART_M0x6 5
+#if MCU_FAMILY != 90
+	// Bit mask for use with AUXR
+	#define M_UART_M0x6 0x20
+	#define P_UART_M0x6 5
+#endif // MCU_FAMILY != 90
 
 // Bit mask for use with PCON
 #define M_SMOD0 0x40
@@ -98,12 +105,12 @@ SFR(S1BUF, 0x99);
 #define P_SMOD 7
 
 // Bit mask for use with IE1
-#define M_ES1 0x10
-#define P_ES1 4
+#define M_S1IE 0x10
+#define P_S1IE 4
 
 // Bit mask for use with IP1L and IP1H
-#define M_PS1 0x10
-#define P_PS1 4
+#define M_S1PR 0x10
+#define P_S1PR 4
 
 // UART 1 interrupt
 #define UART1_INTERRUPT 4
@@ -123,12 +130,12 @@ SFR(S1BUF, 0x99);
 	#endif // TIMER_HAS_BRT
 
 	// Bit mask for use with IE2
-	#define M_ES2 0x01
-	#define P_ES2 0
+	#define M_S2IE 0x01
+	#define P_S2IE 0
 
 	// Bit mask for use with IP2L and IP2H
-	#define M_PS2 0x01
-	#define P_PS2 0
+	#define M_S2PR 0x01
+	#define P_S2PR 0
 
 	#if MCU_FAMILY == 15
 		// For use with INT_CLKO
@@ -153,13 +160,13 @@ SFR(S1BUF, 0x99);
 	SFR(S3BUF, 0xAD);
 
 	// Bit mask for use with IE2
-	#define M_ES3 0x08
-	#define P_ES3 3
+	#define M_S3IE 0x08
+	#define P_S3IE 3
 	
 	#ifdef MCU_HAS_IP3
 		// Bit mask for use with IP3L and IP3H
-		#define M_PS3 0x01
-		#define P_PS3 0
+		#define M_S3PR 0x01
+		#define P_S3PR 0
 	#endif // MCU_HAS_IP3
 
 	// UART 3 interrupt
@@ -177,13 +184,13 @@ SFR(S1BUF, 0x99);
 	SFR(S4BUF, 0x85);
 
 	// Bit mask for use with IE2
-	#define M_ES4 0x10
-	#define P_ES4 4
+	#define M_S4IE 0x10
+	#define P_S4IE 4
 	
 	#ifdef MCU_HAS_IP3
 		// Bit mask for use with IP3L and IP3H
-		#define M_PS4 0x02
-		#define P_PS4 1
+		#define M_S4PR 0x02
+		#define P_S4PR 1
 	#endif // MCU_HAS_IP3
 
 	// UART 4 interrupt

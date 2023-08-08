@@ -104,6 +104,10 @@
 	#ifdef BUILD_FOR_STC12C5A56S2_PDIP40
 		#include <STC/12C5AxxS2/PDIP40.h>
 	#endif
+	
+	#ifdef BUILD_FOR_STC90C58RD_PDIP40
+		#include <STC/90C5xRD+/PDIP40.h>
+	#endif
 #else
 	#include <uni-STC/uni-STC.h>
 #endif // __SDCC

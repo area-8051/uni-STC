@@ -81,11 +81,12 @@
 	#define M_STOIF 0x8
 	#define P_STOIF 3
 	
-	#define M_TXIF 0x10
-	#define P_TXIF 4
+	// UART also has RXIF and TXIF
+	#define M_I2C_TXIF 0x10
+	#define P_I2C_TXIF 4
 	
-	#define M_RXIF 0x20
-	#define P_RXIF 5
+	#define M_I2C_RXIF 0x20
+	#define P_I2C_RXIF 5
 	
 	#define M_STAIF 0x40
 	#define P_STAIF 6

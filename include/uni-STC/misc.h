@@ -51,8 +51,15 @@ SFR(PCON, 0x87);
 #define M_POF 0x10
 #define P_POF 4
 
-#define M_LVDF 0x20
-#define P_LVDF 5
+#if MCU_FAMILY == 90
+	#define M_SMOD0 0x40
+	#define P_SMOD0 6
+	#define M_SMOD 0x80
+	#define P_SMOD 7
+#else
+	#define M_LVDF 0x20
+	#define P_LVDF 5
+#endif // MCU_FAMILY == 90
 
 #if MCU_FAMILY == 8
 	// SFR RSTCFG: Reset configuration register

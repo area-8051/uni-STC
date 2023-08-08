@@ -108,12 +108,13 @@ SFR16E(T0, 0x8C8A);
 #define TIMER0_VECTOR_ADDR 0x0B
 
 // Bit mask for use with IE1
-#define M_ET0 0x02
-#define P_ET0 1
+#define M_T0IE 0x02
+#define P_T0IE 1
+SBIT(T0IE, 0xA8, 1);
 
 // Bit mask for use with IP1L and IP1H
-#define M_PT0 0x02
-#define P_PT0 1
+#define M_T0PR 0x02
+#define P_T0PR 1
 
 #ifdef TIMER_HAS_T1
 	// SFR TL1: Timer 1 low
@@ -129,22 +130,56 @@ SFR16E(T0, 0x8C8A);
 	#define TIMER1_VECTOR_ADDR 0x1B
 	
 	// Bit mask for use with IE1
-	#define M_ET1 0x08
-	#define P_ET1 3
+	#define M_T1IE 0x08
+	#define P_T1IE 3
+	SBIT(T1IE, 0xA8, 3);
 	
 	// Bit mask for use with IP1L and IP1H
-	#define M_PT1 0x08
-	#define P_PT1 3
+	#define M_T1PR 0x08
+	#define P_T1PR 3
 #endif // TIMER_HAS_T1
 
 #ifdef TIMER_HAS_T2
-	// SFR TL2: Timer 2 low
-	SFR(T2L, 0xD7);
-	// SFR TH2: Timer 2 high
-	SFR(T2H, 0xD6);
-	
-	// Timer 2 as an int
-	SFR16E(T2, 0xD6D7);
+	#if MCU_FAMILY == 90
+		// SFR TL2: Timer 2 low
+		SFR(T2L, 0xCC);
+		// SFR TH2: Timer 2 high
+		SFR(T2H, 0xCD);
+		
+		// Timer 2 as an int
+		SFR16E(T2, 0xCDCC);
+
+		// SFR T2CON: Timer/counter 2 control
+		SFR(T2CON, 0xC8);
+		SBIT(CP_RL2, 0xC8, 0);
+		SBIT(C_T2, 0xC8, 1);
+		SBIT(TR2, 0xC8, 2);
+		SBIT(EXEN2, 0xC8, 3);
+		SBIT(TCLK, 0xC8, 4);
+		SBIT(RCLK, 0xC8, 5);
+		SBIT(EXF2, 0xC8, 6);
+		SBIT(TF2, 0xC8, 7);
+
+		// SFR T2MOD: Timer/counter 2 mode
+		SFR(T2MOD, 0xC9);
+		#define M_DCEN 0x1
+		#define M_T2OE 0x2
+
+		// SFR RCAP2L: Timer/counter 2 reload/capture low
+		SFR(RCAP2L, 0xCA);
+		// SFR RCAP2H: Timer/counter 2 reload/capture high
+		SFR(RCAP2H, 0xCB);
+		
+		SFR16E(RCAP2, 0xCBCA);
+	#else
+		// SFR TL2: Timer 2 low
+		SFR(T2L, 0xD7);
+		// SFR TH2: Timer 2 high
+		SFR(T2H, 0xD6);
+		
+		// Timer 2 as an int
+		SFR16E(T2, 0xD6D7);
+	#endif // MCU_FAMILY == 90
 #endif // TIMER_HAS_T2
 
 #ifdef TIMER_HAS_BRT
@@ -172,38 +207,51 @@ SFR16E(T0, 0x8C8A);
 
 // SFR AUXR: Auxiliary register
 SFR(AUXR, 0x8E);
-#define M_T0x12 0x80
-#define P_T0x12 7
+#if MCU_FAMILY == 90
+	#define M_ALEOFF 0x1
+	#define P_ALEOFF 0
+	#define M_EXTRAM 0x2
+	#define P_EXTRAM 1
+	#define M_UART_P1 0x80
+	#define P_UART_P1 7
+#else
+	#define M_T0x12 0x80
+	#define P_T0x12 7
 
-#ifdef TIMER_HAS_T1
-	#define M_T1x12 0x40
-	#define P_T1x12 6
-#endif // TIMER_HAS_T1
+	#ifdef TIMER_HAS_T1
+		#define M_T1x12 0x40
+		#define P_T1x12 6
+	#endif // TIMER_HAS_T1
 
-#ifdef TIMER_HAS_T2
-	#define M_T2_C_T 0x8
-	#define P_T2_C_T 3
-#endif // TIMER_HAS_T2
+	#ifdef TIMER_HAS_T2
+		#define M_T2_C_T 0x8
+		#define P_T2_C_T 3
+	#endif // TIMER_HAS_T2
 
-// Defining these macros also for STC12 facilitates MCU-independent
-// coding (BRT is nothing more than an 8-bit timer 2, so all T2
-// macros apply, only the counter SFR differs.)
-#define M_T2x12 0x4
-#define P_T2x12 2
+	// Defining these macros also for STC12 facilitates MCU-independent
+	// coding (BRT is nothing more than an 8-bit timer 2, so all T2
+	// macros apply, only the counter SFR differs.)
+	#define M_T2x12 0x4
+	#define P_T2x12 2
 
-#define M_T2R 0x10
-#define P_T2R 4
+	#define M_T2R 0x10
+	#define P_T2R 4
 
-#ifdef TIMER_HAS_BRT
-	#define M_BRTx12 0x4
-	#define P_BRTx12 2
+	#ifdef TIMER_HAS_BRT
+		#define M_BRTx12 0x4
+		#define P_BRTx12 2
 
-	#define M_BRTR 0x10
-	#define P_BRTR 4
-#endif // TIMER_HAS_BRT
+		#define M_BRTR 0x10
+		#define P_BRTR 4
+	#endif // TIMER_HAS_BRT
+#endif // MCU_FAMILY == 90
 
 // SFR WDT_CONTR: Watchdog timer control
-SFR(WDT_CONTR, 0xC1);
+#if MCU_FAMILY == 90
+	SFR(WDT_CONTR, 0xE1);
+#else
+	SFR(WDT_CONTR, 0xC1);
+#endif // MCU_FAMILY == 90
 
 #define M_WDT_PS 0x07
 #define P_WDT_PS 0
@@ -217,8 +265,10 @@ SFR(WDT_CONTR, 0xC1);
 #define M_EN_WDT 0x20
 #define P_EN_WDT 5
 
-#define M_WDT_FLAG 0x80
-#define P_WDT_FLAG 7
+#if MCU_FAMILY != 90
+	#define M_WDT_FLAG 0x80
+	#define P_WDT_FLAG 7
+#endif // MCU_FAMILY != 90
 
 #ifdef TIMER_HAS_T3_T4
 	// SFR T4T3M: T4 and T3 mode register
@@ -273,21 +323,27 @@ SFR(WDT_CONTR, 0xC1);
 	#define TIMER4_VECTOR_ADDR 0xA3
 	
 	// Bit masks for use with IE2
-	#define M_ET3 0x40
-	#define P_ET3 6
+	#define M_T3IE 0x40
+	#define P_T3IE 6
 	
-	#define M_ET4 0x80
-	#define P_ET4 7
+	#define M_T4IE 0x80
+	#define P_T4IE 7
 #endif // TIMER_HAS_T3_T4
 
 #ifdef TIMER_HAS_T2
-	// Timer 2 interrupt
-	#define TIMER2_INTERRUPT 12
-	#define TIMER2_VECTOR_ADDR 0x63
-	
-	// Bit mask for use with IE2
-	#define M_ET2 0x04
-	#define P_ET2 2
+	#if MCU_FAMILY == 90
+		// Timer 2 interrupt
+		#define TIMER2_INTERRUPT 5
+		#define TIMER2_VECTOR_ADDR 0x2B
+	#else
+		// Timer 2 interrupt
+		#define TIMER2_INTERRUPT 12
+		#define TIMER2_VECTOR_ADDR 0x63
+		
+		// Bit mask for use with IE2
+		#define M_T2IE 0x04
+		#define P_T2IE 2
+	#endif // MCU_FAMILY == 90
 #endif // TIMER_HAS_T2
 
 #ifdef TIMER_HAS_AUXINTIF
@@ -330,16 +386,25 @@ SFR(WDT_CONTR, 0xC1);
 	#define P_T3T4SEL 0
 #endif // TIMER_HAS_T3_T4
 
+#if MCU_FAMILY == 90
+	// T2 on the STC90 is closer to a PCA channel than to T2 in later MCU.
+	// We don't want to pollute timer-hal's code with such a weird thing,
+	// so let's forget about it now that its SFR and macros are defined.
+	#undef TIMER_HAS_T2
+#endif
+
 typedef enum {
 	TIMER0 = 0,
 #ifdef TIMER_HAS_T1
 	TIMER1 = 1,
-#endif // TIMER_HAS_T1
+#endif
+#if defined(TIMER_HAS_T2) || defined(TIMER_HAS_BRT)
 	TIMER2 = 2,
+#endif
 #ifdef TIMER_HAS_T3_T4
 	TIMER3,
 	TIMER4,
-#endif // TIMER_HAS_T3_T4
+#endif
 } Timer;
 
 #endif // _UNISTC_TIMER_H

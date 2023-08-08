@@ -64,6 +64,12 @@ uint32_t frequencyToSysclkDivisor(uint32_t frequency) {
 	return MCU_FREQ / frequency;
 }
 
+#if MCU_FAMILY == 90
+	#pragma save
+	// Suppress warning "unreferenced function argument"
+	#pragma disable_warning 85
+#endif
+
 TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableOutput, InterruptEnable enableInterrupt, CounterControl timerControl) {
 	TimerStatus rc = TIMER_FREQUENCY_OK;
 	uint8_t sysclkDiv1 = 1;
@@ -133,8 +139,10 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 		
 		switch (timer) {
 		case TIMER0:
+#ifdef M_T0x12
 			// Set prescaler
 			AUXR = (AUXR & ~M_T0x12) | ((sysclkDiv1 << P_T0x12) & M_T0x12);
+#endif
 			
 			// Configure T0 as a 16-bit auto-reload timer (mode 0).
 			TMOD &= 0xf0;
@@ -153,7 +161,7 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 			}
 			
 			T0H = T0L = reloadValue;
-#else
+#elif MCU_FAMILY != 90
 			if (enableOutput == ENABLE_OUTPUT) {
 				INT_CLKO |= M_T0CLKO;
 			} else {
@@ -164,9 +172,9 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 #endif
 			
 			if (enableInterrupt == ENABLE_INTERRUPT) {
-				IE1 |= M_ET0;
+				IE1 |= M_T0IE;
 			} else {
-				IE1 &= ~M_ET0;
+				IE1 &= ~M_T0IE;
 			}
 			
 			// Clear interrupt flag and start timer
@@ -191,11 +199,13 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 			// Configure T1 as a 16-bit auto-reload timer (mode 0)
 			TMOD &= 0x0f;
 			
+		#if MCU_FAMILY != 90
 			if (enableOutput == ENABLE_OUTPUT) {
 				INT_CLKO |= M_T1CLKO;
 			} else {
 				INT_CLKO &= ~M_T1CLKO;
 			}
+		#endif
 			
 			// Set reload value
 			T1 = reloadValue;
@@ -204,20 +214,23 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 			// Configure timer control
 			TMOD = (TMOD & ~M_T1_GATE) | ((timerControl << P_T1_GATE) & M_T1_GATE);
 
+	#ifdef M_T1x12
 			// Configure prescaling
 			AUXR = (sysclkDiv1) ? (AUXR | M_T1x12) : (AUXR & ~M_T1x12);
+	#endif
 			
 			if (enableInterrupt == ENABLE_INTERRUPT) {
-				IE1 |= M_ET1;
+				IE1 |= M_T1IE;
 			} else {
-				IE1 &= ~M_ET1;
+				IE1 &= ~M_T1IE;
 			}
 			
 			// Clear interrupt flag and start timer
 			TCON = (TCON & ~M_T1IF) | M_T1R;
 			break;
 #endif // TIMER_HAS_T1
-	
+
+#if defined(TIMER_HAS_T2) || defined(TIMER_HAS_BRT)
 		case TIMER2:
 #ifdef TIMER_HAS_T2
 			// Configure T2 in timer mode
@@ -249,9 +262,9 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 			
 #ifdef TIMER_HAS_T2
 			if (enableInterrupt == ENABLE_INTERRUPT) {
-				IE2 |= M_ET2;
+				IE2 |= M_T2IE;
 			} else {
-				IE2 &= ~M_ET2;
+				IE2 &= ~M_T2IE;
 			}
 			
 	#ifdef TIMER_HAS_AUXINTIF
@@ -263,6 +276,7 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 			// Start timer
 			AUXR |= M_T2R;
 			break;
+#endif // defined(TIMER_HAS_T2) || defined(TIMER_HAS_BRT)
 	
 #ifdef TIMER_HAS_T3_T4
 		case TIMER3:
@@ -282,9 +296,9 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 			T3 = reloadValue;
 			
 			if (enableInterrupt == ENABLE_INTERRUPT) {
-				IE2 |= M_ET3;
+				IE2 |= M_T3IE;
 			} else {
-				IE2 &= ~M_ET3;
+				IE2 &= ~M_T3IE;
 			}
 			
 #ifdef TIMER_HAS_AUXINTIF
@@ -313,9 +327,9 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 			T4 = reloadValue;
 			
 			if (enableInterrupt == ENABLE_INTERRUPT) {
-				IE2 |= M_ET4;
+				IE2 |= M_T4IE;
 			} else {
-				IE2 &= ~M_ET4;
+				IE2 &= ~M_T4IE;
 			}
 			
 #ifdef TIMER_HAS_AUXINTIF
@@ -332,6 +346,10 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 	
 	return rc;
 }
+
+#if MCU_FAMILY == 90
+	#pragma restore
+#endif
 
 #ifdef HAL_TIMER_API_STOP_TIMER
 uint16_t stopTimer(Timer timer) {
@@ -358,6 +376,7 @@ uint16_t stopTimer(Timer timer) {
 		break;
 #endif // TIMER_HAS_T1
 
+#if defined(TIMER_HAS_T2) || defined(TIMER_HAS_BRT)
 	case TIMER2:
 		AUXR &= ~M_T2R;
 #ifdef TIMER_HAS_T2
@@ -367,6 +386,7 @@ uint16_t stopTimer(Timer timer) {
 		counterValue = BRT;
 #endif
 		break;
+#endif // defined(TIMER_HAS_T2) || defined(TIMER_HAS_BRT)
 
 #ifdef TIMER_HAS_T3_T4
 	case TIMER3:

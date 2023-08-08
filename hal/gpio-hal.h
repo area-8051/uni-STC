@@ -66,32 +66,36 @@
 	#endif
 #endif
 
-typedef enum {
-	DISABLE_SCHMIDT_TRIGGER = 0,
-	ENABLE_SCHMIDT_TRIGGER = 1,
-} GpioSchmidtTrigger;
+#ifdef GPIO_HAS_PU_NCS
+	typedef enum {
+		DISABLE_SCHMIDT_TRIGGER = 0,
+		ENABLE_SCHMIDT_TRIGGER = 1,
+	} GpioSchmidtTrigger;
 
-typedef enum {
-	DISABLE_INTERNAL_PULL_UP = 0,
-	ENABLE_INTERNAL_PULL_UP = 1,
-} GpioInternalPullUp;
+	typedef enum {
+		DISABLE_INTERNAL_PULL_UP = 0,
+		ENABLE_INTERNAL_PULL_UP = 1,
+	} GpioInternalPullUp;
+#endif // GPIO_HAS_PU_NCS
 
-typedef enum {
-	DISABLE_GPIO_DIGITAL_INPUT = 0,
-	ENABLE_GPIO_DIGITAL_INPUT = 1,
-} GpioDigitalInput;
+#ifdef GPIO_HAS_INT_WK
+	typedef enum {
+		DISABLE_GPIO_PIN_INTERRUPT = 0,
+		ENABLE_GPIO_PIN_INTERRUPT = 1,
+	} GpioInterrupt;
 
-typedef enum {
-	DISABLE_GPIO_PIN_INTERRUPT = 0,
-	ENABLE_GPIO_PIN_INTERRUPT = 1,
-} GpioInterrupt;
-
-typedef enum {
-	DISABLE_GPIO_PIN_WAKE_UP = 0,
-	ENABLE_GPIO_PIN_WAKE_UP = 1,
-} GpioWakeUp;
+	typedef enum {
+		DISABLE_GPIO_PIN_WAKE_UP = 0,
+		ENABLE_GPIO_PIN_WAKE_UP = 1,
+	} GpioWakeUp;
+#endif // GPIO_HAS_INT_WK
 
 #ifdef GPIO_HAS_SR_DR_IE
+	typedef enum {
+		DISABLE_GPIO_DIGITAL_INPUT = 0,
+		ENABLE_GPIO_DIGITAL_INPUT = 1,
+	} GpioDigitalInput;
+
 	// More developer-friendly than dealing with SR and DR separately.
 	typedef enum {
 		// SR = 0 DR = 0

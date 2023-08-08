@@ -142,13 +142,13 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 			P_SW2 = p_sw2;
 			__i2c_startReceived = false;
 			i2cOnStop();
-		} else if (flags & M_TXIF) {
-			I2CSLST &= ~M_TXIF;
+		} else if (flags & M_I2C_TXIF) {
+			I2CSLST &= ~M_I2C_TXIF;
 			I2C_AckNak ack = (I2C_AckNak) ((I2CSLST & M_SLACKI) >> P_SLACKI);
 			P_SW2 = p_sw2;
 			i2cOnDataSent(ack);
-		} else if (flags & M_RXIF) {
-			I2CSLST &= ~M_RXIF;
+		} else if (flags & M_I2C_RXIF) {
+			I2CSLST &= ~M_I2C_RXIF;
 			uint8_t byte = I2CRXD;
 			P_SW2 = p_sw2;
 			

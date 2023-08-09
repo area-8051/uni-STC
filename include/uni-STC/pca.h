@@ -60,15 +60,15 @@
 #ifdef MCU_HAS_PCA
 	// SFR CCON: PCA control register
 	SFR(CCON, 0xD8);
-	SBIT(CCF0, 0xD8, 0);
-	SBIT(CCF1, 0xD8, 1);
+	SBIT(CCIF0, 0xD8, 0);
+	SBIT(CCIF1, 0xD8, 1);
 	
 	#if PCA_CHANNELS >= 3
-		SBIT(CCF2, 0xD8, 2);
+		SBIT(CCIF2, 0xD8, 2);
 	#endif // PCA_CHANNELS >= 3
 	
 	#if PCA_CHANNELS >= 4
-		SBIT(CCF3, 0xD8, 3);
+		SBIT(CCIF3, 0xD8, 3);
 	#endif // PCA_CHANNELS >= 4
 	
 	SBIT(CR, 0xD8, 6);
@@ -77,8 +77,9 @@
 	// SFR CMOD: PCA mode register
 	SFR(CMOD, 0xD9);
 	
-	#define M_ECF 0x1
-	#define P_ECF 0
+	// Called ECF in the documentation, enables overflow interrupt
+	#define M_CFIE 0x1
+	#define P_CFIE 0
 	
 	#define M_CPS 0x0e
 	#define P_CPS 1
@@ -90,8 +91,9 @@
 	SFR(CCAPM0, 0xDA);
 
 	// Bit masks common to all PCA mode registers
-	#define M_EECF 0x1
-	#define P_EECF 0
+	// Called ECCF in the documentation, enables PWM interrupt.
+	#define M_CCIE 0x1
+	#define P_CCIE 0
 	
 	#define M_PWM 0x2
 	#define P_PWM 1
@@ -112,8 +114,9 @@
 	#define M_CAP 0x30
 	#define P_CAP 4
 	
-	#define M_ECOM 0x40
-	#define P_ECOM 6
+	// Called ECOM in the documentation, enables output compare.
+	#define M_ENCOM 0x40
+	#define P_ENCOM 6
 
 	// SFR CCAPM1: PCA module 1 mode register
 	SFR(CCAPM1, 0xDB);
@@ -307,8 +310,8 @@
 	#define MAKE_PCA_PWM_BITS(b) __MAKE_PCA_PWM_BITS(b)
 
 	// PCA interrupt priority bit mask to use with IP1L and IP1H
-	#define M_PPCA 0x80
-	#define P_PPCA 7
+	#define M_PCAPR 0x80
+	#define P_PCAPR 7
 
 	// PCA interrupt
 	#define PCA_INTERRUPT 7

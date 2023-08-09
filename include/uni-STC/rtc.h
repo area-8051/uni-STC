@@ -11,14 +11,16 @@
 	// SFR RTCCR: RTC control register
 	SFRX(RTCCR, 0xFE60);
 	
-	#define M_RUNRTC 0x1
-	#define P_RUNRTC 0
+	// Called RUNRTC in the documentation
+	#define M_RTCRUN 0x1
+	#define P_RTCRUN 0
 
 	// SFR RTCCFG: RTC configuration register
 	SFRX(RTCCFG, 0xFE61);
 	
-	#define M_SETRTC 0x1
-	#define P_SETRTC 0
+	// Called SETRTC in the documentation
+	#define M_RTCSET 0x1
+	#define P_RTCSET 0
 	
 	#define M_RTCCKS 0x2
 	#define P_RTCCKS 1
@@ -26,29 +28,29 @@
 	// SFR RTCIEN: RTC interrupt enable register
 	SFRX(RTCIEN, 0xFE62);
 	
-	#define M_ESEC32I 0x1
-	#define P_ESEC32I 0
+	#define M_SEC32IE 0x1
+	#define P_SEC32IE 0
 	
-	#define M_ESEC8I 0x2
-	#define P_ESEC8I 1
+	#define M_SEC8IE 0x2
+	#define P_SEC8IE 1
 	
-	#define M_ESEC2I 0x4
-	#define P_ESEC2I 2
+	#define M_SEC2IE 0x4
+	#define P_SEC2IE 2
 	
-	#define M_ESECI 0x8
-	#define P_ESECI 3
+	#define M_SECIE 0x8
+	#define P_SECIE 3
 	
-	#define M_EMINI 0x10
-	#define P_EMINI 4
+	#define M_MINIE 0x10
+	#define P_MINIE 4
 	
-	#define M_EHOURI 0x20
-	#define P_EHOURI 5
+	#define M_HOURIE 0x20
+	#define P_HOURIE 5
 	
-	#define M_EDAYI 0x40
-	#define P_EDAYI 6
+	#define M_DAYIE 0x40
+	#define P_DAYIE 6
 	
-	#define M_EALAI 0x80
-	#define P_EALAI 7
+	#define M_ALAIE 0x80
+	#define P_ALAIE 7
 
 	// SFR RTCIF: RTC interrupt flag register
 	SFRX(RTCIF, 0xFE63);
@@ -132,8 +134,8 @@
 	SFRX(SSEC, 0xFE76);
 	
 	// For use with IP3L / IP3H
-	#define M_PRTC 0x04
-	#define P_PRTC 2
+	#define M_RTCPR 0x04
+	#define P_RTCPR 2
 
 	// RTC interrupt (usage in C => see STC8H TRM appendix R)
 	#define RTC_INTERRUPT 36

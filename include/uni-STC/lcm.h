@@ -10,7 +10,7 @@
 
 #ifdef MCU_HAS_LCM
 	// SFR LCMIFCFG: LCM interface configuration register
-	SFRX(LCMIFCFG, 0xFE50);
+	SFRX(LCMCFG, 0xFE50);
 	
 	#define M_M68_I80 0x1
 	#define P_M68_I80 0
@@ -18,17 +18,20 @@
 	#define M_D16_D8 0x2
 	#define P_D16_D8 1
 	
-	#define M_LCMIFDPS 0x0c
-	#define P_LCMIFDPS 2
+	// Called LCMIFDPS in the documentation.
+	#define M_LCMDPS 0x0c
+	#define P_LCMDPS 2
 	
-	#define M_LCMIFIP 0x30
-	#define P_LCMIFIP 4
+	// Called LCMIFIP in the documentation.
+	#define M_LCMPR 0x30
+	#define P_LCMPR 4
 	
-	#define M_LCMIFIE 0x80
-	#define P_LCMIFIE 7
+	// Called LCMIFIE in the documentation.
+	#define M_LCMIE 0x80
+	#define P_LCMIE 7
 
 	// SFR LCMIFCFG2: LCM interface configuration register 2
-	SFRX(LCMIFCFG2, 0xFE51);
+	SFRX(LCMCFG2, 0xFE51);
 	
 	#define M_HOLDT 0x03
 	#define P_HOLDT 0
@@ -36,23 +39,26 @@
 	#define M_SETUPT 0x1c
 	#define P_SETUPT 2
 	
-	#define M_LCMIFCPS 0x60
-	#define P_LCMIFCPS 5
+	// Called LCMIFCPS in the documentation.
+	#define M_LCMCPS 0x60
+	#define P_LCMCPS 5
 
 	// SFR LCMIFCR: LCM interface control register
-	SFRX(LCMIFCR, 0xFE52);
+	SFRX(LCMCR, 0xFE52);
 	
 	#define M_LCMCMD 0x07
 	#define P_LCMCMD 0
 	
-	#define M_ENLCMIF 0x80
-	#define P_ENLCMIF 7
+	// Called ENLCMIF in the documentation
+	#define M_ENLCM 0x80
+	#define P_ENLCM 7
 
 	// SFR LCMIFSTA: LCM interface status register
-	SFRX(LCMIFSTA, 0xFE53);
+	SFRX(LCMSTA, 0xFE53);
 	
-	#define M_LCMIFIF 0x1
-	#define P_LCMIFIF 0
+	// Called LCMIFIF in the documentation
+	#define M_LCMIF 0x1
+	#define P_LCMIF 0
 
 	// SFR LCMIDDATL: LCM interface data low
 	SFRX(LCMIDDATL, 0xFE54);

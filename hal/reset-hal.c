@@ -88,11 +88,11 @@ void softwareReset(SWRST_ResetEntryPoint entryPoint) {
 #if MCU_FAMILY == 8
 void enableLowVoltageDetector(LVD_Threshold threshold, LVD_Action action) {
 	// Make sure the flag is cleared (might be set due to prior LVD reset)
-	PCON &= ~M_LVDF;
-	RSTCFG = (RSTCFG & M_P54RST) | (action << P_ENLVR) | threshold;
+	PCON &= ~M_LVDIF;
+	RSTCFG = (RSTCFG & M_P54RST) | (action << P_ENLVD) | threshold;
 	
 	if (action == LVD_Action_Interrupt) {
-		IE1 |= M_ELVD;
+		IE1 |= M_LVDIE;
 	}
 }
 #endif // MCU_FAMILY == 8
@@ -102,8 +102,8 @@ ResetOrigin getResetOrigin() {
 	
 	if (PCON & M_POF) {
 		PCON &= ~M_POF;
-	} else if (PCON & M_LVDF) {
-		PCON &= ~M_LVDF;
+	} else if (PCON & M_LVDIF) {
+		PCON &= ~M_LVDIF;
 		result = LowVoltageDetected;
 	} else {
 		result = OtherReset;

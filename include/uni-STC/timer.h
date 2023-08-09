@@ -52,31 +52,36 @@
 
 // SFR TCON: Timer control
 SFR(TCON, 0x88);
-SBIT(T0R, 0x88, 4);
-SBIT(T0IF, 0x88, 5);
+SBIT(T0RUN, 0x88, 4);
 
-#define M_T0R 0x10
-#define P_T0R 4
+#define M_T0RUN 0x10
+#define P_T0RUN 4
 
 #define M_T0IF 0x20
 #define P_T0IF 5
 
 #ifdef TIMER_HAS_T1
-	SBIT(T1R, 0x88, 6);
-	SBIT(T1IF, 0x88, 7);
+	SBIT(T1RUN, 0x88, 6);
 	
-	#define M_T1R 0x40
-	#define P_T1R 6
+	#define M_T1RUN 0x40
+	#define P_T1RUN 6
 	
 	#define M_T1IF 0x80
 	#define P_T1IF 7
 #endif // TIMER_HAS_T1
 
+/**
+ * Note: bits T0IF and T1IF are not defined because they are
+ * automatically cleared by the CPU upon ISR entry, and each
+ * interrupt has its own ISR, so there's no need to check or
+ * set these flags.
+*/
+
 // SFR TMOD: Timer mode
 SFR(TMOD, 0x89);
 
-#define M_T0_M 0x03
-#define P_T0_M 0
+#define M_T0_MODE 0x03
+#define P_T0_MODE 0
 
 #define M_T0_C_T 0x4
 #define P_T0_C_T 2
@@ -85,8 +90,8 @@ SFR(TMOD, 0x89);
 #define P_T0_GATE 3
 
 #ifdef TIMER_HAS_T1
-	#define M_T1_M 0x30
-	#define P_T1_M 4
+	#define M_T1_MODE 0x30
+	#define P_T1_MODE 4
 	
 	#define M_T1_C_T 0x40
 	#define P_T1_C_T 6
@@ -234,15 +239,15 @@ SFR(AUXR, 0x8E);
 	#define M_T2x12 0x4
 	#define P_T2x12 2
 
-	#define M_T2R 0x10
-	#define P_T2R 4
+	#define M_T2RUN 0x10
+	#define P_T2RUN 4
 
 	#ifdef TIMER_HAS_BRT
 		#define M_BRTx12 0x4
 		#define P_BRTx12 2
 
-		#define M_BRTR 0x10
-		#define P_BRTR 4
+		#define M_BRTRUN 0x10
+		#define P_BRTRUN 4
 	#endif // TIMER_HAS_BRT
 #endif // MCU_FAMILY == 90
 
@@ -283,8 +288,8 @@ SFR(AUXR, 0x8E);
 	#define M_T3_C_T 0x4
 	#define P_T3_C_T 2
 	
-	#define M_T3R 0x8
-	#define P_T3R 3
+	#define M_T3RUN 0x8
+	#define P_T3RUN 3
 	
 	#define M_T4CLKO 0x10
 	#define P_T4CLKO 4
@@ -295,8 +300,8 @@ SFR(AUXR, 0x8E);
 	#define M_T4_C_T 0x40
 	#define P_T4_C_T 6
 	
-	#define M_T4R 0x80
-	#define P_T4R 7
+	#define M_T4RUN 0x80
+	#define P_T4RUN 7
 
 	// SFR T4H: Timer 4 high
 	SFR(T4H, 0xD2);

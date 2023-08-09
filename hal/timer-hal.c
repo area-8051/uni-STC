@@ -178,14 +178,14 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 			}
 			
 			// Clear interrupt flag and start timer
-			TCON = (TCON & ~M_T0IF) | M_T0R;
+			TCON = (TCON & ~M_T0IF) | M_T0RUN;
 			break;
 		
 #ifdef TIMER_HAS_T1
 		case TIMER1:
 	#if MCU_FAMILY == 12
 			// Configure T1 as an 8-bit auto-reload timer (mode 2)
-			TMOD = (TMOD & 0x0f) | (2 << P_T1_M);
+			TMOD = (TMOD & 0x0f) | (2 << P_T1_MODE);
 			
 			if (enableOutput == ENABLE_OUTPUT) {
 				WAKE_CLKO |= M_T1CLKO;
@@ -226,7 +226,7 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 			}
 			
 			// Clear interrupt flag and start timer
-			TCON = (TCON & ~M_T1IF) | M_T1R;
+			TCON = (TCON & ~M_T1IF) | M_T1RUN;
 			break;
 #endif // TIMER_HAS_T1
 
@@ -274,7 +274,7 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 #endif // TIMER_HAS_T2
 			
 			// Start timer
-			AUXR |= M_T2R;
+			AUXR |= M_T2RUN;
 			break;
 #endif // defined(TIMER_HAS_T2) || defined(TIMER_HAS_BRT)
 	
@@ -307,7 +307,7 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 #endif // TIMER_HAS_AUXINTIF
 			
 			// Start timer
-			T4T3M |= M_T3R;
+			T4T3M |= M_T3RUN;
 			break;
 		
 		case TIMER4:
@@ -338,7 +338,7 @@ TimerStatus startTimer(Timer timer, uint32_t sysclkDivisor, OutputEnable enableO
 #endif // TIMER_HAS_AUXINTIF
 			
 			// Start timer
-			T4T3M |= M_T4R;
+			T4T3M |= M_T4RUN;
 			break;
 #endif // TIMER_HAS_T3_T4
 		}

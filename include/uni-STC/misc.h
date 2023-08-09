@@ -39,15 +39,19 @@ SFR(B, 0xF0);
 // SFR PCON: Power control
 SFR(PCON, 0x87);
 
+// Idle mode
 #define M_IDL 0x1
 #define P_IDL 0
 
+// Power-down mode
 #define M_PD 0x2
 #define P_PD 1
 
+// Two user-defined global flags
 #define M_GF 0x0c
 #define P_GF 2
 
+// Power-on reset flag
 #define M_POF 0x10
 #define P_POF 4
 
@@ -57,22 +61,25 @@ SFR(PCON, 0x87);
 	#define M_SMOD 0x80
 	#define P_SMOD 7
 #else
-	#define M_LVDF 0x20
-	#define P_LVDF 5
+	// Called LVDF in the documentation
+	#define M_LVDIF 0x20
+	#define P_LVDIF 5
 #endif // MCU_FAMILY == 90
 
 #if MCU_FAMILY == 8
 	// SFR RSTCFG: Reset configuration register
 	SFR(RSTCFG, 0xFF);
 	
+	// LVD threshold voltage
 	#define M_LVDS 0x03
 	#define P_LVDS 0
 	
 	#define M_P54RST 0x10
 	#define P_P54RST 4
 	
-	#define M_ENLVR 0x40
-	#define P_ENLVR 6
+	// Called ENLVR in the documentation, enable low-voltage detector
+	#define M_ENLVD 0x40
+	#define P_ENLVD 6
 
 	#define MCU_HAS_EAXSFR
 

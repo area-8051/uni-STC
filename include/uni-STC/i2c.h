@@ -30,8 +30,8 @@
 	#define M_MSCMD 0x0f
 	#define P_MSCMD 0
 	
-	#define M_EMSI 0x80
-	#define P_EMSI 7
+	#define M_MSIE 0x80
+	#define P_MSIE 7
 
 	// SFR I2CMSST: I2C host state register
 	SFRX(I2CMSST, 0xFE82);
@@ -54,17 +54,17 @@
 	#define M_SLRST 0x1
 	#define P_SLRST 0
 	
-	#define M_ESTOI 0x8
-	#define P_ESTOI 3
+	#define M_STOIE 0x8
+	#define P_STOIE 3
 	
-	#define M_ETXI 0x10
-	#define P_ETXI 4
+	#define M_I2C_TXIE 0x10
+	#define P_I2C_TXIE 4
 	
-	#define M_ERXI 0x20
-	#define P_ERXI 5
+	#define M_I2C_RXIE 0x20
+	#define P_I2C_RXIE 5
 	
-	#define M_ESTAI 0x40
-	#define P_ESTAI 6
+	#define M_STAIE 0x40
+	#define P_STAIE 6
 
 	// SFR I2CSLST: I2C slave state register
 	SFRX(I2CSLST, 0xFE84);
@@ -116,8 +116,8 @@
 	#define P_WDTA 0
 
 	// Bit mask for use with IP2L and IP2H
-	#define M_PI2C 0x40
-	#define P_PI2C 6
+	#define M_I2CPR 0x40
+	#define P_I2CPR 6
 	
 	// I2C interrupt
 	#define I2C_INTERRUPT 24

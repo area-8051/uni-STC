@@ -13,7 +13,7 @@
  * <source>IE = Interrupt Enable
  * <source>IF = Interrupt Flag
  * <source>PR = interrupt PRiority
- * <source>TR = interrupt TRigger mode (for external interrupts)
+ * <source>TR = interrupt TRigger mode (for INT0 and INT1)
  * 
  * with <source> in:
  * 
@@ -34,13 +34,19 @@
 #endif // MCU_FAMILY == 8
 
 // Bits in the TCON SFR
-// INTnTR => interrupt triggers on falling edge only if set,
-// or both rising and falling edges if cleared.
-// INTnIF => external interrupt request flag.
 SBIT(INT0TR, 0x88, 0);
-SBIT(INT0IF, 0x88, 1);
 SBIT(INT1TR, 0x88, 2);
-SBIT(INT1IF, 0x88, 3);
+
+/**
+ * Note: bits INT0IF and INT1IF are not defined because they are
+ * automatically cleared by the CPU upon ISR entry, and each
+ * interrupt has its own ISR, so there's no need to check or
+ * set these flags.
+*/
+
+// Constants for use with INT0TR and INT1TR
+#define INTxTR_BOTH_EDGES 0
+#define INTxTR_FALLING_EDGE 1
 
 // Bit masks for use with TCON
 #define M_INT0TR 0x01
@@ -66,6 +72,8 @@ SBIT(INT1IF, 0x88, 3);
 	#define M_INT4IF 0x40
 	#define P_INT4IF 6
 #endif
+
+// Note: the STC12 has only INT0 and INT1
 
 #if MCU_FAMILY == 15 || MCU_FAMILY == 8
 	// SFR INT_CLKO: CLK output and external interrupt enable register
@@ -99,8 +107,8 @@ SBIT(EA, 0xA8, 7);
 #define P_INT1IE 2
 
 #if MCU_FAMILY != 90
-	#define M_ELVD 0x40
-	#define P_ELVD 6
+	#define M_LVDIE 0x40
+	#define P_LVDIE 6
 #endif
 
 // SFR IP1L: Interrupt priority register low
@@ -113,8 +121,8 @@ SFR(IP1L, 0xB8);
 #define P_INT1PR 2
 
 #if MCU_FAMILY != 90
-	#define M_PLVD 0x40
-	#define P_PLVD 6
+	#define M_LVDPR 0x40
+	#define P_LVDPR 6
 #endif
 
 // SFR IP1H: Interrupt priority register high

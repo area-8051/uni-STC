@@ -15,8 +15,9 @@
 	#define M_WCOL 0x40
 	#define P_WCOL 6
 
-	#define M_SPIF 0x80
-	#define P_SPIF 7
+	// Interrupt flag
+	#define M_SPIIF 0x80
+	#define P_SPIIF 7
 
 	// SFR SPCTL: SPI control register
 	SFR(SPCTL, 0xCE);
@@ -36,8 +37,9 @@
 	#define M_DORD 0x20
 	#define P_DORD 5
 
-	#define M_SPEN 0x40
-	#define P_SPEN 6
+	// Enable SPI peripheral
+	#define M_ENSPI 0x40
+	#define P_ENSPI 6
 
 	#define M_SSIG 0x80
 	#define P_SSIG 7
@@ -46,12 +48,12 @@
 	SFR(SPDAT, 0xCF);
 
 	// Bit mask for use with IE2
-	#define M_ESPI 0x02
-	#define P_ESPI 1
+	#define M_SPIEN 0x02
+	#define P_SPIEN 1
 
 	// Bit mask for use with IP2L and IP2H
-	#define M_PSPI 0x02
-	#define P_PSPI 1
+	#define M_SPIPR 0x02
+	#define P_SPIPR 1
 
 	// SPI interrupt
 	#define SPI_INTERRUPT 9

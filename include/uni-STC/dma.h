@@ -12,19 +12,22 @@
 	#define M_DMA_BUS_PRIORITY 0x03
 	#define P_DMA_BUS_PRIORITY 0
 	
-	#define M_DMA_INTERRUPT_PRIORITY 0x0c
-	#define P_DMA_INTERRUPT_PRIORITY 2
+	// Interrupt priority
+	#define M_DMAPR 0x0c
+	#define P_DMAPR 2
 	
-	#define M_DMA_INTERRUPT_ENABLE 0x80
-	#define P_DMA_INTERRUPT_ENABLE 7
+	// Interrupt enable
+	#define M_DMAIE 0x80
+	#define P_DMAIE 7
 	
 	// For use with all DMA_XXX_CR
 	#define M_DMA_CHANNEL_ENABLE 0x80
 	#define P_DMA_CHANNEL_ENABLE 7
 	
 	// For use with all DMA_XXX_STA
-	#define M_DMA_INTERRUPT_FLAG 0x1
-	#define P_DMA_INTERRUPT_FLAG 0
+	// Interrupt flag
+	#define M_DMAIF 0x1
+	#define P_DMAIF 0
 	
 	
 	// SFR DMA_M2M_CFG: Memory-to-memory DMA configuration register

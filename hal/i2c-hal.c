@@ -116,7 +116,7 @@ static void __i2c_configurePins(uint8_t pinSwitch) {
 		// Clear interrupt flags and SLACKO
 		I2CSLST = 0;
 		// Enable interrupts
-		I2CSLCR = M_ESTOI | M_ETXI | M_ERXI | M_ESTAI;
+		I2CSLCR = M_STOIE | M_I2C_TXIE | M_I2C_RXIE | M_STAIE;
 		// Enable I2C in SLAVE mode
 		I2CCFG = M_ENI2C;
 	}

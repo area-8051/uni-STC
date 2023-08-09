@@ -185,7 +185,7 @@ inline uint8_t __pca_ccapMode(PCA_ChannelMode channelMode, PCA_EdgeTrigger inter
 		| (interruptTrigger << P_CAPN)
 		| ((interruptTrigger != PCA_EDGE_NONE
 			? ENABLE_INTERRUPT 
-			: DISABLE_INTERRUPT) << P_EECF);
+			: DISABLE_INTERRUPT) << P_CCIE);
 }
 
 void pcaStartCounter(PCA_ClockSource clockSource, CounterControl counterMode, InterruptEnable overflowInterrupt, uint8_t pinSwitch) {
@@ -196,7 +196,7 @@ void pcaStartCounter(PCA_ClockSource clockSource, CounterControl counterMode, In
 		__pca_channelConfig[channel].mode = PCA_UNUSED;
 	}
 	
-	CMOD = (counterMode << P_CIDL) | (clockSource << P_CPS) | (overflowInterrupt << P_ECF);
+	CMOD = (counterMode << P_CIDL) | (clockSource << P_CPS) | (overflowInterrupt << P_CFIE);
 	CCON = 0;
 	PCA_CTR = 0;
 	CR = 1;
@@ -440,8 +440,8 @@ INTERRUPT(pca_isr, PCA_INTERRUPT) {
 #endif // HAL_PCA_CHANNELS > 3
 	}
 	
-	if (CCF0) {
-		CCF0 = 0;
+	if (CCIF0) {
+		CCIF0 = 0;
 		channel = PCA_CHANNEL0;
 		
 		switch (__pca_channelConfig[channel].mode) {
@@ -463,8 +463,8 @@ INTERRUPT(pca_isr, PCA_INTERRUPT) {
 	}
 	
 #if HAL_PCA_CHANNELS > 1
-	if (CCF1) {
-		CCF1 = 0;
+	if (CCIF1) {
+		CCIF1 = 0;
 		channel = PCA_CHANNEL1;
 		
 		switch (__pca_channelConfig[channel].mode) {
@@ -487,8 +487,8 @@ INTERRUPT(pca_isr, PCA_INTERRUPT) {
 #endif // HAL_PCA_CHANNELS > 1
 	
 #if HAL_PCA_CHANNELS > 2
-	if (CCF2) {
-		CCF2 = 0;
+	if (CCIF2) {
+		CCIF2 = 0;
 		channel = PCA_CHANNEL2;
 		
 		switch (__pca_channelConfig[channel].mode) {
@@ -511,8 +511,8 @@ INTERRUPT(pca_isr, PCA_INTERRUPT) {
 #endif // HAL_PCA_CHANNELS > 2
 	
 #if HAL_PCA_CHANNELS > 3
-	if (CCF3) {
-		CCF3 = 0;
+	if (CCIF3) {
+		CCIF3 = 0;
 		channel = PCA_CHANNEL3;
 		
 		switch (__pca_channelConfig[channel].mode) {

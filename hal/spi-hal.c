@@ -227,8 +227,8 @@ void spiConfigure(SpiMode spiMode, SpiBitOrder bitOrder, SpiPolarity polarity, S
 	__spiState.mode = spiMode;
 	SPCTL = spiMode | bitOrder | polarity | phase | speed;
 	IE2 = (spiMode == SPI_DISABLE)
-		? (IE2 & ~M_ESPI)
-		: (IE2 | M_ESPI);
+		? (IE2 & ~M_SPIEN)
+		: (IE2 | M_SPIEN);
 }
 
 void spiSend(uint8_t *buffer, size_t bufferSize, bool *readyFlag) {
@@ -249,7 +249,7 @@ void spiReceive(uint8_t *buffer, size_t bufferSize, bool *readyFlag) {
 }
 
 INTERRUPT(spi_isr, SPI_INTERRUPT) {
-	SPSTAT |= M_SPIF | M_WCOL;
+	SPSTAT |= M_SPIIF | M_WCOL;
 	uint8_t data;
 	
 	switch (__spiState.mode) {

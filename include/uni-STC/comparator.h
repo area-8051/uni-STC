@@ -36,17 +36,21 @@
 		#define P_PIS 3
 	#endif // COMPARATOR_4P2N
 	
+	// Interrupt flag
 	#define M_CMPIF 0x40
 	#define P_CMPIF 6
 	
-	#define M_CMPEN 0x80
-	#define P_CMPEN 7
+	// Peripheral enable
+	#define M_ENCMP 0x80
+	#define P_ENCMP 7
 	
-	#define M_NIE 0x10
-	#define P_NIE 4
+	// Rising edge interrupt enable
+	#define M_CMPNIE 0x10
+	#define P_CMPNIE 4
 	
-	#define M_PIE 0x20
-	#define P_PIE 5
+	// Falling edge interrupt enable
+	#define M_CMPPIE 0x20
+	#define P_CMPPIE 5
 
 	// SFR CMPCR2: Comparator control register 2
 	SFR(CMPCR2, 0xE7);
@@ -75,8 +79,8 @@
 	#endif // COMPARATOR_4P2N
 
 	// Bit mask for use with IP2L and IP2H
-	#define M_PCMP 0x20
-	#define P_PCMP 5
+	#define M_CMPPR 0x20
+	#define P_CMPPR 5
 	
 	// Comparator interrupt
 	#define CMP_INTERRUPT 21

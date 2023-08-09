@@ -134,7 +134,7 @@ void adcInitialise(ADC_Alignment resultAlignment, InterruptEnable useInterrupts)
 	#endif // MCU_FAMILY == 8
 	
 	if (useInterrupts == ENABLE_INTERRUPT) {
-		IE1 |= M_EADC;
+		IE1 |= M_ADCIE;
 	}
 	
 	ADC_CONTR = adcContr;
@@ -201,9 +201,9 @@ uint16_t adcBlockingRead(ADC_Channel channel) {
 	NOP();
 #endif // MCU_FAMILY == 12 || MCU_FAMILY == 15
 
-	while (!(ADC_CONTR & M_ADC_FLAG));
+	while (!(ADC_CONTR & M_ADCIF));
 	
-	ADC_CONTR &= ~M_ADC_FLAG;
+	ADC_CONTR &= ~M_ADCIF;
 	
 	return adcReadResult();
 }
@@ -261,8 +261,8 @@ void compInitialise(
 			| positiveInput;
 	#endif // COMPARATOR_4P2N
 	
-	uint8_t cmpcr1 = M_CMPEN
-		| (interruptMode << P_NIE)
+	uint8_t cmpcr1 = M_ENCMP
+		| (interruptMode << P_CMPNIE)
 		| (outputMode != COMP_OUTPUT_DISABLE ? M_CMPOE : 0);
 	
 	#ifndef COMPARATOR_4P2N

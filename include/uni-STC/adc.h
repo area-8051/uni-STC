@@ -54,8 +54,11 @@
 		#define M_ADC_START 0x08
 		#define P_ADC_START 3
 		
-		#define M_ADC_FLAG 0x10
-		#define P_ADC_FLAG 4
+		// Called ADC_FLAG in the documentation, but must be
+		// cleared by software, so calling it ADCIF acts as
+		// a reminder of this necessity.
+		#define M_ADCIF 0x10
+		#define P_ADCIF 4
 		
 		#define M_ADC_SPEED 0x60
 		#define P_ADC_SPEED 5
@@ -82,8 +85,11 @@
 			#define P_ADC_EPWMT 4
 		#endif // MCU_SERIES == 'G' || MCU_SERIES == 'H' || defined(STC8A8KxxD4)
 		
-		#define M_ADC_FLAG 0x20
-		#define P_ADC_FLAG 5
+		// Called ADC_FLAG in the documentation, but must be
+		// cleared by software, so calling it ADCIF acts as
+		// a reminder of this necessity.
+		#define M_ADCIF 0x20
+		#define P_ADCIF 5
 		
 		#define M_ADC_START 0x40
 		#define P_ADC_START 6
@@ -141,12 +147,12 @@
 	#endif // MCU_FAMILY == 8
 
 	// Bit mask for use with IE1
-	#define M_EADC 0x20
-	#define P_EADC 5
+	#define M_ADCIE 0x20
+	#define P_ADCIE 5
 
 	// Bit mask for use with IP1L and IP1H
-	#define M_PADC 0x20
-	#define P_PADC 5
+	#define M_ADCPR 0x20
+	#define P_ADCPR 5
 
 	// ADC interrupt
 	#define ADC_INTERRUPT 5

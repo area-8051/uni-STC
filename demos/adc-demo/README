@@ -1,8 +1,0 @@
-Reads an ADC channel every 2 seconds and displays its value on the 
-serial console.
-
-You should connect a known voltage source on ADC channel 0 (or 3 on 
-an STC8G1KxxA), but you may also leave it floating for the fun of it.
-
-On STC8, the value of channel 15 (internal voltage reference) will 
-also be displayed.

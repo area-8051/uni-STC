@@ -1,3 +1,0 @@
-Blinks an LED using the power-down wake-up timer.
-
-The LED's cathode must be connected to P5.4.
